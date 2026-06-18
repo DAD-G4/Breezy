@@ -1,157 +1,233 @@
-# Breezy - Réseau Social Léger & Scalable (Twitter/X Clone)
+<div align="center">
 
-## 📝 Description du Projet
+# ☁️ Breezy
 
-Le projet **Breezy** vise à développer un réseau social léger, réactif et hautement scalable, fortement inspiré de Twitter/X, mais optimisé spécifiquement pour des environnements à faibles ressources. L’objectif principal est de garantir une expérience utilisateur rapide, fluide et adaptative (approche mobile-first) tout en maintenant une architecture back-end robuste et découpée en microservices conteneurisés.
+### Réseau Social Léger & Scalable — Twitter/X Clone
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-4.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
+[![Next.js](https://img.shields.io/badge/Next.js-React-000000?logo=next.js&logoColor=white)](https://nextjs.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![MongoDB](https://img.shields.io/badge/MongoDB-6-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com)
+
+*Un réseau social performant, optimisé pour les environnements à faibles ressources, avec une architecture microservices conteneurisée.*
+
+</div>
 
 ---
 
-## 🏗️ Architecture Globale & Stack Technique
+## Table des matières
 
-L'application repose sur une architecture distribuée en microservices, orchestrée par Docker et segmentée pour isoler les responsabilités.
+- [Description](#-description)
+- [Stack technique](#-stack-technique)
+- [Architecture](#-architecture)
+- [Fonctionnalités](#-fonctionnalités)
+- [Bases de données](#-bases-de-données)
+- [API REST](#-api-rest)
+- [Installation](#-installation)
+- [Licence](#-licence)
 
-### 🛠️ Stack Technique Complète
+---
 
-* **Environnement Client :** Navigateur Web / Web App géré via React Router.
-* **Front-end :** Next.js / React.js, Tailwind CSS, Axios (appels API REST avec injection du store JWT).
-* **API Gateway / Proxy Inverse :** Nginx (Gestion du routage, du SSL et des politiques CORS).
-* **Back-end (Microservices) :** Node.js & Express.js.
-* **Sécurisation :** Authentification par Jetons JWT (JSON Web Tokens).
-* **Bases de données & Persistance :**
-* **SGBDR (Relationnel) :** PostgreSQL couplé à l'ORM **Sequelize** (pour les données critiques nécessitant une forte intégrité transactionnelle).
-* **NoSQL (Orienté Documents) :** MongoDB couplé à l'ODM **Mongoose** (pour la haute performance en lecture/écriture sur les flux de messages et logs).
-* **Stockage de fichiers :** Volume Docker persistant dédié aux fichiers bruts multimédias.
+## 📝 Description
 
+**Breezy** est un réseau social léger, réactif et hautement scalable, inspiré de Twitter/X. Conçu pour les environnements à faibles ressources, il garantit une expérience utilisateur rapide et fluide grâce à une approche mobile-first, tout en maintenant une architecture back-end robuste et découpée en microservices.
 
-* **Conteneurisation & Performance :** Docker & Docker Compose.
+**Objectifs clés :**
+- Performance et réactivité sur tous les appareils
+- Architecture distribuée et scalabile
+- Expérience utilisateur fluide (mobile-first)
+- Sécurité renforcée (JWT, rôles stricts)
 
-### 📊 Schéma Architectural (Code Mermaid.js)
+---
 
-Tu peux visualiser ou restituer l'architecture complète du projet grâce au code Mermaid suivant :
+## 🛠️ Stack technique
+
+<table>
+  <tr>
+    <td><strong>Frontend</strong></td>
+    <td>Next.js / React.js, Tailwind CSS, Axios</td>
+  </tr>
+  <tr>
+    <td><strong>Backend</strong></td>
+    <td>Node.js, Express.js, TypeScript</td>
+  </tr>
+  <tr>
+    <td><strong>API Gateway</strong></td>
+    <td>Nginx (Reverse Proxy, CORS, SSL)</td>
+  </tr>
+  <tr>
+    <td><strong>Authentification</strong></td>
+    <td>JWT (JSON Web Tokens), bcrypt</td>
+  </tr>
+  <tr>
+    <td><strong>Base de données</strong></td>
+    <td>PostgreSQL 15 + Sequelize, MongoDB 6 + Mongoose</td>
+  </tr>
+  <tr>
+    <td><strong>Conteneurisation</strong></td>
+    <td>Docker & Docker Compose</td>
+  </tr>
+  <tr>
+    <td><strong>Monorepo</strong></td>
+    <td>npm Workspaces</td>
+  </tr>
+</table>
+
+---
+
+## 🏗️ Architecture
+
+L'application repose sur une **architecture distribuée en microservices**, orchestrée par Docker. Chaque service est isolé et communique via l'API Gateway (Nginx).
 
 ```mermaid
 graph TD
-    subgraph Client ["Environnement Client - Mobile First"]
-        Nav["Navigateur Web / Web App <br>(React Router)"]
+    subgraph Client ["📱 Client — Mobile First"]
+        Nav["Navigateur / Web App<br/>React Router"]
     end
 
-    subgraph Infrastructure ["Conteneurs Docker"]
+    subgraph Infra ["🐳 Docker Infrastructure"]
+        Nginx["⚡ Nginx<br/>API Gateway · Reverse Proxy · CORS"]
 
-        Nginx["Nginx / API Gateway <br>(Reverse Proxy, CORS)"]
-
-        subgraph Frontend ["Front-end"]
-            NextReact["Application Next.js / React.js <br>(Tailwind CSS, Axios, JWT Store)"]
+        subgraph Front ["🎨 Frontend"]
+            Next["Next.js / React.js<br/>Tailwind CSS · Axios · JWT"]
         end
 
-        subgraph Backend ["Back-end - Microservices Node.js / Express"]
-            AuthService["Service d'Authentification <br>(Création Fx1, Login Fx2, Sécurisation JWT)"]
-            UserService["Service Utilisateurs <br>(Profils Fx10, Abonnements Fx9, Langue Fx22, Thème Fx23)"]
-            PostService["Service de Messages <br>(Posts Fx3-Fx4, Feed Fx5, Likes Fx6, Réponses Fx7-Fx8)"]
-            TagService["Service de Recherche & Tags <br>(Ajout Fx12, Recherche Fx13)"]
-            NotificationService["Service de Notifications <br>(Mentions Fx14, Likes Fx15, Followers Fx16)"]
-            DMService["Service de Messagerie <br>(Messages Privés Fx17)"]
-            MediaService["Service Médias <br>(Upload Images Fx18, Vidéos Fx19)"]
-            ModerationService["Service de Modération <br>(Signalements Fx20, Bannissements Fx21)"]
+        subgraph Back ["⚙️ Backend — Microservices"]
+            Auth["🔐 AuthService<br/>Inscription · Login · JWT"]
+            User["👤 UserService<br/>Profils · Abonnements · Langue · Thème"]
+            Post["📝 PostService<br/>Posts · Feed · Likes · Commentaires"]
+            Tag["🏷️ TagService<br/>Ajout · Recherche"]
+            Notif["🔔 NotificationService<br/>Mentions · Likes · Followers"]
+            DM["💬 DMService<br/>Messages Privés"]
+            Media["🖼️ MediaService<br/>Upload Images · Vidéos"]
+            Mod["🛡️ ModerationService<br/>Signalements · Bannissements"]
         end
 
-        subgraph Databases ["Bases de données & Stockage"]
-            PG[("PostgreSQL <br>+ Sequelize<br>(Comptes, Auth, Relations, Rôles)")]
-            Mongo[("MongoDB <br>+ Mongoose<br>(Posts, Commentaires, Tags, DMs, Notifications)")]
-            Storage[("Volume de Stockage<br>(Fichiers Médias)")]
+        subgraph DB ["💾 Bases de données"]
+            PG[("PostgreSQL<br/>Sequelize<br/>Comptes · Auth · Rôles")]
+            Mongo[("MongoDB<br/>Mongoose<br/>Posts · Tags · DMs · Notifs")]
+            Vol[("Volume Docker<br/>Fichiers Médias")]
         end
     end
 
-    Nav -->|"Requêtes HTTP/HTTPS"| Nginx
-    Nginx -->|"Sert l'interface UI"| NextReact
-    NextReact -->|"Appels API REST (Axios avec JWT)"| Nginx
+    Nav -->|"HTTP/HTTPS"| Nginx
+    Nginx -->|"UI"| Next
+    Next -->|"API REST + JWT"| Nginx
 
-    Nginx -->|"Routage /api/auth"| AuthService
-    Nginx -->|"Routage /api/users"| UserService
-    Nginx -->|"Routage /api/posts"| PostService
-    Nginx -->|"Routage /api/tags"| TagService
-    Nginx -->|"Routage /api/notifications"| NotificationService
-    Nginx -->|"Routage /api/dms"| DMService
-    Nginx -->|"Routage /api/media"| MediaService
-    Nginx -->|"Routage /api/moderation"| ModerationService
+    Nginx --> Auth
+    Nginx --> User
+    Nginx --> Post
+    Nginx --> Tag
+    Nginx --> Notif
+    Nginx --> DM
+    Nginx --> Media
+    Nginx --> Mod
 
-    AuthService -.->|"Lecture/Écriture Sécurisée"| PG
-    UserService -.->|"Gestion Profils & Followers"| PG
-    ModerationService -.->|"Mise à jour Statuts (Bans)"| PG
+    Auth -.-> PG
+    User -.-> PG
+    Mod -.-> PG
 
-    PostService -.->|"Stockage Documents (Posts, Feed)"| Mongo
-    TagService -.->|"Indexation des Tags"| Mongo
-    NotificationService -.->|"Logs de Notifications"| Mongo
-    DMService -.->|"Historique des Conversations"| Mongo
-    ModerationService -.->|"Lecture/Signalement des Posts"| Mongo
+    Post -.-> Mongo
+    Tag -.-> Mongo
+    Notif -.-> Mongo
+    DM -.-> Mongo
+    Mod -.-> Mongo
 
-    MediaService -.->|"Métadonnées (URL, Poids)"| Mongo
-    MediaService -.->|"Fichiers bruts (Uploads)"| Storage
+    Media -.-> Mongo
+    Media -.-> Vol
+```
 
+### Structure du monorepo
+
+```
+breezy/
+├── packages/
+│   ├── shared/           # Types, utils, middleware partagés
+│   ├── auth-service/     # Inscription, connexion, JWT
+│   ├── user-service/     # Profils, abonnements, préférences
+│   ├── post-service/     # Posts, feed, likes, commentaires
+│   ├── tag-service/      # Tags et recherche
+│   ├── notification-service/ # Notifications
+│   └── dm-service/       # Messages privés
+├── docker-compose.yml
+├── tsconfig.json
+└── package.json          # Workspaces config
 ```
 
 ---
 
-## 🎯 Spécifications Fonctionnelles & Matrice des Rôles
+## 🎯 Fonctionnalités
 
-Le système implémente 23 fonctionnalités réparties en fonctionnalités primaires (obligatoires) et secondaires (optionnelles), régies par une matrice de permissions stricte.
+Le système implémente **23 fonctionnalités** régies par une matrice de permissions stricte.
 
-### 🔐 Rôles Utilisateurs
+### Rôles utilisateurs
 
-1. **Visiteur :** Utilisateur non authentifié.
-2. **Utilisateur :** Membre standard authentifié.
-3. **Modérateur :** Membre chargé de veiller au respect des règles communautaires.
-4. **Administrateur :** Pouvoirs totaux sur la configuration, la modération et la gestion système.
+| Rôle | Description |
+|------|-------------|
+| **Visiteur** | Utilisateur non authentifié |
+| **Utilisateur** | Membre standard authentifié |
+| **Modérateur** | Veille au respect des règles communautaires |
+| **Administrateur** | Pouvoirs totaux sur la configuration et la modération |
 
-### 📊 Tableau des Fonctionnalités et Permissions
+### Matrice des permissions
 
-| Fonctionnalité (Fx) | Visiteur | Utilisateur | Modérateur | Administrateur |
-| --- | --- | --- | --- | --- |
-| **Fx1.** Création de comptes utilisateurs avec validation | ✅ | ❌ | ❌ | ✅ |
-| **Fx2.** Authentification sécurisée (JWT) | ❌ | ✅ | ✅ | ✅ |
-| **Fx3.** Publication de messages courts (max 280 caractères) | ❌ | ✅ | ✅ | ✅ |
-| **Fx4.** Affichage des messages sur le profil | ❌ | ✅ *(Le sien)* | ✅ | ✅ |
-| **Fx5.** Flux chronologique des messages des utilisateurs suivis | ❌ | ✅ | ✅ | ✅ |
-| **Fx6.** Liker un post | ❌ | ✅ | ✅ | ✅ |
-| **Fx7.** Répondre à un post sous forme de commentaire | ❌ | ✅ | ✅ | ✅ |
-| **Fx8.** Répondre à un commentaire sur un post | ❌ | ✅ | ✅ | ✅ |
-| **Fx9.** Suivre ou être suivi par d'autres utilisateurs | ❌ | ✅ | ✅ | ✅ |
-| **Fx10.** Profil utilisateur avec informations de base | ❌ | ✅ | ✅ | ✅ |
-| **Fx11.** Liste des messages publiés par l'utilisateur sur le profil | ❌ | ✅ | ✅ | ✅ |
-| **Fx12.** Ajout de tags aux messages | ❌ | ✅ | ✅ | ✅ |
-| **Fx13.** Recherche de posts via des tags | ❌ | ✅ | ✅ | ✅ |
-| **Fx14.** Notifications pour les mentions | ❌ | ✅ | ✅ *(Mod)* | ✅ *(Admin)* |
-| **Fx15.** Notifications pour les likes | ❌ | ✅ | ❌ | ❌ |
-| **Fx16.** Notifications pour les nouveaux followers | ❌ | ✅ | ❌ | ❌ |
-| **Fx17.** Système de messages privés entre utilisateurs | ❌ | ✅ | ✅ | ✅ |
-| **Fx18.** Ajout d’images aux messages | ❌ | ✅ | ✅ | ✅ |
-| **Fx19.** Ajout de vidéos aux messages | ❌ | ✅ | ✅ | ✅ |
-| **Fx20.** Signalement de contenu inapproprié | ❌ | ✅ | ✅ | ✅ |
-| **Fx21.** Suspension ou bannissement des utilisateurs | ❌ | ❌ | ✅ | ✅ |
-| **Fx22.** Interface multi-langues | ❌ | ✅ | ✅ | ✅ |
-| **Fx23.** Thème personnalisé (Sombre/Clair) | ✅ | ✅ | ✅ | ✅ |
+| # | Fonctionnalité | Visiteur | Utilisateur | Modérateur | Admin |
+|---|----------------|:--------:|:-----------:|:----------:|:-----:|
+| Fx1 | Création de compte avec validation | ✅ | ❌ | ❌ | ✅ |
+| Fx2 | Authentification sécurisée (JWT) | ❌ | ✅ | ✅ | ✅ |
+| Fx3 | Publication de messages (max 280 car.) | ❌ | ✅ | ✅ | ✅ |
+| Fx4 | Affichage des messages sur le profil | ❌ | ✅¹ | ✅ | ✅ |
+| Fx5 | Flux chronologique des abonnements | ❌ | ✅ | ✅ | ✅ |
+| Fx6 | Liker un post | ❌ | ✅ | ✅ | ✅ |
+| Fx7 | Commenter un post | ❌ | ✅ | ✅ | ✅ |
+| Fx8 | Répondre à un commentaire | ❌ | ✅ | ✅ | ✅ |
+| Fx9 | Suivre / être suivi | ❌ | ✅ | ✅ | ✅ |
+| Fx10 | Profil utilisateur | ❌ | ✅ | ✅ | ✅ |
+| Fx11 | Liste des posts d'un utilisateur | ❌ | ✅ | ✅ | ✅ |
+| Fx12 | Ajout de tags aux messages | ❌ | ✅ | ✅ | ✅ |
+| Fx13 | Recherche de posts par tag | ❌ | ✅ | ✅ | ✅ |
+| Fx14 | Notifications — mentions | ❌ | ✅ | ✅ | ✅ |
+| Fx15 | Notifications — likes | ❌ | ✅ | ❌ | ❌ |
+| Fx16 | Notifications — nouveaux followers | ❌ | ✅ | ❌ | ❌ |
+| Fx17 | Messages privés | ❌ | ✅ | ✅ | ✅ |
+| Fx18 | Images dans les messages | ❌ | ✅ | ✅ | ✅ |
+| Fx19 | Vidéos dans les messages | ❌ | ✅ | ✅ | ✅ |
+| Fx20 | Signalement de contenu | ❌ | ✅ | ✅ | ✅ |
+| Fx21 | Suspension / bannissement | ❌ | ❌ | ✅ | ✅ |
+| Fx22 | Interface multi-langues | ❌ | ✅ | ✅ | ✅ |
+| Fx23 | Thème sombre / clair | ✅ | ✅ | ✅ | ✅ |
+
+> ¹ L'utilisateur ne voit que ses propres messages sur son profil.
 
 ---
 
-## 💾 Architecture des Bases de Données (Spécifique Back-End)
+## 💾 Bases de données
 
-Pour optimiser les ressources, les données sont stratégiquement réparties entre deux moteurs de base de données.
+Les données sont réparties entre deux moteurs pour optimiser performances et intégrité.
 
-### 1. PostgreSQL (via Sequelize) - Données Relationnelles & Critiques
+### PostgreSQL (Sequelize) — Données relationnelles
 
-* **Table `Users` :** `id` (PK), `username`, `email`, `password_hash`, `role` (enum: user, moderator, admin), `is_validated`, `created_at`, `updated_at`.
-* **Table `Profiles` :** `id` (PK), `user_id` (FK -> Users), `display_name`, `bio` (text), `avatar_url`, `language_preference`, `theme_preference`.
-* **Table `Followers` :** `id` (PK), `follower_id` (FK -> Users), `following_id` (FK -> Users), `created_at`.
-* **Table `Bans` :** `id` (PK), `user_id` (FK -> Users), `reason`, `banned_by` (FK -> Users), `expires_at`, `created_at`.
+| Table | Colonnes principales |
+|-------|---------------------|
+| **Users** | `id`, `username`, `email`, `password_hash`, `role`, `is_validated`, `created_at`, `updated_at` |
+| **Profiles** | `id`, `user_id` (FK), `display_name`, `bio`, `avatar_url`, `language_preference`, `theme_preference` |
+| **Followers** | `id`, `follower_id` (FK), `following_id` (FK), `created_at` |
+| **Bans** | `id`, `user_id` (FK), `reason`, `banned_by` (FK), `expires_at`, `created_at` |
 
-### 2. MongoDB (via Mongoose) - Documents & Haute Performance
+### MongoDB (Mongoose) — Documents & haute performance
 
-* **Collection `Posts` :**
+<details>
+<summary><strong>Collection Posts</strong></summary>
+
 ```json
 {
   "_id": "ObjectId",
   "user_id": "Number (Postgres FK)",
   "content": "String (max 280 chars)",
-  "likes": ["Number (Postgres User IDs)"],
+  "likes": ["Number (User IDs)"],
   "comments": [
     {
       "comment_id": "ObjectId",
@@ -175,131 +251,144 @@ Pour optimiser les ressources, les données sont stratégiquement réparties ent
   },
   "created_at": "Date"
 }
-
 ```
+</details>
 
-
-* **Collection `Notifications` :** `_id`, `recipient_id`, `sender_id`, `type` (enum: mention, like, follow), `post_id` (optionnel), `is_read`, `created_at`.
-* **Collection `DirectMessages` (DMs) :** `_id`, `conversation_id`, `sender_id`, `recipient_id`, `message_text`, `created_at`.
-* **Collection `Reports` :** `_id`, `reported_by`, `target_type` (post/comment), `target_id`, `reason`, `status` (pending/resolved), `created_at`.
-
----
-
-## 🌐 Cartographie de l'API RESTful (Routage Gateway)
-
-Toutes les requêtes passent par l'API Gateway (Nginx) qui redirige vers les microservices appropriés. Chaque route requiert (sauf exception publique) une vérification du jeton JWT via un middleware global `authenticateToken`.
-
-### 🔓 Routes Publiques
-
-* `POST /api/auth/register` : Fx1. Inscription d'un nouvel utilisateur.
-* `POST /api/auth/login` : Fx2. Connexion et génération du Token JWT.
-
-### 🔒 Routes Protégées (Utilisateur standard minimum)
-
-* **UserService (`/api/users`) :**
-* `GET /api/users/profile/:id` : Fx10. Récupérer les données de profil d'un utilisateur.
-* `PUT /api/users/profile` : Fx10. Mettre à jour ses propres informations de profil.
-* `POST /api/users/follow/:id` : Fx9. S'abonner à un utilisateur.
-* `DELETE /api/users/unfollow/:id` : Fx9. Se désabonner d'un utilisateur.
-* `PUT /api/users/settings` : Fx22 & Fx23. Configurer la langue et le thème.
-
-
-* **PostService (`/api/posts`) :**
-* `POST /api/posts` : Fx3. Publier un message court.
-* `GET /api/posts/feed` : Fx5. Récupérer le fil d'actualités chronologique des abonnements.
-* `GET /api/posts/user/:id` : Fx4 & Fx11. Récupérer tous les messages d'un profil spécifique.
-* `POST /api/posts/:id/like` : Fx6. Liker un message.
-* `POST /api/posts/:id/comment` : Fx7. Ajouter un commentaire.
-* `POST /api/posts/:id/comment/:commentId/reply` : Fx8. Répondre à un commentaire.
-
-
-* **TagService (`/api/tags`) :**
-* `GET /api/tags/search?q=monTag` : Fx13. Rechercher des messages par hashtag.
-
-
-* **NotificationService (`/api/notifications`) :**
-* `GET /api/notifications` : Fx14, Fx15, Fx16. Récupérer l'historique des notifications de l'utilisateur connecté.
-
-
-* **DMService (`/api/dms`) :**
-* `POST /api/dms/send` : Fx17. Envoyer un message privé.
-* `GET /api/dms/conversation/:userId` : Fx17. Charger l'historique des conversations avec un utilisateur.
-
-
-* **MediaService (`/api/media`) :**
-* `POST /api/media/upload` : Fx18 & Fx19. Téléverser une image ou vidéo (stockage brut + métadonnées).
-
-
-
-### 🛡️ Routes de Modération & Administration
-
-* **ModerationService (`/api/moderation`) :**
-* `POST /api/moderation/report` : Fx20. Signaler un contenu (accessible à tout utilisateur authentifié).
-* `GET /api/moderation/reports` : *(Modérateur/Admin)* Consulter la liste des signalements actifs.
-* `POST /api/moderation/ban` : *(Modérateur/Admin)* Fx21. Suspendre ou bannir définitivement un utilisateur.
-
-
+| Collection | Description |
+|------------|-------------|
+| **Notifications** | `recipient_id`, `sender_id`, `type` (mention/like/follow), `post_id`, `is_read`, `created_at` |
+| **DirectMessages** | `conversation_id`, `sender_id`, `recipient_id`, `message_text`, `created_at` |
+| **Reports** | `reported_by`, `target_type` (post/comment), `target_id`, `reason`, `status` (pending/resolved) |
 
 ---
 
-## 🚀 Guide de Déploiement et d'Installation Local
+## 🌐 API REST
 
-Grâce à la containerisation complète via Docker, l'environnement se déploie de manière portable et unifiée.
+Toutes les requêtes passent par l'**API Gateway (Nginx)**. Les routes protégées nécessitent un jeton JWT via le middleware `authenticateToken`.
+
+### Routes publiques
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| `POST` | `/api/auth/register` | Inscription d'un nouvel utilisateur |
+| `POST` | `/api/auth/login` | Connexion et génération du token JWT |
+
+### Routes protégées — UserService
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| `GET` | `/api/users/profile/:id` | Récupérer un profil utilisateur |
+| `PUT` | `/api/users/profile` | Mettre à jour son profil |
+| `POST` | `/api/users/follow/:id` | Suivre un utilisateur |
+| `DELETE` | `/api/users/unfollow/:id` | Se désabonner |
+| `PUT` | `/api/users/settings` | Configurer langue et thème |
+
+### Routes protégées — PostService
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| `POST` | `/api/posts` | Publier un message |
+| `GET` | `/api/posts/feed` | Fil d'actualités chronologique |
+| `GET` | `/api/posts/user/:id` | Posts d'un utilisateur |
+| `POST` | `/api/posts/:id/like` | Liker un post |
+| `POST` | `/api/posts/:id/comment` | Ajouter un commentaire |
+| `POST` | `/api/posts/:id/comment/:commentId/reply` | Répondre à un commentaire |
+
+### Routes protégées — TagService
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| `GET` | `/api/tags/search?q=monTag` | Rechercher des posts par hashtag |
+
+### Routes protégées — NotificationService
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| `GET` | `/api/notifications` | Historique des notifications |
+
+### Routes protégées — DMService
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| `POST` | `/api/dms/send` | Envoyer un message privé |
+| `GET` | `/api/dms/conversation/:userId` | Historique de conversation |
+
+### Routes protégées — MediaService
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| `POST` | `/api/media/upload` | Téléverser une image ou vidéo |
+
+### Routes de modération — ModerationService
+
+| Méthode | Route | Rôle requis | Description |
+|---------|-------|-------------|-------------|
+| `POST` | `/api/moderation/report` | Utilisateur | Signaler un contenu |
+| `GET` | `/api/moderation/reports` | Modérateur / Admin | Consulter les signalements |
+| `POST` | `/api/moderation/ban` | Modérateur / Admin | Suspendre / bannir un utilisateur |
+
+---
+
+## 🚀 Installation
 
 ### Prérequis
 
-* Docker installé sur la machine hôte.
-* Docker Compose installé.
+- [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/)
+- [Node.js](https://nodejs.org/) ≥ 18 (pour le développement local)
 
-### Procédure de Lancement
+### Lancement rapide
 
-1. Cloner le dépôt du projet :
 ```bash
+# 1. Cloner le dépôt
 git clone https://github.com/votre-organisation/breezy.git
 cd breezy
 
+# 2. Configurer les variables d'environnement
+cp .env.example .env
+# Éditer .env avec vos valeurs
+
+# 3. Lancer l'infrastructure
+docker-compose up --build
 ```
 
+L'application est accessible sur **`http://localhost`** via l'API Gateway Nginx.
 
-2. Configurer les variables d'environnement (fichiers `.env` à la racine de chaque microservice). Exemple type pour le back-end :
+### Variables d'environnement
+
 ```env
 PORT=3000
 JWT_SECRET=votre_cle_secrete_ultra_robuste
 POSTGRES_URI=postgres://user:password@postgres_db:5432/breezy
 MONGO_URI=mongodb://mongo_db:27017/breezy
-
 ```
 
+### Commandes utiles
 
-3. Lancer l'infrastructure complète via Docker Compose :
 ```bash
-docker-compose up --build
+# Build tous les packages
+npm run build
 
+# Lancer les tests
+npm run test
+
+# Linter le code
+npm run lint
+
+# Migrations de base de données
+npm run db:migrate
+npm run db:migrate:undo
 ```
-
-
-4. L'application est accessible à l'adresse suivante : `http://localhost` (via l'API Gateway Nginx).
-
----
-
-## 📋 Attentes de Fin d'Études & Soutenance (Rappel Équipe)
-
-Pour garantir la validation du module, le groupe doit impérativement fournir et préparer les éléments suivants conformément au règlement pédagogique :
-
-1. **Le Rapport Écrit :** Doit inclure l'identification claire des objectifs, la représentation structurée de l'architecture choisie, la hiérarchisation des tâches, la méthodologie appliquée, les wireframes d'interface, et respecter les règles strictes du *Guide de rédaction des rapports de décembre 2023*.
-2. **La Soutenance Orale (Chronologie stricte de 45 minutes) :**
-* **5 min :** Présentation de l'équipe et rappel du contexte.
-* **15 min :** Démonstration dynamique de la maquette (Scénario préconstruit obligatoire pour éviter tout problème technique).
-* **10 min :** Session de Questions/Réponses collectives avec le jury.
-* **5 min :** Questions individuelles sur la maîtrise globale du projet.
-* **5 min :** Délibération confidentielle du jury.
-* **5 min :** Restitution à chaud des notes et commentaires.
-* *Note : Tenue correcte et professionnelle exigée pour tous les membres du projet.*
-
-
 
 ---
 
 ## 📄 Licence
 
-Ce projet est distribué sous la licence **MIT**. Consulter le fichier `LICENSE` pour en savoir plus sur les permissions d'utilisation et d'exploitation du code.
+Ce projet est distribué sous la licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour les détails.
+
+---
+
+<div align="center">
+
+**Breezy** — Conçu avec ❤️ par **DAD-G4**
+
+</div>
