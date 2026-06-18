@@ -1,7 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "../../config/connection";
 
-// Define User attributes interface
 export interface UserAttributes {
   id: number;
   username: string;
@@ -13,14 +12,12 @@ export interface UserAttributes {
   updated_at: Date;
 }
 
-// Define optional fields for creation
 export interface UserCreationAttributes
   extends Optional<
     UserAttributes,
     "id" | "is_validated" | "created_at" | "updated_at"
   > {}
 
-// Define the User model
 export class User
   extends Model<UserAttributes, UserCreationAttributes>
   implements UserAttributes
@@ -34,7 +31,6 @@ export class User
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
 
-  // Association methods
   public getProfile!: () => Promise<any>;
   public setProfile!: (profile: any) => Promise<void>;
 
@@ -53,7 +49,6 @@ export class User
   }
 }
 
-// Initialize the User model
 User.init(
   {
     id: {

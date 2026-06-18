@@ -1,14 +1,10 @@
 import { Request } from 'express';
 
-// ── Enums ────────────────────────────────────────────────────────────────────
-
 export enum UserRole {
   USER = 'user',
   MODERATOR = 'moderator',
   ADMIN = 'admin',
 }
-
-// ── PostgreSQL Models ────────────────────────────────────────────────────────
 
 export interface User {
   id: number;
@@ -47,8 +43,6 @@ export interface Ban {
   created_at: Date;
 }
 
-// ── MongoDB Documents ────────────────────────────────────────────────────────
-
 export interface Comment {
   comment_id: string;
   user_id: number;
@@ -79,8 +73,6 @@ export interface Post {
   media: PostMedia | null;
   created_at: Date;
 }
-
-// ── Request Extensions ───────────────────────────────────────────────────────
 
 export interface AuthRequest extends Request {
   user?: {

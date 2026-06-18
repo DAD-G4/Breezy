@@ -4,7 +4,6 @@ import { sendMessage, getConversation } from '../controllers/dmController';
 
 const router = Router();
 
-// All routes require authentication
 router.use(authenticateToken);
 
 router.post('/send', sendMessage);

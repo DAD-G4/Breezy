@@ -2,19 +2,12 @@ import { Response } from 'express';
 import { success, error, AuthRequest } from '@breezy/shared';
 import DirectMessage from '@breezy/shared/src/models/mongodb/DirectMessage';
 
-/**
- * Generate a deterministic conversation_id from two user IDs.
- * Always sorts numerically so both directions map to the same conversation.
- */
+/** Deterministic ID: ensures (A,B) and (B,A) map to the same conversation. */
 function generateConversationId(userId1: number, userId2: number): string {
   return `${Math.min(userId1, userId2)}-${Math.max(userId1, userId2)}`;
 }
 
-/**
- * POST /api/dms/send
- * Send a private message. Validates message_text (not empty, max 1000 chars).
- * Generates conversation_id from sorted user IDs.
- */
+/** POST /api/dms/send */
 export async function sendMessage(req: AuthRequest, res: Response): Promise<void> {
   try {
     if (!req.user) {
@@ -61,11 +54,7 @@ export async function sendMessage(req: AuthRequest, res: Response): Promise<void
   }
 }
 
-/**
- * GET /api/dms/conversation/:userId
- * Get conversation between current user and :userId, paginated, chronological order.
- * Query params: ?page=1&limit=50
- */
+/** GET /api/dms/conversation/:userId — Query params: ?page=1&limit=50 */
 export async function getConversation(req: AuthRequest, res: Response): Promise<void> {
   try {
     if (!req.user) {

@@ -15,13 +15,11 @@ export async function followUser(req: AuthRequest, res: Response): Promise<void>
     const { id } = req.params;
     const followingId = parseInt(id, 10);
 
-    // Prevent self-follow
     if (req.user.id === followingId) {
       error(res, 'Cannot follow yourself', 400);
       return;
     }
 
-    // Check for existing follow relationship
     const existingFollow = await Follower.findOne({
       where: {
         follower_id: req.user.id,
@@ -34,7 +32,6 @@ export async function followUser(req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    // Create follow relationship
     const follow = await Follower.create({
       follower_id: req.user.id,
       following_id: followingId,

@@ -20,7 +20,6 @@ export async function getFeed(req: AuthRequest, res: Response): Promise<void> {
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
     const skip = (page - 1) * limit;
 
-    // Query Followers table for followed user_ids
     const followedRows = await Follower.findAll({
       where: { follower_id: req.user.id },
       attributes: ['following_id'],
@@ -41,7 +40,6 @@ export async function getFeed(req: AuthRequest, res: Response): Promise<void> {
       return;
     }
 
-    // Query MongoDB for posts from followed users
     const posts = await Post.find({ user_id: { $in: followedIds } })
       .sort({ created_at: -1 })
       .skip(skip)

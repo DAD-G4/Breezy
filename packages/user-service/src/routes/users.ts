@@ -4,7 +4,6 @@ import { getProfile, updateProfile, updateSettings } from '../controllers/userCo
 
 const router = Router();
 
-// All routes require authentication
 router.use(authenticateToken);
 
 router.get('/profile/:id', getProfile);

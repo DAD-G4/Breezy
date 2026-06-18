@@ -16,7 +16,6 @@ export async function register(req: Request, res: Response): Promise<void> {
   try {
     const { email, username, password } = req.body;
 
-    // Validate input
     const validationErrors = validateRegisterInput({ email, username, password });
     if (validationErrors.length > 0) {
       error(res, validationErrors.join(', '), 400);
@@ -75,14 +74,12 @@ export async function login(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    // Compare password
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
       error(res, 'Invalid credentials', 401);
       return;
     }
 
-    // Generate JWT
     const token = jwt.sign(
       {
         id: user.id,

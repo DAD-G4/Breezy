@@ -4,7 +4,6 @@ import { followUser, unfollowUser } from '../controllers/followController';
 
 const router = Router();
 
-// All routes require authentication
 router.use(authenticateToken);
 
 router.post('/follow/:id', followUser);

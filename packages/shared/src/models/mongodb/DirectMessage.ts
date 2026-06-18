@@ -1,7 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-// ── Document Interface ───────────────────────────────────────────────────────
-
 export interface IDirectMessageDocument extends Document {
   conversation_id: string;
   sender_id: number;
@@ -9,8 +7,6 @@ export interface IDirectMessageDocument extends Document {
   message_text: string;
   created_at: Date;
 }
-
-// ── Schema ───────────────────────────────────────────────────────────────────
 
 const DirectMessageSchema = new Schema({
   conversation_id: {
@@ -38,8 +34,6 @@ const DirectMessageSchema = new Schema({
 
 // Compound index: conversation messages sorted by date
 DirectMessageSchema.index({ conversation_id: 1, created_at: -1 });
-
-// ── Model Export ─────────────────────────────────────────────────────────────
 
 const DirectMessage: Model<IDirectMessageDocument> =
   (mongoose.models as any).DirectMessage ||

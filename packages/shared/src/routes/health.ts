@@ -14,7 +14,6 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
   let postgresStatus = 'disconnected';
   let mongodbStatus = 'disconnected';
 
-  // Check PostgreSQL
   try {
     await sequelize.authenticate();
     postgresStatus = 'connected';
@@ -22,12 +21,9 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
     postgresStatus = 'disconnected';
   }
 
-  // Check MongoDB
   try {
     if (mongoose.connection.readyState === 1) {
       mongodbStatus = 'connected';
-    } else {
-      mongodbStatus = 'disconnected';
     }
   } catch {
     mongodbStatus = 'disconnected';

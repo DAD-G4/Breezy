@@ -4,7 +4,6 @@ import { getNotifications, markAsRead } from '../controllers/notificationControl
 
 const router = Router();
 
-// All routes require authentication
 router.use(authenticateToken);
 
 router.get('/', getNotifications);

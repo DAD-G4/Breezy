@@ -1,7 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-// ── Sub-document Interfaces ──────────────────────────────────────────────────
-
 export interface IReply {
   reply_id: mongoose.Types.ObjectId;
   user_id: number;
@@ -22,8 +20,6 @@ export interface IPostMedia {
   url: string;
 }
 
-// ── Main Document Interface ──────────────────────────────────────────────────
-
 export interface IPostDocument extends Document {
   user_id: number;
   content: string;
@@ -33,8 +29,6 @@ export interface IPostDocument extends Document {
   media: IPostMedia | null;
   created_at: Date;
 }
-
-// ── Schemas ──────────────────────────────────────────────────────────────────
 
 const ReplySchema = new Schema(
   {
@@ -64,8 +58,6 @@ const PostMediaSchema = new Schema(
   },
   { _id: false }
 );
-
-// ── Post Schema ──────────────────────────────────────────────────────────────
 
 const PostSchema = new Schema({
   user_id: {
@@ -104,8 +96,6 @@ const PostSchema = new Schema({
 
 // Compound index for feed queries (user posts sorted by date)
 PostSchema.index({ user_id: 1, created_at: -1 });
-
-// ── Model Export ─────────────────────────────────────────────────────────────
 
 const Post: Model<IPostDocument> =
   (mongoose.models as any).Post ||

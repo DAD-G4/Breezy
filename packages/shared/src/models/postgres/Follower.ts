@@ -1,7 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "../../config/connection";
 
-// Define Follower attributes interface
 export interface FollowerAttributes {
   id: number;
   follower_id: number;
@@ -9,11 +8,9 @@ export interface FollowerAttributes {
   created_at: Date;
 }
 
-// Define optional fields for creation
 export interface FollowerCreationAttributes
   extends Optional<FollowerAttributes, "id" | "created_at"> {}
 
-// Define the Follower model
 export class Follower
   extends Model<FollowerAttributes, FollowerCreationAttributes>
   implements FollowerAttributes
@@ -23,7 +20,6 @@ export class Follower
   public following_id!: number;
   public readonly created_at!: Date;
 
-  // Association methods
   public getFollower!: () => Promise<any>;
   public setFollower!: (user: any) => Promise<void>;
   public getFollowing!: () => Promise<any>;
@@ -41,7 +37,6 @@ export class Follower
   }
 }
 
-// Initialize the Follower model
 Follower.init(
   {
     id: {

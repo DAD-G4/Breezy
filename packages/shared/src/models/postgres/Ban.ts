@@ -1,7 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "../../config/connection";
 
-// Define Ban attributes interface
 export interface BanAttributes {
   id: number;
   user_id: number;
@@ -11,11 +10,9 @@ export interface BanAttributes {
   created_at: Date;
 }
 
-// Define optional fields for creation
 export interface BanCreationAttributes
   extends Optional<BanAttributes, "id" | "expires_at" | "created_at"> {}
 
-// Define the Ban model
 export class Ban
   extends Model<BanAttributes, BanCreationAttributes>
   implements BanAttributes
@@ -27,7 +24,6 @@ export class Ban
   public expires_at!: Date | null;
   public readonly created_at!: Date;
 
-  // Association methods
   public getUser!: () => Promise<any>;
   public setUser!: (user: any) => Promise<void>;
   public getBanner!: () => Promise<any>;
@@ -45,7 +41,6 @@ export class Ban
   }
 }
 
-// Initialize the Ban model
 Ban.init(
   {
     id: {

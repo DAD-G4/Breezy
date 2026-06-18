@@ -27,10 +27,8 @@ export async function toggleLike(req: AuthRequest, res: Response): Promise<void>
     const likeIndex = post.likes.indexOf(userId);
 
     if (likeIndex > -1) {
-      // Already liked — unlike
       post.likes.splice(likeIndex, 1);
     } else {
-      // Not liked — like
       post.likes.push(userId);
     }
 

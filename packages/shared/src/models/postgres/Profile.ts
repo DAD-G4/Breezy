@@ -1,7 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "../../config/connection";
 
-// Define Profile attributes interface
 export interface ProfileAttributes {
   id: number;
   user_id: number;
@@ -12,14 +11,12 @@ export interface ProfileAttributes {
   theme_preference: string;
 }
 
-// Define optional fields for creation
 export interface ProfileCreationAttributes
   extends Optional<
     ProfileAttributes,
     "id" | "display_name" | "bio" | "avatar_url" | "language_preference" | "theme_preference"
   > {}
 
-// Define the Profile model
 export class Profile
   extends Model<ProfileAttributes, ProfileCreationAttributes>
   implements ProfileAttributes
@@ -32,7 +29,6 @@ export class Profile
   public language_preference!: string;
   public theme_preference!: string;
 
-  // Association methods
   public getUser!: () => Promise<any>;
   public setUser!: (user: any) => Promise<void>;
 
@@ -41,7 +37,6 @@ export class Profile
   }
 }
 
-// Initialize the Profile model
 Profile.init(
   {
     id: {

@@ -4,7 +4,6 @@ import { addComment, replyToComment } from '../controllers/commentController';
 
 const router = Router();
 
-// All routes require authentication
 router.use(authenticateToken);
 
 router.post('/:id/comment', addComment);

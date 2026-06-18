@@ -4,7 +4,6 @@ import { Follower } from "./Follower";
 import { Ban } from "./Ban";
 import { sequelize } from "../../config/connection";
 
-// Import all models
 const models = {
   User,
   Profile,
@@ -12,7 +11,6 @@ const models = {
   Ban,
 };
 
-// Set up associations
 Object.values(models).forEach((model: any) => {
   if (model.associate) {
     model.associate(models);

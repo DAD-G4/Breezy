@@ -4,7 +4,6 @@ import { toggleLike } from '../controllers/likeController';
 
 const router = Router();
 
-// All routes require authentication
 router.use(authenticateToken);
 
 router.post('/:id/like', toggleLike);

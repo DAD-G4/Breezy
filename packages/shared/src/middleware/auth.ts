@@ -47,10 +47,6 @@ export function authenticateToken(
       res.status(401).json({ error: 'Token expired.' });
       return;
     }
-    if (err instanceof jwt.JsonWebTokenError) {
-      res.status(401).json({ error: 'Invalid token.' });
-      return;
-    }
     res.status(401).json({ error: 'Invalid token.' });
   }
 }
