@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import axios from "axios";
-// useRouter pour rediriger le user apres la connexion
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation"; // useRouter pour rediriger le user apres la connexion
+import Header from "../../components/layout/Header";
 
 export default function LoginPage() {   // Composant de la page de connexion
   const router = useRouter();
@@ -39,20 +39,7 @@ export default function LoginPage() {   // Composant de la page de connexion
   return (
     <div className="flex flex-col min-h-screen">
       {/*Barre de navigation */}
-      <header className="flex justify-between items-center p-4 border-b border-deep-space-blue/20 dark:border-papaya-whip/20">
-        <button className="p-2" aria-label="Menu">
-          {/* Menu burger (SVG)*/}
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-        <button className="p-2" aria-label="Infos">
-          {/* Icône Info (SVG) */}
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </button>
-      </header>
+        <Header />
 
       {/* Contenu principal */}
       <main className="flex-1 flex flex-col items-center justify-center p-6">

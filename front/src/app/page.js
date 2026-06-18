@@ -1,27 +1,53 @@
-"use client"; //on utilise un hook useTheme
+"use client";
 
-import { useTheme } from "../context/ThemeContext";
+import PostCard from "../components/feed/PostCard";
+import Header from "../components/layout/Header";
 
-export default function Home() {
-  const { theme, toggleTheme } = useTheme();
+export default function FeedPage() {
+  
+  // Mock Data pour simuler le flux chronologique (Feed) de l'utilisateur. A REMPLACER PAR LES DONNEES REELLES DU BACK-END
+  // On reproduit 3 posts...
+  const mockPosts = [
+    {
+      id: 1,
+      username: "User1",
+      time: "1h",
+      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      likesCount: 12,
+      commentsCount: 3,
+    },
+    {
+      id: 2,
+      username: "User2",
+      time: "5min",
+      content: "Regardez cette magnifique vue pour tester l'intégration des images ! 🌄",
+      // On utilise Picsum, c'est un générateur d'images de test infaillible
+      imageUrl: "https://picsum.photos/800/400", 
+      likesCount: 45,
+      commentsCount: 8,
+    },
+    {
+      id: 3,
+      username: "User67",
+      time: "3d",
+      content: "Lorem Ipsum pour tester le défilement : Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat ",
+      likesCount: 0,
+      commentsCount: 0,
+    }
+  ];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-4xl font-bold mb-8">
-        Bienvenue sur Breezy !
-      </h1>
-      
-      <p className="mb-8 text-lg text-slate-500 dark:text-slate-400">
-        Thème actuel : <span className="font-semibold uppercase">{theme}</span>
-      </p>
+    <div className="flex flex-col min-h-screen pb-20">
+      {/* Barre de navigation */}
+      <Header />
 
-      {/* Bouton pour tester Fx23 light/dark mode */}
-      <button
-        onClick={toggleTheme}
-        className="px-6 py-3 rounded-full bg-sky-500 text-white font-semibold shadow-lg hover:bg-sky-400 transition-all duration-300 transform hover:scale-105 active:scale-95"
-      >
-        Basculer le thème
-      </button>
+      {/* p-4 (marges gauche/droite/haut) et gap-4 (espace entre les posts) */}
+      <main className="flex-1 flex flex-col p-4 gap-4">
+        {mockPosts.map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
+      </main>
+      
     </div>
   );
 }
