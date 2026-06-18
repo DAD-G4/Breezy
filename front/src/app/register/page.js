@@ -1,86 +1,65 @@
-"use client"; 
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/layout/Header";
 
+const inputClass =
+  "w-full px-4 py-3 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-transparent focus:border-steel-blue focus:outline-none transition-colors placeholder:text-gray-400 font-medium text-sm";
+
 export default function RegisterPage() {
-  // useRouter permet de rediriger le user vers login apres connexion
   const router = useRouter();
-  
-  // On stocke ce que l'utilisateur rentre dans chaque champ
+
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
-  // INTERFACE (UI)
-  const [error, setError] = useState(""); // stocker et afficher  message d'erreur 
-  const [loading, setLoading] = useState(false); // désactiver le bouton de soumission pendant le chargement...
 
-  // Fonction de soumission inscription
-  // déclenche quand le user clique sur le bouton "S'inscrire"
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true); // on active l'état de chargement (le bouton affiche Chargement...)
+    setLoading(true);
 
     try {
-      // Simulation d'un appel réseau vers la Couche Proxy (API Gateway) A REMPLACER PAR L'URL DU BACK-END
-      // En production, tu auras : await axios.post("http://localhost:5000/api/auth/register", { displayName, username, email, password })
-      
-      await new Promise((resolve) => setTimeout(resolve, 1500)); 
-      
-      // Si le serveur répond avec succès ->> on redirige l'utilisateur vers la page de connexion
-      router.push("/login"); 
+      // Simulation - replace with: await axios.post("/api/auth/register", { displayName, username, email, password })
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      router.push("/login");
     } catch (err) {
-      // Si le serveur renvoie une erreur
       setError("Erreur lors de l'inscription. Veuillez vérifier vos informations.");
     } finally {
-      // Quoi qu'il arrive (succès ou erreur), on arrête l'animation de loading
       setLoading(false);
     }
   };
 
-  // HTML / JSX 
   return (
-    // Conteneur principal toute la hauteur de l'ecran (min-h-screen)
     <div className="flex flex-col min-h-screen">
-      {/* navbar */}
       <Header />
 
-      {/* Bloc principal */}
-      {/* prend tout l'espace restant sous le header */}
       <main className="flex-1 flex flex-col items-center justify-center p-6">
-        
-    {/* Logo A REMPLACER PAR LE LOGO DE L'APPLICATION */}
         <div className="mb-8 w-16 h-16 bg-deep-space-blue dark:bg-papaya-whip text-papaya-whip dark:text-deep-space-blue rounded-full flex items-center justify-center text-4xl shadow-lg">
           🍃
         </div>
 
-        {/* Bloc formulaire*/}
         <div className="w-full max-w-sm border-2 border-deep-space-blue dark:border-papaya-whip rounded-lg p-6 bg-white dark:bg-deep-space-blue shadow-xl transition-colors duration-300">
-          
           <h1 className="text-2xl font-bold text-center mb-6 pb-4 border-b-2 border-deep-space-blue/20 dark:border-papaya-whip/20">
             Register
           </h1>
 
-          {/* formulaire */}
           <form onSubmit={handleRegister} className="space-y-4">
-            
-            {/* Nom d'affichage */}
             <div>
               <input
                 type="text"
                 required
                 placeholder="nom d'affichage :"
                 value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)} // Met à jour l'état à chaque frappe
-                className="w-full px-4 py-3 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-transparent focus:border-steel-blue focus:outline-none transition-colors placeholder:text-gray-400 font-medium text-sm"
+                onChange={(e) => setDisplayName(e.target.value)}
+                className={inputClass}
               />
             </div>
 
-            {/* Identifiant (@) */}
             <div>
               <input
                 type="text"
@@ -88,11 +67,10 @@ export default function RegisterPage() {
                 placeholder="Identifiant (@) :"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-transparent focus:border-steel-blue focus:outline-none transition-colors placeholder:text-gray-400 font-medium text-sm"
+                className={inputClass}
               />
             </div>
 
-            {/* Email */}
             <div>
               <input
                 type="email"
@@ -100,11 +78,10 @@ export default function RegisterPage() {
                 placeholder="adresse mail :"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-transparent focus:border-steel-blue focus:outline-none transition-colors placeholder:text-gray-400 font-medium text-sm"
+                className={inputClass}
               />
             </div>
 
-            {/* Mot de passe */}
             <div>
               <input
                 type="password"
@@ -112,28 +89,24 @@ export default function RegisterPage() {
                 placeholder="mot de passe :"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-transparent focus:border-steel-blue focus:outline-none transition-colors placeholder:text-gray-400 font-medium text-sm"
+                className={inputClass}
               />
             </div>
 
-            {/* Affichage de l'erreur UI */}
-            {/* on affiche ce bloc d'alerte error */}
             {error && (
               <div className="text-center text-brick-red font-semibold text-sm animate-pulse pt-2">
                 {error}
               </div>
             )}
 
-            {/* bouton de soumission */}
             <button
               type="submit"
-              disabled={loading} // Se désactive si requete est en cours
+              disabled={loading}
               className="w-full py-3 mt-4 rounded-full border-2 border-deep-space-blue dark:border-papaya-whip font-bold text-lg hover:bg-deep-space-blue hover:text-papaya-whip dark:hover:bg-papaya-whip dark:hover:text-deep-space-blue transition-all disabled:opacity-50"
             >
               {loading ? "Chargement..." : "S'inscrire"}
             </button>
 
-            {/* Zone de redirection vers Login */}
             <div className="mt-4 text-center text-sm font-semibold flex flex-col items-center">
               <button
                 type="button"
@@ -146,7 +119,6 @@ export default function RegisterPage() {
                 Vous avez déjà un compte ?
               </span>
             </div>
-            
           </form>
         </div>
       </main>

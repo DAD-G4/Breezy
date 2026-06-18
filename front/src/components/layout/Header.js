@@ -5,14 +5,11 @@ import { useTheme } from "../../context/ThemeContext";
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // État pour ouvrir/fermer menu burger
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <>
-      {/* navbar*/}
       <header className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-papaya-whip/20 bg-white dark:bg-deep-space-blue z-40 relative">
-        
-        {/*  Menu Burger */}
         <button 
           onClick={() => setIsMenuOpen(true)}
           className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip" 
@@ -23,12 +20,10 @@ export default function Header() {
           </svg>
         </button>
 
-        {/* Logo */}
         <span className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip flex items-center gap-2">
           🍃 Breezy
         </span>
 
-        {/* Icône Profil */}
         <button className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip" aria-label="Profil">
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -36,22 +31,18 @@ export default function Header() {
         </button>
       </header>
 
-      {/* drawer du menu burger */}
-      {/* Fond sombre transparent qui couvre tout l'écran quand le menu est ouvert */}
       {isMenuOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-50 transition-opacity"
-          onClick={() => setIsMenuOpen(false)} // Ferme le menu si on clique dans le vide
+          onClick={() => setIsMenuOpen(false)}
         />
       )}
 
-      {/* glisse depuis la gauche */}
       <div 
         className={`fixed top-0 left-0 h-full w-64 bg-white dark:bg-deep-space-blue z-50 transform transition-transform duration-300 ease-in-out shadow-2xl border-r border-gray-200 dark:border-white/10 flex flex-col ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* En-tête du menu avec bouton fermeture */}
         <div className="p-4 border-b border-gray-200 dark:border-papaya-whip/20 flex justify-between items-center">
           <span className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip">Menu</span>
           <button onClick={() => setIsMenuOpen(false)} className="p-2 text-gray-500 hover:text-brick-red transition-colors">
@@ -61,10 +52,7 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Liens et actions du menu */}
         <nav className="flex-1 p-4 space-y-4">
-          
-          {/* Créer un post */}
           <button className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-deep-space-blue dark:text-papaya-whip transition-colors text-left font-medium">
             <svg className="w-6 h-6 text-steel-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
@@ -72,7 +60,6 @@ export default function Header() {
             Créer un post
           </button>
 
-          {/* Thème Sombre/Clair */}
           <button 
             onClick={toggleTheme}
             className="flex items-center justify-between w-full p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-deep-space-blue dark:text-papaya-whip transition-colors text-left font-medium"

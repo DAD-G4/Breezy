@@ -4,9 +4,7 @@ import PostCard from "../components/feed/PostCard";
 import Header from "../components/layout/Header";
 
 export default function FeedPage() {
-  
-  // Mock Data pour simuler le flux chronologique (Feed) de l'utilisateur. A REMPLACER PAR LES DONNEES REELLES DU BACK-END
-  // On reproduit 3 posts...
+  // TODO: remplacer par les données réelles du back-end
   const mockPosts = [
     {
       id: 1,
@@ -22,7 +20,7 @@ export default function FeedPage() {
       time: "5min",
       content: "Regardez cette magnifique vue pour tester l'intégration des images ! 🌄",
       // On utilise Picsum, c'est un générateur d'images de test infaillible
-      imageUrl: "https://picsum.photos/800/400", 
+      imageUrl: "https://picsum.photos/800/400",
       likesCount: 45,
       commentsCount: 8,
     },
@@ -38,16 +36,13 @@ export default function FeedPage() {
 
   return (
     <div className="flex flex-col min-h-screen pb-20">
-      {/* Barre de navigation */}
       <Header />
 
-      {/* p-4 (marges gauche/droite/haut) et gap-4 (espace entre les posts) */}
       <main className="flex-1 flex flex-col p-4 gap-4">
         {mockPosts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
       </main>
-      
     </div>
   );
 }

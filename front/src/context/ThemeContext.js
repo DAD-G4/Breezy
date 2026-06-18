@@ -1,11 +1,9 @@
-"use client"; // on utilise des hooks interactifs useState / useEffect
+"use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-// On crée le Context
 const ThemeContext = createContext();
 
-// On crée le  Provider qui va englober l'app
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState("light");
 
@@ -18,13 +16,11 @@ export function ThemeProvider({ children }) {
     }
   }, []);
 
-  // fonction pour basculer d'un mode à l'autre
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
-    localStorage.setItem("theme", newTheme); // On sauvegarde le choix en localstorrage
-    
-    // On ajoute / enlève la classe dark sur la balise html
+    localStorage.setItem("theme", newTheme);
+
     if (newTheme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
@@ -32,12 +28,11 @@ export function ThemeProvider({ children }) {
     }
   };
 
-  return (  // On envoie le theme et la fonction de bascule a tous les composants enfants
+  return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
 }
 
-// On crée un Custom Hook pour simplifier l'utilisation apres
 export const useTheme = () => useContext(ThemeContext);

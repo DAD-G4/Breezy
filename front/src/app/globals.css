@@ -2,7 +2,6 @@
 
 @variant dark (&:is(.dark *));
 
-/* palette personnalisée Tailwind */
 @theme {
   --color-molten-lava: #780000;
   --color-brick-red: #c1121f;
