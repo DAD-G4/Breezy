@@ -1,0 +1,29 @@
+{
+  "development": {
+    "username": "breezy",
+    "password": "breezy",
+    "database": "breezy",
+    "host": "localhost",
+    "port": 5432,
+    "dialect": "postgres",
+    "logging": true
+  },
+  "test": {
+    "username": "breezy",
+    "password": "breezy",
+    "database": "breezy_test",
+    "host": "localhost",
+    "port": 5432,
+    "dialect": "postgres",
+    "logging": false
+  },
+  "production": {
+    "username": "breezy",
+    "password": "breezy",
+    "database": "breezy",
+    "host": "postgres_db",
+    "port": 5432,
+    "dialect": "postgres",
+    "logging": false
+  }
+}
