@@ -1,6 +1,5 @@
 import { Response } from 'express';
-import Post from '@breezy/shared/src/models/mongodb/Post';
-import { success, error, AuthRequest } from '@breezy/shared';
+import { PostModel as Post, NotificationModel as Notification, success, error, AuthRequest } from '@breezy/shared';
 
 /**
  * POST /api/posts/:id/like
@@ -33,6 +32,16 @@ export async function toggleLike(req: AuthRequest, res: Response): Promise<void>
     }
 
     await post.save();
+
+    if (likeIndex === -1 && userId !== post.user_id) {
+      await Notification.create({
+        recipient_id: post.user_id,
+        sender_id: userId,
+        type: 'like',
+        post_id: post._id,
+        is_read: false,
+      });
+    }
 
     success(res, {
       liked: likeIndex === -1,

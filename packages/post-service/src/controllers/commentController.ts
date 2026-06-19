@@ -1,7 +1,6 @@
 import { Response } from 'express';
 import mongoose from 'mongoose';
-import Post from '@breezy/shared/src/models/mongodb/Post';
-import { success, error, AuthRequest } from '@breezy/shared';
+import { PostModel as Post, success, error, AuthRequest } from '@breezy/shared';
 
 /**
  * POST /api/posts/:id/comment

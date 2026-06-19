@@ -1,6 +1,5 @@
 import { Response } from 'express';
-import Post from '@breezy/shared/src/models/mongodb/Post';
-import { Follower, success, error, AuthRequest } from '@breezy/shared';
+import { PostModel as Post, Follower, success, error, AuthRequest } from '@breezy/shared';
 
 /**
  * GET /api/posts/feed
