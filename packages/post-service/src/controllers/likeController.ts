@@ -1,11 +1,6 @@
 import { Response } from 'express';
 import { PostModel as Post, NotificationModel as Notification, success, error, AuthRequest } from '@breezy/shared';
 
-/**
- * POST /api/posts/:id/like
- * Toggle like on a post. If user already liked, remove like (unlike).
- * If user hasn't liked, add like. Returns { liked, likesCount }.
- */
 export async function toggleLike(req: AuthRequest, res: Response): Promise<void> {
   try {
     if (!req.user) {
@@ -14,38 +9,45 @@ export async function toggleLike(req: AuthRequest, res: Response): Promise<void>
     }
 
     const { id } = req.params;
-
     const userId = req.user.id;
 
-    const post = await Post.findById(id).select('likes user_id');
-
+    const post = await Post.findById(id).select('user_id');
     if (!post) {
       error(res, 'Post not found', 404);
       return;
     }
 
-    const alreadyLiked = post.likes.includes(userId);
+    const hasLiked = post.likes?.includes(userId) ?? false;
 
     const updatedPost = await Post.findByIdAndUpdate(
       id,
-      alreadyLiked
+      hasLiked
         ? { $pull: { likes: userId } }
         : { $addToSet: { likes: userId } },
       { new: true },
     );
 
-    if (!alreadyLiked && userId !== post.user_id) {
-      await Notification.create({
+    if (!hasLiked && userId !== post.user_id) {
+      const alreadyNotified = await Notification.findOne({
         recipient_id: post.user_id,
         sender_id: userId,
         type: 'like',
         post_id: post._id,
-        is_read: false,
       });
+
+      if (!alreadyNotified) {
+        await Notification.create({
+          recipient_id: post.user_id,
+          sender_id: userId,
+          type: 'like',
+          post_id: post._id,
+          is_read: false,
+        });
+      }
     }
 
     success(res, {
-      liked: !alreadyLiked,
+      liked: !hasLiked,
       likesCount: updatedPost!.likes.length,
     });
   } catch (err) {
