@@ -1,5 +1,5 @@
 import express from 'express';
-import { connectMongo, errorHandler, notFound, healthRouter } from '@breezy/shared';
+import { connectPostgres, connectMongo, errorHandler, notFound, healthRouter } from '@breezy/shared';
 import notificationRoutes from './routes/notifications';
 
 const app = express();
@@ -15,6 +15,7 @@ app.use(errorHandler);
 
 async function start() {
   try {
+    await connectPostgres();
     await connectMongo();
 
     app.listen(PORT, () => {
