@@ -25,19 +25,15 @@ export async function createReport(
     return;
   }
 
-  try {
-    const report = await Report.create({
-      reported_by: req.user!.id,
-      target_type,
-      target_id,
-      reason,
-      status: 'pending',
-    });
+  const report = await Report.create({
+    reported_by: req.user!.id,
+    target_type,
+    target_id,
+    reason,
+    status: 'pending',
+  });
 
-    success(res, report, 'Report created successfully.', 201);
-  } catch (err) {
-    error(res, 'Failed to create report.', 500);
-  }
+  success(res, report, 'Report created successfully.', 201);
 }
 
 /**
@@ -52,28 +48,24 @@ export async function listReports(
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
   const skip = (page - 1) * limit;
 
-  try {
-    const [reports, total] = await Promise.all([
-      Report.find({ status })
-        .sort({ created_at: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      Report.countDocuments({ status }),
-    ]);
+  const [reports, total] = await Promise.all([
+    Report.find({ status })
+      .sort({ created_at: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Report.countDocuments({ status }),
+  ]);
 
-    success(res, {
-      reports,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    });
-  } catch (err) {
-    error(res, 'Failed to list reports.', 500);
-  }
+  success(res, {
+    reports,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
+  });
 }
 
 /**
@@ -83,22 +75,18 @@ export async function resolveReport(
   req: AuthRequest,
   res: Response
 ): Promise<void> {
-  try {
-    const report = await Report.findByIdAndUpdate(
-      req.params.id,
-      { status: 'resolved' },
-      { new: true }
-    );
+  const report = await Report.findByIdAndUpdate(
+    req.params.id,
+    { status: 'resolved' },
+    { new: true }
+  );
 
-    if (!report) {
-      error(res, 'Report not found.', 404);
-      return;
-    }
-
-    success(res, report, 'Report resolved successfully.');
-  } catch (err) {
-    error(res, 'Failed to resolve report.', 500);
+  if (!report) {
+    error(res, 'Report not found.', 404);
+    return;
   }
+
+  success(res, report, 'Report resolved successfully.');
 }
 
 /**
@@ -132,32 +120,28 @@ export async function createBan(
     return;
   }
 
-  try {
-    const targetUser = await UserModel.findByPk(user_id);
-    if (!targetUser) {
-      error(res, 'Target user not found.', 404);
-      return;
-    }
-
-    const callerLevel = ROLE_HIERARCHY[req.user!.role] ?? 0;
-    const targetLevel = ROLE_HIERARCHY[targetUser.role] ?? 0;
-
-    if (callerLevel <= targetLevel) {
-      error(res, 'Insufficient permissions to ban this user.', 403);
-      return;
-    }
-
-    const ban = await Ban.create({
-      user_id,
-      reason,
-      banned_by: req.user!.id,
-      expires_at: expires_at || null,
-    });
-
-    success(res, ban, 'User banned successfully.', 201);
-  } catch (err) {
-    error(res, 'Failed to ban user.', 500);
+  const targetUser = await UserModel.findByPk(user_id);
+  if (!targetUser) {
+    error(res, 'Target user not found.', 404);
+    return;
   }
+
+  const callerLevel = ROLE_HIERARCHY[req.user!.role] ?? 0;
+  const targetLevel = ROLE_HIERARCHY[targetUser.role] ?? 0;
+
+  if (callerLevel <= targetLevel) {
+    error(res, 'Insufficient permissions to ban this user.', 403);
+    return;
+  }
+
+  const ban = await Ban.create({
+    user_id,
+    reason,
+    banned_by: req.user!.id,
+    expires_at: expires_at || null,
+  });
+
+  success(res, ban, 'User banned successfully.', 201);
 }
 
 /**
@@ -174,20 +158,16 @@ export async function deleteBan(
     return;
   }
 
-  try {
-    const ban = await Ban.findOne({ where: { user_id: userId } });
+  const ban = await Ban.findOne({ where: { user_id: userId } });
 
-    if (!ban) {
-      error(res, 'No active ban found for this user.', 404);
-      return;
-    }
-
-    await ban.destroy();
-
-    success(res, null, 'User unbanned successfully.');
-  } catch (err) {
-    error(res, 'Failed to unban user.', 500);
+  if (!ban) {
+    error(res, 'No active ban found for this user.', 404);
+    return;
   }
+
+  await ban.destroy();
+
+  success(res, null, 'User unbanned successfully.');
 }
 
 /**
@@ -204,27 +184,23 @@ export async function listBans(
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
   const offset = (page - 1) * limit;
 
-  try {
-    const where: Record<string, unknown> = {};
-    if (userId !== undefined && !isNaN(userId)) {
-      where.user_id = userId;
-    }
-
-    const [bans, total] = await Promise.all([
-      Ban.findAll({ where, offset, limit, order: [['created_at', 'DESC']] }),
-      Ban.count({ where }),
-    ]);
-
-    success(res, {
-      bans,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    });
-  } catch (err) {
-    error(res, 'Failed to list bans.', 500);
+  const where: Record<string, unknown> = {};
+  if (userId !== undefined && !isNaN(userId)) {
+    where.user_id = userId;
   }
+
+  const [bans, total] = await Promise.all([
+    Ban.findAll({ where, offset, limit, order: [['created_at', 'DESC']] }),
+    Ban.count({ where }),
+  ]);
+
+  success(res, {
+    bans,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
+  });
 }
