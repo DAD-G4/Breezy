@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
+import Link from "next/link";
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
@@ -9,12 +10,14 @@ export default function Header() {
 
   return (
     <>
+      {/* En-tête fixe en haut de l'écran */}
       <header className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-papaya-whip/20 bg-white dark:bg-deep-space-blue z-40 relative">
         <button 
           onClick={() => setIsMenuOpen(true)}
           className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip" 
           aria-label="Ouvrir le menu"
         >
+          {/* Icône du menu hamburger */}
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -24,11 +27,16 @@ export default function Header() {
           🍃 Breezy
         </span>
 
-        <button className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip" aria-label="Profil">
+        {/* Icône du profil */}
+        <Link 
+          href="/profile"
+          className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip" 
+          aria-label="Profil"
+        >
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
-        </button>
+        </Link>
       </header>
 
       {isMenuOpen && (
@@ -52,13 +60,19 @@ export default function Header() {
           </button>
         </div>
 
+
         <nav className="flex-1 p-4 space-y-4">
-          <button className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-deep-space-blue dark:text-papaya-whip transition-colors text-left font-medium">
+        {/* Action : Créer un post */}
+          <Link 
+            href="/create"
+            onClick={() => setIsMenuOpen(false)} // On referme le menu latéral après avoir cliqué
+            className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-deep-space-blue dark:text-papaya-whip transition-colors text-left font-medium"
+          >
             <svg className="w-6 h-6 text-steel-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
             </svg>
             Créer un post
-          </button>
+          </Link>
 
           <button 
             onClick={toggleTheme}

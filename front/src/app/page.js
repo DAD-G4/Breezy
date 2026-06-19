@@ -2,6 +2,7 @@
 
 import PostCard from "../components/feed/PostCard";
 import Header from "../components/layout/Header";
+import BottomNav from "../components/layout/BottomNav";
 
 export default function FeedPage() {
   // TODO: remplacer par les données réelles du back-end
@@ -42,7 +43,8 @@ export default function FeedPage() {
         {mockPosts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
-      </main>
+      </main> 
+      <BottomNav />
     </div>
   );
 }
