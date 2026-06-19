@@ -2,8 +2,8 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Header from "../../components/layout/Header";
-import BottomNav from "../../components/layout/BottomNav";
+import Header from "@/components/layout/Header";
+import BottomNav from "@/components/layout/BottomNav";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -49,12 +49,23 @@ export default function CreatePostPage() {
       
       <main className="flex-1 flex flex-col p-4 gap-4">
         
-        {/* Titre*/}
-        <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip mb-2 px-2">
-          Nouvelle publication
-        </h1>
+        {/* En-tête avec bouton retour et Titre */}
+        <div className="flex items-center gap-1 mb-2">
+          <button 
+            onClick={() => router.back()} 
+            className="p-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors"
+            aria-label="Retour"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+          <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">
+            Nouvelle publication
+          </h1>
+        </div>
 
-        {/* Carte de création*/}
+        {/* Carte de création */}
         <form 
           onSubmit={handleSubmit} 
           className="p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm dark:shadow-[0_0_15px_rgba(102,155,188,0.15)] flex flex-col gap-4 transition-all"
@@ -70,7 +81,7 @@ export default function CreatePostPage() {
             </span>
           </div>
 
-          {/* Zone de texte*/}
+          {/* Zone de texte */}
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -79,7 +90,7 @@ export default function CreatePostPage() {
             required={!imagePreview} // uniquement s'il y a pas d'image
           />
 
-          {/* Aperçu de l'image*/}
+          {/* Aperçu de l'image */}
           {imagePreview && (
             <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 mt-2">
               <img src={imagePreview} alt="Aperçu" className="w-full h-auto object-cover" />
@@ -100,7 +111,7 @@ export default function CreatePostPage() {
           {/* Barre d'outils et bouton Publier */}
           <div className="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-white/10 mt-2">
             
-            {/* Outils*/}
+            {/* Outils */}
             <div className="flex gap-2 text-steel-blue">
               
               {/* Ajout d'Image */}
@@ -141,4 +152,4 @@ export default function CreatePostPage() {
       <BottomNav />
     </div>
   );
-}
+} 
