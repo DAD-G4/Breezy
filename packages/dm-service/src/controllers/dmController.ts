@@ -117,11 +117,13 @@ export async function getConversations(req: AuthRequest, res: Response): Promise
     const total = distinctConversations.length;
     const paginatedIds = distinctConversations.slice(skip, skip + limit);
 
-    const conversations = await Promise.all(
+    const conversations = (await Promise.all(
       paginatedIds.map(async (conversationId) => {
         const lastMessage = await DirectMessage.findOne({ conversation_id: conversationId })
           .sort({ created_at: -1 })
           .limit(1);
+
+        if (!lastMessage) return null;
 
         const unreadCount = await DirectMessage.countDocuments({
           conversation_id: conversationId,
@@ -130,7 +132,7 @@ export async function getConversations(req: AuthRequest, res: Response): Promise
         });
 
         const otherUserId =
-          lastMessage!.sender_id === userId ? lastMessage!.recipient_id : lastMessage!.sender_id;
+          lastMessage.sender_id === userId ? lastMessage.recipient_id : lastMessage.sender_id;
 
         return {
           conversation_id: conversationId,
@@ -139,7 +141,7 @@ export async function getConversations(req: AuthRequest, res: Response): Promise
           unread_count: unreadCount,
         };
       }),
-    );
+    )).filter(Boolean);
 
     conversations.sort((a, b) => {
       const timeA = a.last_message?.created_at?.getTime?.() ?? 0;
