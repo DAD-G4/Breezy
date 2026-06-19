@@ -2,7 +2,19 @@ import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AuthRequest, UserRole } from '../types';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
+/**
+ * Returns the JWT_SECRET from environment.
+ * Throws on startup if not configured — prevents insecure fallback.
+ */
+export function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
+  return secret;
+}
+
+const JWT_SECRET = getJwtSecret();
 
 interface JwtPayload {
   id: number;
@@ -82,7 +94,6 @@ export function checkBan(banChecker: BanChecker) {
       const ban = await banChecker(req.user.id);
 
       if (ban) {
-        // If ban has an expiry and it's in the past, the ban has lapsed
         if (ban.expires_at && new Date(ban.expires_at) < new Date()) {
           next();
           return;
@@ -99,4 +110,34 @@ export function checkBan(banChecker: BanChecker) {
   };
 }
 
-export default authenticateToken;
+/**
+ * Role-based access control middleware.
+ * MUST be used AFTER authenticateToken.
+ * - Checks if the authenticated user's role meets the minimum required level
+ * - Role hierarchy: user < moderator < admin
+ * - Returns 403 if the user's role is insufficient
+ */
+const ROLE_HIERARCHY: Record<string, number> = {
+  [UserRole.USER]: 0,
+  [UserRole.MODERATOR]: 1,
+  [UserRole.ADMIN]: 2,
+};
+
+export function requireRole(minimumRole: UserRole) {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({ error: 'Authentication required.' });
+      return;
+    }
+
+    const userLevel = ROLE_HIERARCHY[req.user.role] ?? 0;
+    const requiredLevel = ROLE_HIERARCHY[minimumRole] ?? 0;
+
+    if (userLevel < requiredLevel) {
+      res.status(403).json({ error: 'Insufficient permissions.' });
+      return;
+    }
+
+    next();
+  };
+}

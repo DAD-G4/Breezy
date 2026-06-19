@@ -1,18 +1,16 @@
 import { Sequelize } from "sequelize";
 import mongoose from "mongoose";
+import { sequelize } from "./connection";
 
 export async function connectPostgres(): Promise<Sequelize> {
-  const uri =
-    process.env.POSTGRES_URI ||
-    "postgres://breezy:breezy@localhost:5432/breezy";
-
-  const sequelize = new Sequelize(uri, {
-    dialect: "postgres",
-    logging: process.env.NODE_ENV === "production" ? false : console.log,
-  });
-
   await sequelize.authenticate();
   console.log("✅ PostgreSQL connected successfully");
+
+  // Auto-sync tables in development (creates tables if they don't exist)
+  if (process.env.NODE_ENV !== "production") {
+    await sequelize.sync({ alter: true });
+    console.log("✅ Database tables synced");
+  }
 
   return sequelize;
 }

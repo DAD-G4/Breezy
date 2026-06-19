@@ -1,12 +1,14 @@
 export * from './types';
 
-export { authenticateToken, checkBan } from './middleware/auth';
+export { authenticateToken, checkBan, requireRole, getJwtSecret } from './middleware/auth';
 export type { BanChecker, BanRecord } from './middleware/auth';
 export { errorHandler, AppError } from './middleware/errorHandler';
 export type { ErrorResponse as ErrorHandlerErrorResponse } from './middleware/errorHandler';
 export { default as notFound } from './middleware/notFound';
 
 export { default as healthRouter } from './routes/health';
+
+export { connectPostgres, connectMongo } from './config/database';
 
 export { success, error } from './utils/response';
 export type { SuccessResponse, ErrorResponse } from './utils/response';
@@ -19,3 +21,12 @@ export { sequelize } from './config/connection';
 
 export { default as PostModel } from './models/mongodb/Post';
 export type { IPostDocument, IComment, IReply, IPostMedia } from './models/mongodb/Post';
+
+export { default as NotificationModel } from './models/mongodb/Notification';
+export type { INotificationDocument } from './models/mongodb/Notification';
+
+export { default as DirectMessageModel } from './models/mongodb/DirectMessage';
+export type { IDirectMessageDocument } from './models/mongodb/DirectMessage';
+
+export { default as ReportModel } from './models/mongodb/Report';
+export type { IReportDocument } from './models/mongodb/Report';
