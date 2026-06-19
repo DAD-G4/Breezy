@@ -42,6 +42,11 @@ const banChecker = async (userId: number) => {
 };
 
 const router = Router();
+
+router.get('/auth', authenticateToken, (_req, res) => {
+  res.status(200).json({ valid: true });
+});
+
 router.use(authenticateToken);
 router.use(checkBan(banChecker));
 router.post('/upload', upload.single('file'), uploadMedia);
