@@ -97,6 +97,9 @@ const PostSchema = new Schema({
 // Compound index for feed queries (user posts sorted by date)
 PostSchema.index({ user_id: 1, created_at: -1 });
 
+// Compound index for tag search sorted by date
+PostSchema.index({ tags: 1, created_at: -1 });
+
 const Post: Model<IPostDocument> =
   (mongoose.models as any).Post ||
   mongoose.model<IPostDocument>('Post', PostSchema);
