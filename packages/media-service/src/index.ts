@@ -1,5 +1,5 @@
 import express from 'express';
-import { connectMongo, errorHandler, notFound, healthRouter } from '@breezy/shared';
+import { connectPostgres, connectMongo, errorHandler, notFound, healthRouter } from '@breezy/shared';
 import mediaRoutes from './routes/media';
 
 const app = express();
@@ -13,6 +13,7 @@ app.use(errorHandler);
 
 async function start() {
   try {
+    await connectPostgres();
     await connectMongo();
     app.listen(PORT, () => {
       console.log(`Media service running on port ${PORT}`);

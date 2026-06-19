@@ -13,9 +13,26 @@ const storage = multer.diskStorage({
   },
 });
 
+const ALLOWED_TYPES: Record<string, string[]> = {
+  'image/jpeg': ['.jpg', '.jpeg'],
+  'image/png': ['.png'],
+  'image/gif': ['.gif'],
+  'video/mp4': ['.mp4'],
+  'video/webm': ['.webm'],
+};
+
 const upload = multer({
   storage,
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowedExts = ALLOWED_TYPES[file.mimetype];
+    if (allowedExts && allowedExts.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Allowed: jpeg, png, gif, mp4, webm'));
+    }
+  },
 });
 
 const banChecker = async (userId: number) => {
