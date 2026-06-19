@@ -11,12 +11,28 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
+
+  // récupère les stats de base, 0 par défaut
+  const [followers, setFollowers] = useState(initialUser.followers || 0);
+  const [following, setFollowing] = useState(initialUser.following || 0);
+  const [isFollowing, setIsFollowing] = useState(false); // Est-ce que l'utilisateur actuel folow ce profil ?
   
   const fileInputRef = useRef(null);
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  // Clic sur bouton Follow/Unfollow
+  const handleFollowToggle = () => {
+    if (isFollowing) {
+      setIsFollowing(false);
+      setFollowers(followers - 1); // retire notre abonnement
+    } else {
+      setIsFollowing(true);
+      setFollowers(followers + 1); // ça follow et compteur +1
+    }
   };
 
   return (
@@ -103,6 +119,38 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
               )}
             </div>
           )}
+        </div>
+
+
+      {/* --- STATS & BOUTON S'ABONNER --- */}
+        <div className="flex flex-col gap-4 mt-2">
+          
+          {/* Les Compteurs */}
+          <div className="flex justify-center gap-6 text-sm">
+            <div className="flex flex-col items-center">
+              <span className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip">{followers}</span>
+              <span className="text-gray-500 dark:text-gray-400">Abonnés</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip">{following}</span>
+              <span className="text-gray-500 dark:text-gray-400">Abonnements</span>
+            </div>
+          </div>
+
+          {/* Le Bouton d'action (N'apparaît QUE si ce n'est pas mon profil) */}
+          {!isOwnProfile && (
+            <button 
+              onClick={handleFollowToggle}
+              className={`w-full py-2.5 rounded-xl font-bold transition-all duration-300 ${
+                isFollowing 
+                  ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-papaya-whip border border-gray-200 dark:border-white/20" 
+                  : "bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
+              }`}
+            >
+              {isFollowing ? "Abonné" : "S'abonner"}
+            </button>
+          )}
+
         </div>
       </section>
 

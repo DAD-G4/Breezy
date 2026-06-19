@@ -20,7 +20,7 @@ export default function FeedPage() {
       username: "User2",
       time: "5min",
       content: "Regardez cette magnifique vue pour tester l'intégration des images ! 🌄",
-      // On utilise Picsum, c'est un générateur d'images de test infaillible
+      // Picsum, générateur d'images 
       imageUrl: "https://picsum.photos/800/400",
       likesCount: 45,
       commentsCount: 8,
