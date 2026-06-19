@@ -1,8 +1,9 @@
 import { Sequelize } from "sequelize";
 
-const uri =
-  process.env.POSTGRES_URI ||
-  "postgres://user:password@localhost:5432/breezy";
+const uri = process.env.POSTGRES_URI;
+if (!uri) {
+  throw new Error("POSTGRES_URI environment variable is required");
+}
 
 export const sequelize = new Sequelize(uri, {
   dialect: "postgres",
