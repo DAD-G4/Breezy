@@ -20,6 +20,10 @@ const mockBan = {
   count: jest.fn(),
 };
 
+const mockUserModel = {
+  findByPk: jest.fn(),
+};
+
 jest.mock('@breezy/shared', () => {
   // Set JWT_SECRET before requireActual triggers auth.ts module-scope getJwtSecret()
   process.env.JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
@@ -27,6 +31,7 @@ jest.mock('@breezy/shared', () => {
   return {
     ...actual,
     Ban: mockBan,
+    UserModel: mockUserModel,
     success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
       const code = statusCode || 200;
       const body: any = { data };
@@ -240,6 +245,7 @@ describe('Moderation Routes', () => {
 
   describe('POST /api/moderation/ban', () => {
     it('should ban a user as admin (201)', async () => {
+      mockUserModel.findByPk.mockResolvedValue({ id: 5, role: 'user' });
       mockBan.create.mockResolvedValue({
         id: 1,
         user_id: 5,
@@ -263,6 +269,7 @@ describe('Moderation Routes', () => {
     });
 
     it('should ban a user as moderator (201)', async () => {
+      mockUserModel.findByPk.mockResolvedValue({ id: 5, role: 'user' });
       mockBan.create.mockResolvedValue({
         id: 2,
         user_id: 5,
@@ -281,6 +288,51 @@ describe('Moderation Routes', () => {
         });
 
       expect(res.status).toBe(201);
+    });
+
+    it('should return 403 when moderator tries to ban admin', async () => {
+      mockUserModel.findByPk.mockResolvedValue({ id: 99, role: 'admin' });
+
+      const res = await request(app)
+        .post('/api/moderation/ban')
+        .set('Authorization', `Bearer ${modToken}`)
+        .send({
+          user_id: 99,
+          reason: 'Trying to ban admin',
+        });
+
+      expect(res.status).toBe(403);
+      expect(res.body.error).toContain('Insufficient permissions');
+    });
+
+    it('should return 403 when moderator tries to ban another moderator', async () => {
+      mockUserModel.findByPk.mockResolvedValue({ id: 98, role: 'moderator' });
+
+      const res = await request(app)
+        .post('/api/moderation/ban')
+        .set('Authorization', `Bearer ${modToken}`)
+        .send({
+          user_id: 98,
+          reason: 'Trying to ban moderator',
+        });
+
+      expect(res.status).toBe(403);
+      expect(res.body.error).toContain('Insufficient permissions');
+    });
+
+    it('should return 404 when target user not found', async () => {
+      mockUserModel.findByPk.mockResolvedValue(null);
+
+      const res = await request(app)
+        .post('/api/moderation/ban')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          user_id: 999,
+          reason: 'Non-existent user',
+        });
+
+      expect(res.status).toBe(404);
+      expect(res.body.error).toContain('Target user not found');
     });
 
     it('should return 403 for regular user', async () => {

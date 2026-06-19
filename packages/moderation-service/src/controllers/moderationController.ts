@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { ReportModel as Report, AuthRequest, Ban, success, error } from '@breezy/shared';
+import { ReportModel as Report, AuthRequest, Ban, UserModel, UserRole, success, error } from '@breezy/shared';
 
 /**
  * Create a content report (any authenticated user).
@@ -102,7 +102,19 @@ export async function resolveReport(
 }
 
 /**
+ * Role hierarchy: user < moderator < admin.
+ * A moderator can only ban users, not other moderators or admins.
+ * An admin can ban anyone.
+ */
+const ROLE_HIERARCHY: Record<string, number> = {
+  [UserRole.USER]: 0,
+  [UserRole.MODERATOR]: 1,
+  [UserRole.ADMIN]: 2,
+};
+
+/**
  * Ban a user (moderator/admin only).
+ * Moderators cannot ban moderators or admins.
  */
 export async function createBan(
   req: AuthRequest,
@@ -121,6 +133,20 @@ export async function createBan(
   }
 
   try {
+    const targetUser = await UserModel.findByPk(user_id);
+    if (!targetUser) {
+      error(res, 'Target user not found.', 404);
+      return;
+    }
+
+    const callerLevel = ROLE_HIERARCHY[req.user!.role] ?? 0;
+    const targetLevel = ROLE_HIERARCHY[targetUser.role] ?? 0;
+
+    if (callerLevel <= targetLevel) {
+      error(res, 'Insufficient permissions to ban this user.', 403);
+      return;
+    }
+
     const ban = await Ban.create({
       user_id,
       reason,
