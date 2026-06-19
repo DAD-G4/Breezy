@@ -2,7 +2,7 @@ import { Sequelize } from "sequelize";
 
 const uri =
   process.env.POSTGRES_URI ||
-  "postgres://breezy:breezy@localhost:5432/breezy";
+  "postgres://user:password@localhost:5432/breezy";
 
 export const sequelize = new Sequelize(uri, {
   dialect: "postgres",

@@ -62,6 +62,7 @@ services:
       PORT: 3002
       POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
       MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
     depends_on:
       - postgres
       - mongo
@@ -76,6 +77,7 @@ services:
       PORT: 3003
       POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
       MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
     depends_on:
       - postgres
       - mongo
@@ -89,6 +91,7 @@ services:
     environment:
       PORT: 3004
       MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
     depends_on:
       - mongo
 
@@ -100,8 +103,11 @@ services:
     restart: unless-stopped
     environment:
       PORT: 3005
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
       MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
     depends_on:
+      - postgres
       - mongo
 
   dm-service:
@@ -112,8 +118,11 @@ services:
     restart: unless-stopped
     environment:
       PORT: 3006
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
       MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
     depends_on:
+      - postgres
       - mongo
 
   media-service:
@@ -124,6 +133,10 @@ services:
     restart: unless-stopped
     environment:
       PORT: 3007
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
+    depends_on:
+      - postgres
     volumes:
       - media_uploads:/app/packages/media-service/uploads
 
@@ -137,6 +150,7 @@ services:
       PORT: 3008
       POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
       MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
     depends_on:
       - postgres
       - mongo

@@ -14,7 +14,13 @@ export function getJwtSecret(): string {
   return secret;
 }
 
-const JWT_SECRET = getJwtSecret();
+let cachedJwtSecret: string | null = null;
+function getJwtSecretLazy(): string {
+  if (cachedJwtSecret === null) {
+    cachedJwtSecret = getJwtSecret();
+  }
+  return cachedJwtSecret;
+}
 
 interface JwtPayload {
   id: number;
@@ -46,7 +52,7 @@ export function authenticateToken(
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, getJwtSecretLazy(), { algorithms: ['HS256'] }) as JwtPayload;
     req.user = {
       id: decoded.id,
       username: decoded.username,
