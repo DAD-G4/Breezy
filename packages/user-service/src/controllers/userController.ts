@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { UserModel, ProfileModel, success, error, AuthRequest } from '@breezy/shared';
+import { UserModel, ProfileModel, Follower, PostModel, success, error, AuthRequest } from '@breezy/shared';
 
 /**
  * GET /api/users/profile/:id
@@ -19,7 +19,15 @@ export async function getProfile(req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    success(res, user);
+    const userId = parseInt(id, 10);
+
+    const [followersCount, followingCount, postsCount] = await Promise.all([
+      Follower.count({ where: { following_id: userId } }),
+      Follower.count({ where: { follower_id: userId } }),
+      PostModel.countDocuments({ user_id: userId }),
+    ]);
+
+    success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount });
   } catch (err) {
     console.error('[GetProfile]', err);
     error(res, 'Internal server error', 500);

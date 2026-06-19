@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { Follower, success, error, AuthRequest } from '@breezy/shared';
+import { NotificationModel as Notification, Follower, success, error, AuthRequest } from '@breezy/shared';
 
 /**
  * POST /api/users/follow/:id
@@ -35,6 +35,14 @@ export async function followUser(req: AuthRequest, res: Response): Promise<void>
     const follow = await Follower.create({
       follower_id: req.user.id,
       following_id: followingId,
+    });
+
+    await Notification.create({
+      recipient_id: followingId,
+      sender_id: req.user.id,
+      type: 'follow',
+      post_id: null,
+      is_read: false,
     });
 
     success(res, follow, 'Successfully followed user');

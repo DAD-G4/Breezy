@@ -1,9 +1,11 @@
 import { Router } from 'express';
+import { authenticateToken } from '@breezy/shared';
 import { searchPostsByTag } from '../controllers/tagController';
 
 const router = Router();
 
-// Public endpoint — no authentication required
+router.use(authenticateToken);
+
 router.get('/search', searchPostsByTag);
 
 export default router;

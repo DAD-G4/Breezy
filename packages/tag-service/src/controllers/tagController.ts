@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
-import Post from '@breezy/shared/src/models/mongodb/Post';
-import { success, error } from '@breezy/shared';
+import { PostModel as Post, success, error } from '@breezy/shared';
 
 /**
  * GET /api/tags/search?q=monTag&page=1&limit=20

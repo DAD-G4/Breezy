@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { UserModel, ProfileModel, success, error } from '@breezy/shared';
+import { UserModel, ProfileModel, success, error, getJwtSecret } from '@breezy/shared';
 import { validateRegisterInput } from '../validators/auth';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
+const JWT_SECRET = getJwtSecret();
 const SALT_ROUNDS = 10;
 const JWT_EXPIRY = '1h';
 

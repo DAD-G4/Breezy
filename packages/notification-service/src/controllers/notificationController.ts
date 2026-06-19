@@ -1,6 +1,5 @@
 import { Response } from 'express';
-import { success, error, AuthRequest } from '@breezy/shared';
-import Notification from '@breezy/shared/src/models/mongodb/Notification';
+import { NotificationModel as Notification, success, error, AuthRequest } from '@breezy/shared';
 
 /**
  * GET /api/notifications
