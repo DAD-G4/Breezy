@@ -15,25 +15,26 @@ export async function toggleLike(req: AuthRequest, res: Response): Promise<void>
 
     const { id } = req.params;
 
-    const post = await Post.findById(id);
+    const userId = req.user.id;
+
+    const post = await Post.findById(id).select('likes user_id');
 
     if (!post) {
       error(res, 'Post not found', 404);
       return;
     }
 
-    const userId = req.user.id;
-    const likeIndex = post.likes.indexOf(userId);
+    const alreadyLiked = post.likes.includes(userId);
 
-    if (likeIndex > -1) {
-      post.likes.splice(likeIndex, 1);
-    } else {
-      post.likes.push(userId);
-    }
+    const updatedPost = await Post.findByIdAndUpdate(
+      id,
+      alreadyLiked
+        ? { $pull: { likes: userId } }
+        : { $addToSet: { likes: userId } },
+      { new: true },
+    );
 
-    await post.save();
-
-    if (likeIndex === -1 && userId !== post.user_id) {
+    if (!alreadyLiked && userId !== post.user_id) {
       await Notification.create({
         recipient_id: post.user_id,
         sender_id: userId,
@@ -44,8 +45,8 @@ export async function toggleLike(req: AuthRequest, res: Response): Promise<void>
     }
 
     success(res, {
-      liked: likeIndex === -1,
-      likesCount: post.likes.length,
+      liked: !alreadyLiked,
+      likesCount: updatedPost!.likes.length,
     });
   } catch (err) {
     console.error('[ToggleLike]', err);

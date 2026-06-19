@@ -4,7 +4,10 @@ import request from 'supertest';
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
 const mockPostModel = {
-  findById: jest.fn(),
+  findById: jest.fn().mockReturnValue({
+    select: jest.fn().mockResolvedValue(null),
+  }),
+  findByIdAndUpdate: jest.fn(),
 };
 
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
@@ -54,6 +57,11 @@ describe('Like Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthenticatedUser = null;
+    // Reset default mock behavior (post not found)
+    mockPostModel.findById.mockReturnValue({
+      select: jest.fn().mockResolvedValue(null),
+    });
+    mockPostModel.findByIdAndUpdate.mockReset();
   });
 
   describe('POST /api/posts/:id/like', () => {
@@ -64,17 +72,26 @@ describe('Like Routes', () => {
         _id: 'post123',
         user_id: 2,
         likes: [] as number[],
-        save: jest.fn().mockResolvedValue(true),
       };
 
-      mockPostModel.findById.mockResolvedValue(mockPost);
+      mockPostModel.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockPost),
+      });
+
+      mockPostModel.findByIdAndUpdate.mockResolvedValue({
+        ...mockPost,
+        likes: [1],
+      });
 
       const res = await request(app).post('/api/posts/post123/like');
 
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual({ liked: true, likesCount: 1 });
-      expect(mockPost.likes).toContain(1);
-      expect(mockPost.save).toHaveBeenCalled();
+      expect(mockPostModel.findByIdAndUpdate).toHaveBeenCalledWith(
+        'post123',
+        { $addToSet: { likes: 1 } },
+        { new: true },
+      );
     });
 
     it('should unlike a post that was already liked (toggle)', async () => {
@@ -84,23 +101,34 @@ describe('Like Routes', () => {
         _id: 'post123',
         user_id: 2,
         likes: [1, 3, 5] as number[],
-        save: jest.fn().mockResolvedValue(true),
       };
 
-      mockPostModel.findById.mockResolvedValue(mockPost);
+      mockPostModel.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockPost),
+      });
+
+      mockPostModel.findByIdAndUpdate.mockResolvedValue({
+        ...mockPost,
+        likes: [3, 5],
+      });
 
       const res = await request(app).post('/api/posts/post123/like');
 
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual({ liked: false, likesCount: 2 });
-      expect(mockPost.likes).not.toContain(1);
-      expect(mockPost.save).toHaveBeenCalled();
+      expect(mockPostModel.findByIdAndUpdate).toHaveBeenCalledWith(
+        'post123',
+        { $pull: { likes: 1 } },
+        { new: true },
+      );
     });
 
     it('should return 404 if the post does not exist', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      mockPostModel.findById.mockResolvedValue(null);
+      mockPostModel.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(null),
+      });
 
       const res = await request(app).post('/api/posts/nonexistent/like');
 
@@ -124,10 +152,16 @@ describe('Like Routes', () => {
         _id: 'post123',
         user_id: 2,
         likes: [] as number[],
-        save: jest.fn().mockResolvedValue(true),
       };
 
-      mockPostModel.findById.mockResolvedValue(mockPost);
+      mockPostModel.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockPost),
+      });
+
+      mockPostModel.findByIdAndUpdate.mockResolvedValue({
+        ...mockPost,
+        likes: [1],
+      });
 
       await request(app).post('/api/posts/post123/like');
 
@@ -147,10 +181,16 @@ describe('Like Routes', () => {
         _id: 'post123',
         user_id: 1,
         likes: [] as number[],
-        save: jest.fn().mockResolvedValue(true),
       };
 
-      mockPostModel.findById.mockResolvedValue(mockPost);
+      mockPostModel.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockPost),
+      });
+
+      mockPostModel.findByIdAndUpdate.mockResolvedValue({
+        ...mockPost,
+        likes: [1],
+      });
 
       await request(app).post('/api/posts/post123/like');
 
@@ -164,10 +204,16 @@ describe('Like Routes', () => {
         _id: 'post123',
         user_id: 2,
         likes: [1] as number[],
-        save: jest.fn().mockResolvedValue(true),
       };
 
-      mockPostModel.findById.mockResolvedValue(mockPost);
+      mockPostModel.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockPost),
+      });
+
+      mockPostModel.findByIdAndUpdate.mockResolvedValue({
+        ...mockPost,
+        likes: [],
+      });
 
       await request(app).post('/api/posts/post123/like');
 
