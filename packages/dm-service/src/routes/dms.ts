@@ -1,22 +1,16 @@
 import { Router } from 'express';
-import { authenticateToken, checkBan, Ban } from '@breezy/shared';
+import { authenticateToken, checkBan, Ban, asyncHandler, createBanChecker, validateDMContent } from '@breezy/shared';
 import { sendMessage, getConversation, getConversations, getUnreadCount, markConversationAsRead } from '../controllers/dmController';
 
 const router = Router();
 
-const banChecker = async (userId: number) => {
-  const ban = await Ban.findOne({ where: { user_id: userId } });
-  if (!ban) return null;
-  return { user_id: ban.user_id, expires_at: ban.expires_at };
-};
-
 router.use(authenticateToken);
-router.use(checkBan(banChecker));
+router.use(checkBan(createBanChecker(Ban)));
 
-router.post('/send', sendMessage);
-router.get('/conversations', getConversations);
-router.get('/unread-count', getUnreadCount);
-router.put('/conversation/:userId/read', markConversationAsRead);
-router.get('/conversation/:userId', getConversation);
+router.post('/send', validateDMContent, asyncHandler(sendMessage));
+router.get('/conversations', asyncHandler(getConversations));
+router.get('/unread-count', asyncHandler(getUnreadCount));
+router.put('/conversation/:userId/read', asyncHandler(markConversationAsRead));
+router.get('/conversation/:userId', asyncHandler(getConversation));
 
 export default router;

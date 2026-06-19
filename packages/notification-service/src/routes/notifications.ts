@@ -1,19 +1,13 @@
 import { Router } from 'express';
-import { authenticateToken, checkBan, Ban } from '@breezy/shared';
+import { authenticateToken, checkBan, Ban, asyncHandler, createBanChecker } from '@breezy/shared';
 import { getNotifications, markAsRead } from '../controllers/notificationController';
 
 const router = Router();
 
-const banChecker = async (userId: number) => {
-  const ban = await Ban.findOne({ where: { user_id: userId } });
-  if (!ban) return null;
-  return { user_id: ban.user_id, expires_at: ban.expires_at };
-};
-
 router.use(authenticateToken);
-router.use(checkBan(banChecker));
+router.use(checkBan(createBanChecker(Ban)));
 
-router.get('/', getNotifications);
-router.put('/:id/read', markAsRead);
+router.get('/', asyncHandler(getNotifications));
+router.put('/:id/read', asyncHandler(markAsRead));
 
 export default router;

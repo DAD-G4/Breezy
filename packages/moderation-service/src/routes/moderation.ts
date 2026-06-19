@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateToken, checkBan, Ban, requireRole, UserRole } from '@breezy/shared';
+import { authenticateToken, checkBan, Ban, requireRole, UserRole, asyncHandler, createBanChecker, validateReportInput, validateBanInput } from '@breezy/shared';
 import {
   createReport,
   listReports,
@@ -11,21 +11,15 @@ import {
 
 const router = Router();
 
-const banChecker = async (userId: number) => {
-  const ban = await Ban.findOne({ where: { user_id: userId } });
-  if (!ban) return null;
-  return { user_id: ban.user_id, expires_at: ban.expires_at };
-};
-
 router.use(authenticateToken);
-router.use(checkBan(banChecker));
+router.use(checkBan(createBanChecker(Ban)));
 
-router.post('/report', createReport);
-router.get('/reports', requireRole(UserRole.MODERATOR), listReports);
-router.put('/reports/:id/resolve', requireRole(UserRole.MODERATOR), resolveReport);
+router.post('/report', validateReportInput, asyncHandler(createReport));
+router.get('/reports', requireRole(UserRole.MODERATOR), asyncHandler(listReports));
+router.put('/reports/:id/resolve', requireRole(UserRole.MODERATOR), asyncHandler(resolveReport));
 
-router.post('/ban', requireRole(UserRole.MODERATOR), createBan);
-router.delete('/ban/:userId', requireRole(UserRole.ADMIN), deleteBan);
-router.get('/bans', requireRole(UserRole.MODERATOR), listBans);
+router.post('/ban', requireRole(UserRole.MODERATOR), validateBanInput, asyncHandler(createBan));
+router.delete('/ban/:userId', requireRole(UserRole.ADMIN), asyncHandler(deleteBan));
+router.get('/bans', requireRole(UserRole.MODERATOR), asyncHandler(listBans));
 
 export default router;

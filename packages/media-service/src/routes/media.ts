@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
-import { authenticateToken, checkBan, Ban } from '@breezy/shared';
+import { authenticateToken, checkBan, Ban, asyncHandler, createBanChecker } from '@breezy/shared';
 import { uploadMedia } from '../controllers/mediaController';
 
 const storage = multer.diskStorage({
@@ -35,12 +35,6 @@ const upload = multer({
   },
 });
 
-const banChecker = async (userId: number) => {
-  const ban = await Ban.findOne({ where: { user_id: userId } });
-  if (!ban) return null;
-  return { user_id: ban.user_id, expires_at: ban.expires_at };
-};
-
 const router = Router();
 
 router.get('/auth', authenticateToken, (_req, res) => {
@@ -48,7 +42,7 @@ router.get('/auth', authenticateToken, (_req, res) => {
 });
 
 router.use(authenticateToken);
-router.use(checkBan(banChecker));
-router.post('/upload', upload.single('file'), uploadMedia);
+router.use(checkBan(createBanChecker(Ban)));
+router.post('/upload', upload.single('file'), asyncHandler(uploadMedia));
 
 export default router;
