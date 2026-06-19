@@ -147,3 +147,11 @@ export function requireRole(minimumRole: UserRole) {
     next();
   };
 }
+
+export function createBanChecker(BanModel: any) {
+  return async (userId: number) => {
+    const ban = await BanModel.findOne({ where: { user_id: userId } });
+    if (!ban) return null;
+    return { user_id: ban.user_id, expires_at: ban.expires_at };
+  };
+}

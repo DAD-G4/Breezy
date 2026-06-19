@@ -1,10 +1,20 @@
 export * from './types';
 
-export { authenticateToken, checkBan, requireRole, getJwtSecret } from './middleware/auth';
+export { authenticateToken, checkBan, requireRole, getJwtSecret, createBanChecker } from './middleware/auth';
 export type { BanChecker, BanRecord } from './middleware/auth';
 export { errorHandler, AppError } from './middleware/errorHandler';
 export type { ErrorResponse as ErrorHandlerErrorResponse } from './middleware/errorHandler';
 export { default as notFound } from './middleware/notFound';
+export { asyncHandler } from './middleware/asyncHandler';
+export {
+  validateRequired,
+  validatePostContent,
+  validateCommentContent,
+  validateDMContent,
+  validateLoginInput,
+  validateReportInput,
+  validateBanInput,
+} from './middleware/validate';
 
 export { default as healthRouter } from './routes/health';
 
