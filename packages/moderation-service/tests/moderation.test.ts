@@ -326,9 +326,18 @@ describe('Moderation Routes', () => {
   describe('DELETE /api/moderation/ban/:userId', () => {
     it('should unban a user as admin (200)', async () => {
       const mockBanInstance = {
+        user_id: 5,
         destroy: jest.fn().mockResolvedValue(undefined),
       };
-      mockBan.findOne.mockResolvedValue(mockBanInstance);
+
+      // banChecker queries for the authenticated user (id: 3) - return null (not banned)
+      // deleteBan queries for the target user (id: 5) - return the ban instance
+      mockBan.findOne.mockImplementation((query) => {
+        if (query?.where?.user_id === 5) {
+          return Promise.resolve(mockBanInstance);
+        }
+        return Promise.resolve(null);
+      });
 
       const res = await request(app)
         .delete('/api/moderation/ban/5')
@@ -340,6 +349,9 @@ describe('Moderation Routes', () => {
     });
 
     it('should return 403 for moderator', async () => {
+      // banChecker queries for mod user (id: 2) - return null (not banned)
+      mockBan.findOne.mockResolvedValue(null);
+
       const res = await request(app)
         .delete('/api/moderation/ban/5')
         .set('Authorization', `Bearer ${modToken}`);
@@ -349,6 +361,9 @@ describe('Moderation Routes', () => {
     });
 
     it('should return 403 for regular user', async () => {
+      // banChecker queries for user (id: 1) - return null (not banned)
+      mockBan.findOne.mockResolvedValue(null);
+
       const res = await request(app)
         .delete('/api/moderation/ban/5')
         .set('Authorization', `Bearer ${userToken}`);
@@ -357,6 +372,8 @@ describe('Moderation Routes', () => {
     });
 
     it('should return 404 if no active ban found', async () => {
+      // banChecker queries for admin user (id: 3) - return null (not banned)
+      // deleteBan queries for user 999 - return null (no ban found)
       mockBan.findOne.mockResolvedValue(null);
 
       const res = await request(app)
@@ -368,6 +385,9 @@ describe('Moderation Routes', () => {
     });
 
     it('should return 400 for invalid userId', async () => {
+      // banChecker queries for admin user (id: 3) - return null (not banned)
+      mockBan.findOne.mockResolvedValue(null);
+
       const res = await request(app)
         .delete('/api/moderation/ban/abc')
         .set('Authorization', `Bearer ${adminToken}`);
