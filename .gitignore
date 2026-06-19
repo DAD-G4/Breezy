@@ -36,3 +36,7 @@ yarn-error.log*
 # Credentials
 packages/shared/config/config.json
 packages/shared/config/config.js
+
+# Test environment
+.env.test
+.env.test.local
