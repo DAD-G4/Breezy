@@ -15,6 +15,7 @@ const mockProfileModel = {
 jest.mock('@breezy/shared', () => ({
   UserModel: mockUserModel,
   ProfileModel: mockProfileModel,
+  getJwtSecret: jest.fn(() => process.env.JWT_SECRET || 'default-secret'),
   success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
     const code = statusCode || 200;
     const body: any = { data };

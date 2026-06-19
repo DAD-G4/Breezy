@@ -17,7 +17,9 @@ let mockAuthenticatedUser: { id: number; username: string; email: string; role: 
 jest.mock('@breezy/shared/src/models/mongodb/Post', () => mockPostModel);
 
 jest.mock('@breezy/shared', () => ({
+  PostModel: mockPostModel,
   Follower: mockFollowerModel,
+  Ban: { findOne: jest.fn().mockResolvedValue(null) },
   success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
     const code = statusCode || 200;
     const body: any = { data };
@@ -35,6 +37,7 @@ jest.mock('@breezy/shared', () => ({
       res.status(401).json({ error: 'Access denied. No token provided.' });
     }
   }),
+  checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
 }));
 
 import feedRoutes from '../src/routes/feed';

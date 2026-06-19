@@ -9,11 +9,22 @@ const mockProfileModel = {
   findOne: jest.fn(),
 };
 
+const mockFollowerModel = {
+  count: jest.fn(),
+};
+
+const mockPostModel = {
+  countDocuments: jest.fn(),
+};
+
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
 
 jest.mock('@breezy/shared', () => ({
   UserModel: mockUserModel,
   ProfileModel: mockProfileModel,
+  Follower: mockFollowerModel,
+  PostModel: mockPostModel,
+  Ban: { findOne: jest.fn().mockResolvedValue(null) },
   success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
     const code = statusCode || 200;
     const body: any = { data };
@@ -31,6 +42,7 @@ jest.mock('@breezy/shared', () => ({
       res.status(401).json({ error: 'Access denied. No token provided.' });
     }
   }),
+  checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
 }));
 
 import userRoutes from '../src/routes/users';
@@ -54,7 +66,7 @@ describe('User Routes', () => {
     it('should return user profile successfully', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      mockUserModel.findByPk.mockResolvedValue({
+      const mockUserData = {
         id: 1,
         username: 'alice',
         email: 'alice@test.com',
@@ -68,7 +80,15 @@ describe('User Routes', () => {
           language_preference: 'en',
           theme_preference: 'light',
         },
-      });
+        toJSON() {
+          return { ...this };
+        },
+      };
+
+      mockUserModel.findByPk.mockResolvedValue(mockUserData);
+      mockFollowerModel.count.mockResolvedValueOnce(10);
+      mockFollowerModel.count.mockResolvedValueOnce(5);
+      mockPostModel.countDocuments.mockResolvedValue(3);
 
       const res = await request(app).get('/api/users/profile/1');
 
@@ -77,6 +97,9 @@ describe('User Routes', () => {
       expect(res.body.data.id).toBe(1);
       expect(res.body.data.username).toBe('alice');
       expect(res.body.data.profile).toBeDefined();
+      expect(res.body.data.followers_count).toBe(10);
+      expect(res.body.data.following_count).toBe(5);
+      expect(res.body.data.post_count).toBe(3);
       expect(mockUserModel.findByPk).toHaveBeenCalledWith('1', {
         include: [{ model: expect.anything(), as: 'profile' }],
         attributes: { exclude: ['password_hash'] },

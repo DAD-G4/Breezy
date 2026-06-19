@@ -7,10 +7,16 @@ const mockFollowerModel = {
   destroy: jest.fn(),
 };
 
+const mockNotificationModel = {
+  create: jest.fn(),
+};
+
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
 
 jest.mock('@breezy/shared', () => ({
   Follower: mockFollowerModel,
+  NotificationModel: mockNotificationModel,
+  Ban: { findOne: jest.fn().mockResolvedValue(null) },
   success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
     const code = statusCode || 200;
     const body: any = { data };
@@ -28,6 +34,7 @@ jest.mock('@breezy/shared', () => ({
       res.status(401).json({ error: 'Access denied. No token provided.' });
     }
   }),
+  checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
 }));
 
 import followRoutes from '../src/routes/follows';
@@ -58,6 +65,7 @@ describe('Follow Routes', () => {
         following_id: 2,
         created_at: new Date(),
       });
+      mockNotificationModel.create.mockResolvedValue({});
 
       const res = await request(app).post('/api/users/follow/2');
 
@@ -72,6 +80,13 @@ describe('Follow Routes', () => {
         follower_id: 1,
         following_id: 2,
       });
+      expect(mockNotificationModel.create).toHaveBeenCalledWith({
+        recipient_id: 2,
+        sender_id: 1,
+        type: 'follow',
+        post_id: null,
+        is_read: false,
+      });
     });
 
     it('should return 400 when trying to follow yourself', async () => {
@@ -82,6 +97,7 @@ describe('Follow Routes', () => {
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Cannot follow yourself');
       expect(mockFollowerModel.create).not.toHaveBeenCalled();
+      expect(mockNotificationModel.create).not.toHaveBeenCalled();
     });
 
     it('should return 409 when already following', async () => {

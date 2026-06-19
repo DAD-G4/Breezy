@@ -7,14 +7,26 @@ const mockPostModel = {
   create: jest.fn(),
   find: jest.fn(),
   findById: jest.fn(),
+  findByIdAndUpdate: jest.fn(),
   findByIdAndDelete: jest.fn(),
   countDocuments: jest.fn(),
 };
 
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
 
+const mockUserModel = {
+  findOne: jest.fn(),
+};
+
+const mockNotificationModel = {
+  create: jest.fn(),
+};
+
 jest.mock('@breezy/shared', () => ({
   PostModel: mockPostModel,
+  UserModel: mockUserModel,
+  NotificationModel: mockNotificationModel,
+  Ban: { findOne: jest.fn().mockResolvedValue(null) },
   success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
     const code = statusCode || 200;
     const body: any = { data };
@@ -32,6 +44,7 @@ jest.mock('@breezy/shared', () => ({
       res.status(401).json({ error: 'Access denied. No token provided.' });
     }
   }),
+  checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
 }));
 
 import postRoutes from '../src/routes/posts';
@@ -51,6 +64,8 @@ describe('Post Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthenticatedUser = null;
+    mockUserModel.findOne.mockReset();
+    mockNotificationModel.create.mockReset();
   });
 
   describe('POST /api/posts', () => {
@@ -336,6 +351,233 @@ describe('Post Routes', () => {
       const res = await request(app).delete('/api/posts/abc123');
 
       expect(res.status).toBe(401);
+    });
+  });
+
+  describe('PUT /api/posts/:id', () => {
+    it('should update a post successfully and re-extract tags when content changes', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const existingPost = {
+        _id: 'abc123',
+        user_id: 1,
+        content: 'Old content',
+        tags: [],
+      };
+
+      const updatedPost = {
+        _id: 'abc123',
+        user_id: 1,
+        content: 'Updated #content here',
+        tags: ['content'],
+      };
+
+      mockPostModel.findById.mockResolvedValue(existingPost);
+      mockPostModel.findByIdAndUpdate.mockResolvedValue(updatedPost);
+
+      const res = await request(app)
+        .put('/api/posts/abc123')
+        .send({ content: 'Updated #content here' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.content).toBe('Updated #content here');
+      expect(res.body.data.tags).toEqual(['content']);
+      expect(res.body.message).toBe('Post updated successfully');
+      expect(mockPostModel.findByIdAndUpdate).toHaveBeenCalledWith(
+        'abc123',
+        { content: 'Updated #content here', tags: ['content'] },
+        { new: true }
+      );
+    });
+
+    it('should update a post without re-extracting tags if content unchanged', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const existingPost = {
+        _id: 'abc123',
+        user_id: 1,
+        content: 'Same content',
+        tags: ['old'],
+      };
+
+      const updatedPost = {
+        _id: 'abc123',
+        user_id: 1,
+        content: 'Same content',
+        tags: ['old'],
+      };
+
+      mockPostModel.findById.mockResolvedValue(existingPost);
+      mockPostModel.findByIdAndUpdate.mockResolvedValue(updatedPost);
+
+      const res = await request(app)
+        .put('/api/posts/abc123')
+        .send({ content: 'Same content' });
+
+      expect(res.status).toBe(200);
+      expect(mockPostModel.findByIdAndUpdate).toHaveBeenCalledWith(
+        'abc123',
+        { content: 'Same content' },
+        { new: true }
+      );
+    });
+
+    it('should return 403 if not the owner', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const mockPost = {
+        _id: 'abc123',
+        user_id: 2,
+        content: 'Someone else post',
+      };
+
+      mockPostModel.findById.mockResolvedValue(mockPost);
+
+      const res = await request(app)
+        .put('/api/posts/abc123')
+        .send({ content: 'Trying to update' });
+
+      expect(res.status).toBe(403);
+      expect(res.body.error).toContain('Forbidden');
+      expect(mockPostModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should return 404 if post not found', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      mockPostModel.findById.mockResolvedValue(null);
+
+      const res = await request(app)
+        .put('/api/posts/nonexistent')
+        .send({ content: 'Hello' });
+
+      expect(res.status).toBe(404);
+      expect(res.body.error).toBe('Post not found');
+      expect(mockPostModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 if content exceeds 280 characters', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const longContent = 'a'.repeat(281);
+
+      const res = await request(app)
+        .put('/api/posts/abc123')
+        .send({ content: longContent });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Content cannot exceed 280 characters');
+      expect(mockPostModel.findById).not.toHaveBeenCalled();
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      mockAuthenticatedUser = null;
+
+      const res = await request(app)
+        .put('/api/posts/abc123')
+        .send({ content: 'Hello' });
+
+      expect(res.status).toBe(401);
+    });
+  });
+
+  describe('Mention notifications', () => {
+    it('should create notifications for mentioned users on post creation', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const createdPost = {
+        _id: 'abc123',
+        user_id: 1,
+        content: 'Hello @bob and @charlie!',
+        tags: [],
+        likes: [],
+        comments: [],
+        media: null,
+        created_at: new Date(),
+      };
+
+      mockPostModel.create.mockResolvedValue(createdPost);
+
+      mockUserModel.findOne
+        .mockResolvedValueOnce({ id: 2, username: 'bob' })
+        .mockResolvedValueOnce({ id: 3, username: 'charlie' });
+
+      mockNotificationModel.create.mockResolvedValue({});
+
+      const res = await request(app)
+        .post('/api/posts')
+        .send({ content: 'Hello @bob and @charlie!' });
+
+      expect(res.status).toBe(201);
+      expect(mockUserModel.findOne).toHaveBeenCalledTimes(2);
+      expect(mockUserModel.findOne).toHaveBeenCalledWith({ where: { username: 'bob' } });
+      expect(mockUserModel.findOne).toHaveBeenCalledWith({ where: { username: 'charlie' } });
+      expect(mockNotificationModel.create).toHaveBeenCalledTimes(2);
+      expect(mockNotificationModel.create).toHaveBeenCalledWith({
+        recipient_id: 2,
+        sender_id: 1,
+        type: 'mention',
+        post_id: 'abc123',
+        is_read: false,
+      });
+      expect(mockNotificationModel.create).toHaveBeenCalledWith({
+        recipient_id: 3,
+        sender_id: 1,
+        type: 'mention',
+        post_id: 'abc123',
+        is_read: false,
+      });
+    });
+
+    it('should not create notification for self-mentions', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const createdPost = {
+        _id: 'abc124',
+        user_id: 1,
+        content: 'Hello @alice!',
+        tags: [],
+        likes: [],
+        comments: [],
+        media: null,
+        created_at: new Date(),
+      };
+
+      mockPostModel.create.mockResolvedValue(createdPost);
+      mockUserModel.findOne.mockResolvedValue({ id: 1, username: 'alice' });
+
+      const res = await request(app)
+        .post('/api/posts')
+        .send({ content: 'Hello @alice!' });
+
+      expect(res.status).toBe(201);
+      expect(mockUserModel.findOne).toHaveBeenCalledWith({ where: { username: 'alice' } });
+      expect(mockNotificationModel.create).not.toHaveBeenCalled();
+    });
+
+    it('should skip notification if mentioned user not found', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const createdPost = {
+        _id: 'abc125',
+        user_id: 1,
+        content: 'Hello @ghost!',
+        tags: [],
+        likes: [],
+        comments: [],
+        media: null,
+        created_at: new Date(),
+      };
+
+      mockPostModel.create.mockResolvedValue(createdPost);
+      mockUserModel.findOne.mockResolvedValue(null);
+
+      const res = await request(app)
+        .post('/api/posts')
+        .send({ content: 'Hello @ghost!' });
+
+      expect(res.status).toBe(201);
+      expect(mockNotificationModel.create).not.toHaveBeenCalled();
     });
   });
 });

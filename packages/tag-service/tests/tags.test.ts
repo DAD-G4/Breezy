@@ -13,12 +13,23 @@ jest.mock('@breezy/shared/src/models/mongodb/Post', () => ({
   default: mockPostModel,
 }));
 
+let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
+
 jest.mock('@breezy/shared', () => ({
+  PostModel: mockPostModel,
   success: jest.fn((res: any, data: any) => {
     return res.status(200).json({ data });
   }),
   error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
     return res.status(statusCode).json({ error: errorMessage, statusCode });
+  }),
+  authenticateToken: jest.fn((req: any, res: any, next: any) => {
+    if (mockAuthenticatedUser) {
+      req.user = { ...mockAuthenticatedUser };
+      next();
+    } else {
+      res.status(401).json({ error: 'Access denied. No token provided.' });
+    }
   }),
 }));
 
@@ -38,6 +49,7 @@ describe('Tag Routes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthenticatedUser = { id: 1, username: 'user1', email: 'user1@test.com', role: 'user' };
   });
 
   describe('GET /api/tags/search', () => {

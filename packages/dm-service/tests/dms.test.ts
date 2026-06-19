@@ -10,12 +10,17 @@ const mockDirectMessageDoc = {
 const mockDirectMessageModel = {
   create: jest.fn(),
   find: jest.fn(),
+  findOne: jest.fn(),
   countDocuments: jest.fn(),
+  distinct: jest.fn(),
+  updateMany: jest.fn(),
 };
 
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
 
 jest.mock('@breezy/shared', () => ({
+  DirectMessageModel: mockDirectMessageModel,
+  Ban: { findOne: jest.fn().mockResolvedValue(null) },
   success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
     const code = statusCode || 200;
     const body: any = { data };
@@ -33,6 +38,7 @@ jest.mock('@breezy/shared', () => ({
       res.status(401).json({ error: 'Access denied. No token provided.' });
     }
   }),
+  checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
 }));
 
 // Mock the DirectMessage model import used by the controller
@@ -186,6 +192,168 @@ describe('DM Routes', () => {
       mockAuthenticatedUser = null;
 
       const res = await request(app).get('/api/dms/conversation/2');
+
+      expect(res.status).toBe(401);
+    });
+  });
+
+  describe('GET /api/dms/conversations', () => {
+    it('should return conversations with last message and unread count', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      mockDirectMessageModel.distinct.mockResolvedValue(['1-2', '1-3']);
+
+      const lastMessage2 = {
+        _id: 'dm1',
+        conversation_id: '1-2',
+        sender_id: 2,
+        recipient_id: 1,
+        message_text: 'Hey!',
+        is_read: false,
+        created_at: new Date('2024-01-02T00:00:00.000Z'),
+      };
+      const lastMessage3 = {
+        _id: 'dm3',
+        conversation_id: '1-3',
+        sender_id: 1,
+        recipient_id: 3,
+        message_text: 'Hi there!',
+        is_read: false,
+        created_at: new Date('2024-01-01T00:00:00.000Z'),
+      };
+
+      mockDirectMessageModel.findOne.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          limit: jest.fn().mockResolvedValueOnce(lastMessage2),
+        }),
+      });
+      mockDirectMessageModel.findOne.mockReturnValueOnce({
+        sort: jest.fn().mockReturnValue({
+          limit: jest.fn().mockResolvedValueOnce(lastMessage2),
+        }),
+      });
+      mockDirectMessageModel.findOne.mockReturnValueOnce({
+        sort: jest.fn().mockReturnValue({
+          limit: jest.fn().mockResolvedValueOnce(lastMessage3),
+        }),
+      });
+
+      mockDirectMessageModel.countDocuments
+        .mockResolvedValueOnce(2)
+        .mockResolvedValueOnce(0);
+
+      const res = await request(app).get('/api/dms/conversations');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.conversations).toHaveLength(2);
+      expect(res.body.data.conversations[0].conversation_id).toBe('1-2');
+      expect(res.body.data.conversations[0].other_user_id).toBe(2);
+      expect(res.body.data.conversations[0].unread_count).toBe(2);
+      expect(res.body.data.pagination).toEqual({
+        page: 1,
+        limit: 20,
+        total: 2,
+        totalPages: 1,
+      });
+    });
+
+    it('should return empty list when no conversations', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      mockDirectMessageModel.distinct.mockResolvedValue([]);
+
+      const res = await request(app).get('/api/dms/conversations');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.conversations).toEqual([]);
+      expect(res.body.data.pagination.total).toBe(0);
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      mockAuthenticatedUser = null;
+
+      const res = await request(app).get('/api/dms/conversations');
+
+      expect(res.status).toBe(401);
+    });
+  });
+
+  describe('GET /api/dms/unread-count', () => {
+    it('should return total unread count', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      mockDirectMessageModel.countDocuments.mockReset();
+      mockDirectMessageModel.countDocuments.mockResolvedValue(5);
+
+      const res = await request(app).get('/api/dms/unread-count');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.unreadCount).toBe(5);
+    });
+
+    it('should return 0 when no unread messages', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      mockDirectMessageModel.countDocuments.mockResolvedValue(0);
+
+      const res = await request(app).get('/api/dms/unread-count');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.unreadCount).toBe(0);
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      mockAuthenticatedUser = null;
+
+      const res = await request(app).get('/api/dms/unread-count');
+
+      expect(res.status).toBe(401);
+    });
+  });
+
+  describe('PUT /api/dms/conversation/:userId/read', () => {
+    it('should mark conversation messages as read', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      mockDirectMessageModel.updateMany.mockResolvedValue({ modifiedCount: 3 });
+
+      const res = await request(app).put('/api/dms/conversation/2/read');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.updated).toBe(3);
+      expect(mockDirectMessageModel.updateMany).toHaveBeenCalledWith(
+        {
+          conversation_id: '1-2',
+          recipient_id: 1,
+          is_read: false,
+        },
+        { $set: { is_read: true } },
+      );
+    });
+
+    it('should return 0 updated when no unread messages', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      mockDirectMessageModel.updateMany.mockResolvedValue({ modifiedCount: 0 });
+
+      const res = await request(app).put('/api/dms/conversation/2/read');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.updated).toBe(0);
+    });
+
+    it('should return 400 for invalid user ID', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const res = await request(app).put('/api/dms/conversation/abc/read');
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      mockAuthenticatedUser = null;
+
+      const res = await request(app).put('/api/dms/conversation/2/read');
 
       expect(res.status).toBe(401);
     });

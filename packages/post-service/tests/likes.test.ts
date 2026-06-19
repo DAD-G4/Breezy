@@ -9,7 +9,14 @@ const mockPostModel = {
 
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
 
+const mockNotificationModel = {
+  create: jest.fn().mockResolvedValue(true),
+};
+
 jest.mock('@breezy/shared', () => ({
+  PostModel: mockPostModel,
+  NotificationModel: mockNotificationModel,
+  Ban: { findOne: jest.fn().mockResolvedValue(null) },
   success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
     const code = statusCode || 200;
     const body: any = { data };
@@ -27,11 +34,7 @@ jest.mock('@breezy/shared', () => ({
       res.status(401).json({ error: 'Access denied. No token provided.' });
     }
   }),
-}));
-
-jest.mock('@breezy/shared/src/models/mongodb/Post', () => ({
-  __esModule: true,
-  default: mockPostModel,
+  checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
 }));
 
 import likeRoutes from '../src/routes/likes';
@@ -112,6 +115,63 @@ describe('Like Routes', () => {
       const res = await request(app).post('/api/posts/post123/like');
 
       expect(res.status).toBe(401);
+    });
+
+    it('should create a notification when a user likes another user\'s post', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const mockPost = {
+        _id: 'post123',
+        user_id: 2,
+        likes: [] as number[],
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      mockPostModel.findById.mockResolvedValue(mockPost);
+
+      await request(app).post('/api/posts/post123/like');
+
+      expect(mockNotificationModel.create).toHaveBeenCalledWith({
+        recipient_id: 2,
+        sender_id: 1,
+        type: 'like',
+        post_id: 'post123',
+        is_read: false,
+      });
+    });
+
+    it('should not create a notification when a user likes their own post', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const mockPost = {
+        _id: 'post123',
+        user_id: 1,
+        likes: [] as number[],
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      mockPostModel.findById.mockResolvedValue(mockPost);
+
+      await request(app).post('/api/posts/post123/like');
+
+      expect(mockNotificationModel.create).not.toHaveBeenCalled();
+    });
+
+    it('should not create a notification when unliking a post', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const mockPost = {
+        _id: 'post123',
+        user_id: 2,
+        likes: [1] as number[],
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      mockPostModel.findById.mockResolvedValue(mockPost);
+
+      await request(app).post('/api/posts/post123/like');
+
+      expect(mockNotificationModel.create).not.toHaveBeenCalled();
     });
   });
 });
