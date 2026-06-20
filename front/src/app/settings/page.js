@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Header from "@/components/layout/Header";
-import BottomNav from "@/components/layout/BottomNav";
+import AppShell from "@/components/layout/AppShell";
 
 export default function SettingsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -116,11 +115,9 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen pb-20">
-      <Header />
-      
-      <main className="flex-1 flex flex-col p-4 gap-6">
-        
+    <AppShell>
+      <div className="flex flex-col p-4 gap-6">
+
         {/* BARRE DE RECHERCHE */}
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -222,9 +219,7 @@ export default function SettingsPage() {
           )}
         </div>
 
-      </main>
-      
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }

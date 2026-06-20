@@ -1,8 +1,7 @@
 "use client";
 
 import PostCard from "../components/feed/PostCard";
-import Header from "../components/layout/Header";
-import BottomNav from "../components/layout/BottomNav";
+import AppShell from "../components/layout/AppShell";
 
 export default function FeedPage() {
   // TODO: remplacer par les données réelles du back-end
@@ -36,15 +35,17 @@ export default function FeedPage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen pb-20">
-      <Header />
+    <AppShell>
+      {/* En-tête de section, collant en haut du feed sur desktop */}
+      <div className="sticky top-0 z-30 bg-slate-50/80 dark:bg-deep-space-blue/80 backdrop-blur border-b border-gray-200 dark:border-white/10 px-4 py-3 hidden md:block">
+        <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">Accueil</h1>
+      </div>
 
-      <main className="flex-1 flex flex-col p-4 gap-4">
+      <div className="flex flex-col p-4 gap-4">
         {mockPosts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
-      </main> 
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }

@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Header from "../../components/layout/Header";
-import BottomNav from "../../components/layout/BottomNav";
+import AppShell from "../../components/layout/AppShell";
 
 export default function SearchPage() {
   // MOCK DATA A REMPLACER PLUS TARD PAR L'APPEL API 
@@ -26,11 +25,9 @@ export default function SearchPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen pb-20">
-      <Header />
-      
-      <main className="flex-1 flex flex-col p-4 gap-6">
-        
+    <AppShell>
+      <div className="flex flex-col p-4 gap-6">
+
         {/* BARRE DE RECHERCHE */}
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -81,9 +78,7 @@ export default function SearchPage() {
           )}
         </div>
 
-      </main>
-      
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }

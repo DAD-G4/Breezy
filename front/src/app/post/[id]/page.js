@@ -2,8 +2,7 @@
 
 import { useState, use } from "react";
 import { useRouter } from "next/navigation";
-import Header from "../../../components/layout/Header";
-import BottomNav from "../../../components/layout/BottomNav";
+import AppShell from "../../../components/layout/AppShell";
 import PostCard from "../../../components/feed/PostCard";
 
 export default function PostDetailsPage({ params }) {
@@ -46,12 +45,10 @@ export default function PostDetailsPage({ params }) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-20">
-      <Header />
-      
-      <main className="flex-1 flex flex-col p-4 gap-4">
-        
-        <button 
+    <AppShell>
+      <div className="flex flex-col p-4 gap-4">
+
+        <button
           onClick={() => router.back()} 
           className="p-2 -ml-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all w-fit"
           aria-label="Retour"
@@ -92,8 +89,7 @@ export default function PostDetailsPage({ params }) {
           ))}
         </div>
 
-      </main>
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }

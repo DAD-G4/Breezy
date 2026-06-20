@@ -2,7 +2,7 @@ import Link from "next/link";
 export default function BottomNav() {
   return (
     // pour que la barre reste collée en bas 
-    <nav className="fixed bottom-0 w-full max-w-md bg-white dark:bg-deep-space-blue border-t border-gray-200 dark:border-steel-blue/40 flex justify-around items-center p-3 z-40 dark:shadow-[0_-5px_15px_rgba(102,155,188,0.1)] transition-colors">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 w-full bg-white dark:bg-deep-space-blue border-t border-gray-200 dark:border-steel-blue/40 flex justify-around items-center p-3 z-40 dark:shadow-[0_-5px_15px_rgba(102,155,188,0.1)] transition-colors">
       
       {/* Bouton Accueil*/}
       <Link 

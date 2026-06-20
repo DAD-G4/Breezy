@@ -2,8 +2,7 @@
 
 import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Header from "@/components/layout/Header";
-import BottomNav from "@/components/layout/BottomNav";
+import AppShell from "@/components/layout/AppShell";
 
 export default function ConversationPage({ params }) {
   const router = useRouter();
@@ -42,11 +41,9 @@ export default function ConversationPage({ params }) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-36">
-      <Header />
-      
-      <main className="flex-1 flex flex-col p-4">
-        
+    <AppShell>
+      <div className="flex flex-col p-4 pb-32 md:pb-4">
+
         {/* EN-TÊTE (Retour + Infos user) */}
         <div className="flex items-center gap-4 mb-6 sticky top-0 bg-gray-200/90 dark:bg-deep-space-blue/90 backdrop-blur-sm z-10 py-2 border-b border-gray-300 dark:border-steel-blue/30 -mx-4 px-4">
           <button 
@@ -99,12 +96,12 @@ export default function ConversationPage({ params }) {
           {/* pour l'auto-scroll */}
           <div ref={messagesEndRef} />
         </div>
-      </main>
+      </div>
 
-      {/* BARRE DE SAISIE */}
-      <form 
-        onSubmit={handleSend} 
-        className="fixed bottom-[65px] w-full max-w-md p-3 bg-gray-200/95 dark:bg-deep-space-blue/95 backdrop-blur-md border-t border-gray-300 dark:border-steel-blue/40 z-30"
+      {/* BARRE DE SAISIE : fixée au-dessus du BottomNav en mobile, collante en bas de colonne en desktop */}
+      <form
+        onSubmit={handleSend}
+        className="fixed bottom-[65px] left-0 right-0 md:sticky md:bottom-0 md:left-auto md:right-auto p-3 bg-gray-200/95 dark:bg-deep-space-blue/95 backdrop-blur-md border-t border-gray-300 dark:border-steel-blue/40 z-30"
         >
         <div className="relative flex items-center">
           <input 
@@ -126,8 +123,6 @@ export default function ConversationPage({ params }) {
           </button>
         </div>
       </form>
-      
-      <BottomNav />
-    </div>
+    </AppShell>
   );
 }

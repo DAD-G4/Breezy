@@ -2,8 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Header from "@/components/layout/Header";
-import BottomNav from "@/components/layout/BottomNav";
+import AppShell from "../../components/layout/AppShell";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -44,15 +43,13 @@ export default function CreatePostPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      
-      <main className="flex-1 flex flex-col p-4 gap-4">
-        
+    <AppShell>
+      <div className="flex flex-col p-4 gap-4">
+
         {/* En-tête avec bouton retour et Titre */}
         <div className="flex items-center gap-1 mb-2">
-          <button 
-            onClick={() => router.back()} 
+          <button
+            onClick={() => router.back()}
             className="p-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors"
             aria-label="Retour"
           >
@@ -147,9 +144,7 @@ export default function CreatePostPage() {
 
           </div>
         </form>
-      </main>
-      
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 } 

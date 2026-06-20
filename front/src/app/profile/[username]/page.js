@@ -2,8 +2,7 @@
 import { use } from "react";
 import { useRouter } from "next/navigation"; 
 
-import Header from "@/components/layout/Header";
-import BottomNav from "@/components/layout/BottomNav";
+import AppShell from "@/components/layout/AppShell";
 import ProfileView from "@/components/profile/ProfileView";
 
 export default function PublicProfilePage({ params }) {
@@ -29,10 +28,9 @@ export default function PublicProfilePage({ params }) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-20">
-      <Header />
-      <main className="flex-1 p-4 flex flex-col gap-4">
-        
+    <AppShell>
+      <div className="p-4 flex flex-col gap-4">
+
         {/* fleche retour*/}
         <button 
           onClick={() => router.back()} 
@@ -45,8 +43,7 @@ export default function PublicProfilePage({ params }) {
         </button>
 
         <ProfileView initialUser={publicUserData} isOwnProfile={false} />
-      </main>
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/layout/Header";
+import BreezyBadge from "../../components/ui/BreezyBadge";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,8 +35,8 @@ export default function LoginPage() {
 
       <main className="flex-1 flex flex-col items-center justify-center p-6">
         
-        <div className="mb-8 w-16 h-16 bg-deep-space-blue dark:bg-papaya-whip text-papaya-whip dark:text-deep-space-blue rounded-full flex items-center justify-center text-4xl shadow-lg">
-          🍃
+        <div className="mb-8">
+          <BreezyBadge className="w-24 h-24 drop-shadow-lg" />
         </div>
 
         <div className="w-full max-w-sm border-2 border-deep-space-blue dark:border-papaya-whip rounded-lg p-6 bg-white dark:bg-deep-space-blue shadow-xl transition-colors duration-300">

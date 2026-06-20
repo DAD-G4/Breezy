@@ -1,7 +1,6 @@
 "use client";
 
-import Header from "../../components/layout/Header";
-import BottomNav from "../../components/layout/BottomNav";
+import AppShell from "../../components/layout/AppShell";
 import ProfileView from "../../components/profile/ProfileView";
 
 export default function MyProfilePage() {
@@ -18,13 +17,11 @@ export default function MyProfilePage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-20">
-      <Header />
-      <main className="flex-1 p-4">
+    <AppShell>
+      <div className="p-4">
         {/* On appelle le composant en précisant le profil de l'utilisateur */}
         <ProfileView initialUser={myData} isOwnProfile={true} />
-      </main>
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }
