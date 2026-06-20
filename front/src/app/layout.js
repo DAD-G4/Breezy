@@ -1,5 +1,6 @@
 import "./globals.css";
 import { ThemeProvider } from "../context/ThemeContext";
+import { AuthProvider } from "../context/AuthContext";
 
 export const metadata = {
   title: "Breezy",
@@ -14,7 +15,9 @@ export default function RootLayout({ children }) {
     <html lang="fr">
       <body className="bg-slate-50 dark:bg-deep-space-blue text-slate-900 dark:text-papaya-whip transition-colors duration-300 min-h-screen">
         <ThemeProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -4,9 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/layout/Header";
 import BreezyBadge from "../../components/ui/BreezyBadge";
+import { useAuth } from "../../context/AuthContext";
+import { getApiErrorMessage } from "../../lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,12 +21,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Faux délai pour tester l'UI de chargement
-      await new Promise((resolve) => setTimeout(resolve, 1500)); 
-
-      router.push("/"); 
+      // POST /api/auth/login : stocke le JWT puis redirige vers le feed.
+      await login(email, password);
+      router.push("/");
     } catch (err) {
-      setError("Identifiants incorrects. Veuillez réessayer.");
+      setError(getApiErrorMessage(err, "Identifiants incorrects. Veuillez réessayer."));
     } finally {
       setLoading(false);
     }

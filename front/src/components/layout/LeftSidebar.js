@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 import BreezyBadge from "../ui/BreezyBadge";
 
 // Item de navigation : icône seule en tablette (md), icône + label en desktop (lg+)
@@ -35,6 +36,7 @@ function NavItem({ href, label, icon, active, onClick }) {
 export default function LeftSidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
 
   const iconHome = (
     <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
@@ -91,6 +93,18 @@ export default function LeftSidebar() {
           {theme === "dark" ? "Mode clair" : "Mode sombre"}
         </span>
       </button>
+
+      {/* Déconnexion (uniquement si connecté) */}
+      {user && (
+        <button
+          onClick={logout}
+          className="flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-brick-red hover:bg-brick-red/10 justify-center lg:justify-start"
+          aria-label="Se déconnecter"
+        >
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          <span className="hidden lg:inline font-medium">Se déconnecter</span>
+        </button>
+      )}
     </aside>
   );
 }

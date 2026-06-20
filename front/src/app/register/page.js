@@ -4,12 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/layout/Header";
 import BreezyBadge from "../../components/ui/BreezyBadge";
+import { useAuth } from "../../context/AuthContext";
+import { getApiErrorMessage } from "../../lib/api";
 
 const inputClass =
   "w-full px-4 py-3 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-transparent focus:border-steel-blue focus:outline-none transition-colors placeholder:text-gray-400 font-medium text-sm";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { register } = useAuth();
 
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
@@ -25,11 +28,13 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // Simulation - replace with: await axios.post("/api/auth/register", { displayName, username, email, password })
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // POST /api/auth/register. Le backend dérive display_name depuis username.
+      await register({ email, username, password });
       router.push("/login");
     } catch (err) {
-      setError("Erreur lors de l'inscription. Veuillez vérifier vos informations.");
+      setError(
+        getApiErrorMessage(err, "Erreur lors de l'inscription. Veuillez vérifier vos informations.")
+      );
     } finally {
       setLoading(false);
     }
