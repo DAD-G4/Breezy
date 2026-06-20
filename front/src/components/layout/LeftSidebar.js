@@ -54,10 +54,9 @@ export default function LeftSidebar() {
       {/* Logo */}
       <Link
         href="/"
-        className="flex items-center gap-2 px-3 py-3 text-2xl font-bold text-deep-space-blue dark:text-papaya-whip justify-center lg:justify-start"
+        className="flex items-center px-3 py-3 justify-center lg:justify-start"
       >
-        <BreezyBadge className="w-10 h-10 shrink-0" />
-        <span className="hidden lg:inline">Breezy</span>
+        <BreezyBadge className="w-14 h-14 shrink-0" />
       </Link>
 
       {/* Navigation */}

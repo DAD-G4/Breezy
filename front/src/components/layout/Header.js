@@ -18,9 +18,8 @@ export default function Header() {
         </Link>
 
         {/* LOGO BREEZY */}
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <BreezyBadge className="w-9 h-9" />
-          <span className="text-xl font-bold tracking-wide">Breezy</span>
+        <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+          <BreezyBadge className="w-12 h-12" />
         </Link>
 
         {/* PROFIL UTILISATEUR */}
