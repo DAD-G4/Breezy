@@ -1,0 +1,33 @@
+import express from 'express';
+import { connectMongo, errorHandler, notFound, healthRouter } from '@breezy/shared';
+import tagRoutes from './routes/tags';
+
+const app = express();
+const PORT = process.env.PORT || 3004;
+
+app.use(express.json());
+
+// Health check
+app.use('/api/health', healthRouter);
+
+// Routes
+app.use('/api/tags', tagRoutes);
+
+// Error handling
+app.use(notFound);
+app.use(errorHandler);
+
+async function start() {
+  try {
+    await connectMongo();
+
+    app.listen(PORT, () => {
+      console.log(`Tag service running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Failed to start tag service:', err);
+    process.exit(1);
+  }
+}
+
+start();
