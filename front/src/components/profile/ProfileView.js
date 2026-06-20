@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import PostCard from "../feed/PostCard";
+import { follow, unfollow } from "../../services/users";
 
 // composant reçoit les infos de base (initialUser) et un booléen (isOwnProfile)
 export default function ProfileView({ initialUser, isOwnProfile }) {
@@ -15,8 +16,8 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
   // récupère les stats de base, 0 par défaut
   const [followers, setFollowers] = useState(initialUser.followers || 0);
   const [following, setFollowing] = useState(initialUser.following || 0);
-  const [isFollowing, setIsFollowing] = useState(false); // Est-ce que l'utilisateur actuel folow ce profil ?
-  
+  const [isFollowing, setIsFollowing] = useState(initialUser.isFollowing || false); // Est-ce que l'utilisateur actuel folow ce profil ?
+
   const fileInputRef = useRef(null);
 
   const handleAvatarChange = (e) => {
@@ -24,14 +25,29 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
     if (file) setAvatarPreview(URL.createObjectURL(file));
   };
 
-  // Clic sur bouton Follow/Unfollow
-  const handleFollowToggle = () => {
-    if (isFollowing) {
-      setIsFollowing(false);
-      setFollowers(followers - 1); // retire notre abonnement
-    } else {
-      setIsFollowing(true);
-      setFollowers(followers + 1); // ça follow et compteur +1
+  // Fx9 — Suivre/Ne plus suivre.
+  //   follow   : POST   /api/users/follow/:id
+  //   unfollow : DELETE /api/users/unfollow/:id
+  // initialUser.id = id numérique du profil affiché (fourni par la couche data).
+  // UI optimiste avec rollback si l'appel échoue.
+  const handleFollowToggle = async () => {
+    const targetId = initialUser.id;
+    const prevFollowing = isFollowing;
+    const prevFollowers = followers;
+
+    setIsFollowing(!prevFollowing);
+    setFollowers(prevFollowing ? prevFollowers - 1 : prevFollowers + 1);
+
+    try {
+      if (prevFollowing) {
+        await unfollow(targetId);
+      } else {
+        await follow(targetId);
+      }
+    } catch (err) {
+      // Rollback
+      setIsFollowing(prevFollowing);
+      setFollowers(prevFollowers);
     }
   };
 

@@ -1,19 +1,31 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { toggleLike } from "../../services/posts";
 
 export default function PostCard({ post, disableProfileLink = false }) {
-  // Etats pour gérer le like
-  const [isLiked, setIsLiked] = useState(false);
+  // Etats pour gérer le like (initialisés depuis les données du post)
+  const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
 
-  const handleLike = () => {
-    if (isLiked) {
-      setLikesCount(likesCount - 1);
-      setIsLiked(false);
-    } else {
-      setLikesCount(likesCount + 1);
-      setIsLiked(true);
+  // Fx6 — Liker : POST /api/posts/:id/like (toggle côté backend).
+  // UI optimiste : on bascule tout de suite, puis on recale avec la réponse
+  // (ou on annule si l'appel échoue).
+  const handleLike = async () => {
+    const prevLiked = isLiked;
+    const prevCount = likesCount;
+
+    setIsLiked(!prevLiked);
+    setLikesCount(prevLiked ? prevCount - 1 : prevCount + 1);
+
+    try {
+      const { liked, likesCount: count } = await toggleLike(post.id);
+      setIsLiked(liked);
+      setLikesCount(count);
+    } catch (err) {
+      // Rollback : on remet l'état d'avant le clic.
+      setIsLiked(prevLiked);
+      setLikesCount(prevCount);
     }
   };
 

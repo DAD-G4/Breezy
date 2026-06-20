@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import AppShell from "@/components/layout/AppShell";
+import { useRequireAuth } from "@/context/AuthContext";
 
 export default function SettingsPage() {
+  useRequireAuth();
   const [searchTerm, setSearchTerm] = useState("");
 
 // État pour savoir quel menu déroulant est ouvert (null si aucun)

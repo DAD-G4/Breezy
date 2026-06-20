@@ -3,40 +3,61 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "../../components/layout/AppShell";
+import { getApiErrorMessage } from "../../lib/api";
+import { createPost } from "../../services/posts";
+import { upload } from "../../services/media";
+import { useRequireAuth } from "../../context/AuthContext";
 
 export default function CreatePostPage() {
+  useRequireAuth();
   const router = useRouter();
-  
+
   // etats du formulaire
   const [content, setContent] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [error, setError] = useState("");
+
   // simuler le clic sur l'input file caché
   const fileInputRef = useRef(null);
 
-  // gérer l'ajout d'une image
+  // gérer l'ajout d'une image (aperçu local + fichier conservé pour l'upload)
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Crée une URL temporaire pour afficher l'image instantanément A REMPLACER PAR UN UPLOAD VERS LE BACK-END
+      setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     }
   };
 
-  // soumission de post (Fx3)
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  // soumission de post (Fx3) — upload média éventuel puis création du post.
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     setIsLoading(true);
 
     try {
-      // Simulation d'envoi au back-end A REMPLACER PAR UN APPEL API VERS LE BACK-END
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      let media = null;
+
+      // 1. Upload de l'image si présente.
+      if (imageFile) {
+        const { url, type } = await upload(imageFile);
+        media = { url, type };
+      }
+
+      // 2. Création du post.
+      await createPost({ content, media });
+
       // Retour feed apres publication
       router.push("/");
-    } catch (error) {
-      console.error("Erreur lors de la publication");
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Erreur lors de la publication."));
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +115,7 @@ export default function CreatePostPage() {
               {/* retirer l'image */}
               <button
                 type="button"
-                onClick={() => setImagePreview(null)}
+                onClick={removeImage}
                 className="absolute top-2 right-2 bg-black/70 text-white p-2 rounded-full hover:bg-brick-red transition-colors"
                 aria-label="Supprimer l'image"
               >
@@ -103,6 +124,11 @@ export default function CreatePostPage() {
                 </svg>
               </button>
             </div>
+          )}
+
+          {/* Message d'erreur API */}
+          {error && (
+            <p className="text-center text-brick-red font-semibold text-sm">{error}</p>
           )}
 
           {/* Barre d'outils et bouton Publier */}

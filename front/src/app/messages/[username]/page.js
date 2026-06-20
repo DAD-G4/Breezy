@@ -3,8 +3,10 @@
 import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "@/components/layout/AppShell";
+import { useRequireAuth } from "@/context/AuthContext";
 
 export default function ConversationPage({ params }) {
+  useRequireAuth();
   const router = useRouter();
   
   // URL avec decodeURIComponent

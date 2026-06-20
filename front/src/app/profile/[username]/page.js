@@ -18,6 +18,9 @@ export default function PublicProfilePage({ params }) {
   const safeUsername = username || "Utilisateur Inconnu";
 
   const publicUserData = {
+    // TODO (couche data) : remplacer par l'id numérique réel du profil
+    // (résolu depuis le username via GET /api/users/...). Requis par Fx9 (Suivre).
+    id: null,
     name: safeUsername,
     bio: `Salut ! Je suis ${safeUsername} et ceci est mon profil public.`,
     followers: 42,

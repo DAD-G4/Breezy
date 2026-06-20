@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import AppShell from "../../components/layout/AppShell";
+import { useRequireAuth } from "../../context/AuthContext";
 
 export default function MessagesInboxPage() {
-  // MOCK DATA 
+  useRequireAuth();
+  // MOCK DATA
   const initialConversations = [
     { id: 1, username: "User1", time: "5min", lastMessage: "Lorem ipsum dolor sit amet consectetur.", unread: true },
     { id: 2, username: "User2", time: "1d", lastMessage: "On se voit demain alors ?", unread: true },

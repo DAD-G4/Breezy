@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import AppShell from "../../components/layout/AppShell";
+import { useRequireAuth } from "../../context/AuthContext";
 
 export default function SearchPage() {
-  // MOCK DATA A REMPLACER PLUS TARD PAR L'APPEL API 
+  useRequireAuth();
+  // MOCK DATA A REMPLACER PLUS TARD PAR L'APPEL API
   const allUsers = [
     { id: 1, username: "User1", name: "Premier Utilisateur" },
     { id: 2, username: "User2", name: "Deuxième Utilisateur" },

@@ -1,38 +1,57 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import PostCard from "../components/feed/PostCard";
 import AppShell from "../components/layout/AppShell";
+import { getApiErrorMessage } from "../lib/api";
+import { mapPost } from "../lib/mappers";
+import { getFeed } from "../services/posts";
+import { resolveUser } from "../services/users";
+import { useAuth, useRequireAuth } from "../context/AuthContext";
 
 export default function FeedPage() {
-  // TODO: remplacer par les données réelles du back-end
-  const mockPosts = [
-    {
-      id: 1,
-      username: "User1",
-      time: "1h",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-      likesCount: 12,
-      commentsCount: 3,
-    },
-    {
-      id: 2,
-      username: "User2",
-      time: "5min",
-      content: "Regardez cette magnifique vue pour tester l'intégration des images ! 🌄",
-      // Picsum, générateur d'images 
-      imageUrl: "https://picsum.photos/800/400",
-      likesCount: 45,
-      commentsCount: 8,
-    },
-    {
-      id: 3,
-      username: "User67",
-      time: "3d",
-      content: "Lorem Ipsum pour tester le défilement : Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat ",
-      likesCount: 0,
-      commentsCount: 0,
+  useRequireAuth();
+  const { user, loading: authLoading } = useAuth();
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    // On attend la fin de la restauration de session avant de décider.
+    if (authLoading) return;
+
+    if (!user) {
+      setError("Connectez-vous pour voir votre feed.");
+      setLoading(false);
+      return;
     }
-  ];
+
+    let active = true;
+    (async () => {
+      setLoading(true);
+      setError("");
+      try {
+        // Feed des utilisateurs suivis (paginé).
+        const { posts: raw } = await getFeed();
+        // Le backend renvoie user_id (pas le nom) → on résout chaque auteur.
+        const mapped = await Promise.all(
+          raw.map(async (p) => {
+            const author = await resolveUser(p.user_id);
+            return mapPost(p, { authorLabel: author.displayName, currentUserId: user.id });
+          })
+        );
+        if (active) setPosts(mapped);
+      } catch (err) {
+        if (active) setError(getApiErrorMessage(err, "Impossible de charger le feed."));
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [authLoading, user]);
 
   return (
     <AppShell>
@@ -42,7 +61,21 @@ export default function FeedPage() {
       </div>
 
       <div className="flex flex-col p-4 gap-4">
-        {mockPosts.map((post) => (
+        {loading && (
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">Chargement du feed…</p>
+        )}
+
+        {!loading && error && (
+          <p className="text-center text-brick-red font-semibold py-8">{error}</p>
+        )}
+
+        {!loading && !error && posts.length === 0 && (
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+            Aucun post pour le moment. Suivez des utilisateurs pour voir leur activité.
+          </p>
+        )}
+
+        {posts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
       </div>
