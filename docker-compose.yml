@@ -21,6 +21,20 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_* est inliné au build → passé en build arg.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost/api}
+    container_name: breezy-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nginx
+
   nginx:
     image: nginx:alpine
     container_name: breezy-nginx
@@ -90,9 +104,12 @@ services:
     restart: unless-stopped
     environment:
       PORT: 3004
+      # tag-service n'utilise que Mongo, mais @breezy/shared exige POSTGRES_URI à l'import.
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
       MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
       JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
     depends_on:
+      - postgres
       - mongo
 
   notification-service:
