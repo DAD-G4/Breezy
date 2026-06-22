@@ -14,7 +14,13 @@ export {
   validateLoginInput,
   validateReportInput,
   validateBanInput,
+  validateContent,
+  validateEmail,
+  validateUsername,
+  validatePassword,
+  validateRegisterInput,
 } from './middleware/validate';
+export type { RegisterInput } from './middleware/validate';
 
 export { default as healthRouter } from './routes/health';
 

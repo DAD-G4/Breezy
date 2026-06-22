@@ -3,6 +3,86 @@ import { error } from '../utils/response';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+export function validateEmail(email: string): string | null {
+  if (!email || typeof email !== 'string') {
+    return 'Email is required';
+  }
+  if (!EMAIL_REGEX.test(email)) {
+    return 'Invalid email format';
+  }
+  return null;
+}
+
+export function validateUsername(username: string): string | null {
+  if (!username || typeof username !== 'string') {
+    return 'Username is required';
+  }
+  if (username.length < 3) {
+    return 'Username must be at least 3 characters';
+  }
+  if (username.length > 30) {
+    return 'Username must be at most 30 characters';
+  }
+  return null;
+}
+
+export function validatePassword(password: string): string | null {
+  if (!password || typeof password !== 'string') {
+    return 'Password is required';
+  }
+  if (password.length < 8) {
+    return 'Password must be at least 8 characters';
+  }
+  return null;
+}
+
+export interface RegisterInput {
+  email?: string;
+  username?: string;
+  password?: string;
+}
+
+/**
+ * Validate the full registration payload.
+ * Returns an array of error messages (empty = valid).
+ */
+export function validateRegisterInput(input: RegisterInput): string[] {
+  const errors: string[] = [];
+
+  const emailErr = validateEmail(input.email as string);
+  if (emailErr) errors.push(emailErr);
+
+  const usernameErr = validateUsername(input.username as string);
+  if (usernameErr) errors.push(usernameErr);
+
+  const passwordErr = validatePassword(input.password as string);
+  if (passwordErr) errors.push(passwordErr);
+
+  return errors;
+}
+
+/**
+ * Create an Express middleware that validates `req.body.content`
+ * is a non-empty string not exceeding `maxLength` characters.
+ */
+export function validateContent(maxLength: number) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const { content } = req.body;
+    if (!content || typeof content !== 'string' || content.trim().length === 0) {
+      error(res, 'Content is required', 400);
+      return;
+    }
+    if (content.length > maxLength) {
+      error(res, `Content cannot exceed ${maxLength} characters`, 400);
+      return;
+    }
+    next();
+  };
+}
+
+export const validatePostContent = validateContent(280);
+export const validateCommentContent = validateContent(280);
+
 export function validateRequired(fields: string[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const missing = fields.filter((f) => {
@@ -15,32 +95,6 @@ export function validateRequired(fields: string[]) {
     }
     next();
   };
-}
-
-export function validatePostContent(req: Request, res: Response, next: NextFunction): void {
-  const { content } = req.body;
-  if (!content || typeof content !== 'string' || content.trim().length === 0) {
-    error(res, 'Content is required', 400);
-    return;
-  }
-  if (content.length > 280) {
-    error(res, 'Content cannot exceed 280 characters', 400);
-    return;
-  }
-  next();
-}
-
-export function validateCommentContent(req: Request, res: Response, next: NextFunction): void {
-  const { content } = req.body;
-  if (!content || typeof content !== 'string' || content.trim().length === 0) {
-    error(res, 'Content is required', 400);
-    return;
-  }
-  if (content.length > 280) {
-    error(res, 'Content cannot exceed 280 characters', 400);
-    return;
-  }
-  next();
 }
 
 export function validateDMContent(req: Request, res: Response, next: NextFunction): void {

@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { UserModel, ProfileModel, success, error, getJwtSecret } from '@breezy/shared';
-import { validateRegisterInput } from '../validators/auth';
+import { UserModel, ProfileModel, success, error, getJwtSecret, validateRegisterInput } from '@breezy/shared';
 
 const JWT_SECRET = getJwtSecret();
 const SALT_ROUNDS = 10;
