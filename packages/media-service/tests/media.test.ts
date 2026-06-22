@@ -19,27 +19,31 @@ const mockError = jest.fn(
 
 const mockFileRef: { current: Record<string, unknown> | null } = { current: null };
 
-jest.mock('@breezy/shared', () => ({
-  authenticateToken: jest.fn(
-    (req: Request & { user?: Record<string, unknown> }, res: Response, next: NextFunction) => {
-      if (req.headers.authorization) {
-        req.user = {
-          id: 1,
-          username: 'testuser',
-          email: 'test@example.com',
-          role: 'user',
-        };
-        next();
-      } else {
-        res.status(401).json({ error: 'Access denied. No token provided.' });
+jest.mock('@breezy/shared', () => {
+  const actual = jest.requireActual('@breezy/shared');
+  return {
+    ...actual,
+    authenticateToken: jest.fn(
+      (req: Request & { user?: Record<string, unknown> }, res: Response, next: NextFunction) => {
+        if (req.headers.authorization) {
+          req.user = {
+            id: 1,
+            username: 'testuser',
+            email: 'test@example.com',
+            role: 'user',
+          };
+          next();
+        } else {
+          res.status(401).json({ error: 'Access denied. No token provided.' });
+        }
       }
-    }
-  ),
-  checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
-  Ban: { findOne: jest.fn().mockResolvedValue(null) },
-  success: mockSuccess,
-  error: mockError,
-}));
+    ),
+    checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
+    Ban: { findOne: jest.fn().mockResolvedValue(null) },
+    success: mockSuccess,
+    error: mockError,
+  };
+});
 
 jest.mock('multer', () => {
   const instance = {
@@ -50,7 +54,7 @@ jest.mock('multer', () => {
         next: NextFunction
       ) => {
         if (mockFileRef.current) {
-          req.file = mockFileRef.current;
+          (req as any).file = mockFileRef.current;
           mockFileRef.current = null;
         }
         next();
@@ -112,7 +116,7 @@ describe('MediaService Routes', () => {
         filename: 'test-uuid-1234.jpg',
       };
 
-      const res = await request(app)
+      await request(app)
         .post('/api/media/upload')
         .set('Authorization', 'Bearer valid-token')
         .attach('file', Buffer.from('fake-image-data'), {
@@ -144,7 +148,7 @@ describe('MediaService Routes', () => {
         filename: 'test-uuid-1234.mp4',
       };
 
-      const res = await request(app)
+      await request(app)
         .post('/api/media/upload')
         .set('Authorization', 'Bearer valid-token')
         .attach('file', Buffer.from('fake-video-data'), {
@@ -176,7 +180,7 @@ describe('MediaService Routes', () => {
         filename: 'test-uuid-1234.pdf',
       };
 
-      const res = await request(app)
+      await request(app)
         .post('/api/media/upload')
         .set('Authorization', 'Bearer valid-token')
         .attach('file', Buffer.from('fake-pdf-data'), {
@@ -202,7 +206,7 @@ describe('MediaService Routes', () => {
         filename: 'test-uuid-1234.jpg',
       };
 
-      const res = await request(app)
+      await request(app)
         .post('/api/media/upload')
         .set('Authorization', 'Bearer valid-token')
         .attach('file', Buffer.from('fake-data'), {
@@ -228,7 +232,7 @@ describe('MediaService Routes', () => {
         filename: 'test-uuid-1234.mp4',
       };
 
-      const res = await request(app)
+      await request(app)
         .post('/api/media/upload')
         .set('Authorization', 'Bearer valid-token')
         .attach('file', Buffer.from('fake-data'), {

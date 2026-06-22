@@ -8,8 +8,7 @@ export interface FollowerAttributes {
   created_at: Date;
 }
 
-export interface FollowerCreationAttributes
-  extends Optional<FollowerAttributes, "id" | "created_at"> {}
+export type FollowerCreationAttributes = Optional<FollowerAttributes, "id" | "created_at">;
 
 export class Follower
   extends Model<FollowerAttributes, FollowerCreationAttributes>

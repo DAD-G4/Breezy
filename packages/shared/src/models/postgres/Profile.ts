@@ -11,11 +11,10 @@ export interface ProfileAttributes {
   theme_preference: string;
 }
 
-export interface ProfileCreationAttributes
-  extends Optional<
-    ProfileAttributes,
-    "id" | "display_name" | "bio" | "avatar_url" | "language_preference" | "theme_preference"
-  > {}
+export type ProfileCreationAttributes = Optional<
+  ProfileAttributes,
+  "id" | "display_name" | "bio" | "avatar_url" | "language_preference" | "theme_preference"
+>;
 
 export class Profile
   extends Model<ProfileAttributes, ProfileCreationAttributes>

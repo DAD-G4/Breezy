@@ -10,8 +10,7 @@ export interface BanAttributes {
   created_at: Date;
 }
 
-export interface BanCreationAttributes
-  extends Optional<BanAttributes, "id" | "expires_at" | "created_at"> {}
+export type BanCreationAttributes = Optional<BanAttributes, "id" | "expires_at" | "created_at">;
 
 export class Ban
   extends Model<BanAttributes, BanCreationAttributes>

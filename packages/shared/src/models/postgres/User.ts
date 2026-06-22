@@ -12,11 +12,10 @@ export interface UserAttributes {
   updated_at: Date;
 }
 
-export interface UserCreationAttributes
-  extends Optional<
-    UserAttributes,
-    "id" | "is_validated" | "created_at" | "updated_at"
-  > {}
+export type UserCreationAttributes = Optional<
+  UserAttributes,
+  "id" | "is_validated" | "created_at" | "updated_at"
+>;
 
 export class User
   extends Model<UserAttributes, UserCreationAttributes>

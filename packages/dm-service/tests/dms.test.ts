@@ -1,12 +1,6 @@
 import express from 'express';
 import request from 'supertest';
 
-// ── Mocks ─────────────────────────────────────────────────────────────────────
-
-const mockDirectMessageDoc = {
-  save: jest.fn(),
-};
-
 const mockDirectMessageModel = {
   create: jest.fn(),
   find: jest.fn(),
@@ -18,28 +12,32 @@ const mockDirectMessageModel = {
 
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
 
-jest.mock('@breezy/shared', () => ({
-  DirectMessageModel: mockDirectMessageModel,
-  Ban: { findOne: jest.fn().mockResolvedValue(null) },
-  success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
-    const code = statusCode || 200;
-    const body: any = { data };
-    if (message) body.message = message;
-    return res.status(code).json(body);
-  }),
-  error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
-    return res.status(statusCode).json({ error: errorMessage, statusCode });
-  }),
-  authenticateToken: jest.fn((req: any, res: any, next: any) => {
-    if (mockAuthenticatedUser) {
-      req.user = { ...mockAuthenticatedUser };
-      next();
-    } else {
-      res.status(401).json({ error: 'Access denied. No token provided.' });
-    }
-  }),
-  checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
-}));
+jest.mock('@breezy/shared', () => {
+  const actual = jest.requireActual('@breezy/shared');
+  return {
+    ...actual,
+    DirectMessageModel: mockDirectMessageModel,
+    Ban: { findOne: jest.fn().mockResolvedValue(null) },
+    success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
+      const code = statusCode || 200;
+      const body: any = { data };
+      if (message) body.message = message;
+      return res.status(code).json(body);
+    }),
+    error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
+      return res.status(statusCode).json({ error: errorMessage, statusCode });
+    }),
+    authenticateToken: jest.fn((req: any, res: any, next: any) => {
+      if (mockAuthenticatedUser) {
+        req.user = { ...mockAuthenticatedUser };
+        next();
+      } else {
+        res.status(401).json({ error: 'Access denied. No token provided.' });
+      }
+    }),
+    checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
+  };
+});
 
 // Mock the DirectMessage model import used by the controller
 jest.mock('@breezy/shared/src/models/mongodb/DirectMessage', () => ({
@@ -55,8 +53,6 @@ function buildApp() {
   app.use('/api/dms', dmRoutes);
   return app;
 }
-
-// ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('DM Routes', () => {
   const app = buildApp();
