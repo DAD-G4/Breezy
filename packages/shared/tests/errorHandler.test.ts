@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { errorHandler, AppError } from '../middleware/errorHandler';
+import { errorHandler, AppError } from '../src/middleware/errorHandler';
 
 function mockRes() {
   return {

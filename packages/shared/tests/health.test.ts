@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 
-jest.mock('../config/connection', () => ({
+jest.mock('../src/config/connection', () => ({
   sequelize: { authenticate: jest.fn() },
 }));
 jest.mock('mongoose', () => ({
@@ -9,8 +9,8 @@ jest.mock('mongoose', () => ({
   __esModule: true,
 }));
 
-import healthRouter from '../routes/health';
-import { sequelize } from '../config/connection';
+import healthRouter from '../src/routes/health';
+import { sequelize } from '../src/config/connection';
 import mongoose from 'mongoose';
 
 const app = express();

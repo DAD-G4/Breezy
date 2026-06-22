@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import notFound from '../middleware/notFound';
+import notFound from '../src/middleware/notFound';
 
 function mockReqRes() {
   const req = {} as Request;
