@@ -20,16 +20,6 @@ export async function createPost(req: AuthRequest, res: Response): Promise<void>
 
   const { content, media } = req.body;
 
-  if (!content || typeof content !== 'string') {
-    error(res, 'Content is required', 400);
-    return;
-  }
-
-  if (content.length > 280) {
-    error(res, 'Content cannot exceed 280 characters', 400);
-    return;
-  }
-
   const tags = extractTags(content);
 
   const post = await PostModel.create({
@@ -126,16 +116,6 @@ export async function updatePost(req: AuthRequest, res: Response): Promise<void>
 
   const { id } = req.params;
   const { content } = req.body;
-
-  if (!content || typeof content !== 'string') {
-    error(res, 'Content is required', 400);
-    return;
-  }
-
-  if (content.length > 280) {
-    error(res, 'Content cannot exceed 280 characters', 400);
-    return;
-  }
 
   const post = await PostModel.findById(id);
 

@@ -29,13 +29,6 @@ interface JwtPayload {
   role: UserRole;
 }
 
-/**
- * JWT authentication middleware.
- * - Extracts token from Authorization header (Bearer <token>)
- * - Verifies token with JWT_SECRET
- * - Attaches decoded user to req.user
- * - Returns 401 for invalid/expired tokens
- */
 export function authenticateToken(
   req: AuthRequest,
   res: Response,
@@ -119,9 +112,6 @@ export function checkBan(banChecker: BanChecker) {
 /**
  * Role-based access control middleware.
  * MUST be used AFTER authenticateToken.
- * - Checks if the authenticated user's role meets the minimum required level
- * - Role hierarchy: user < moderator < admin
- * - Returns 403 if the user's role is insufficient
  */
 const ROLE_HIERARCHY: Record<string, number> = {
   [UserRole.USER]: 0,

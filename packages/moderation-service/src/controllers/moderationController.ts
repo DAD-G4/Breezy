@@ -1,29 +1,11 @@
 import { Response } from 'express';
 import { ReportModel as Report, AuthRequest, Ban, UserModel, UserRole, success, error } from '@breezy/shared';
 
-/**
- * Create a content report (any authenticated user).
- */
 export async function createReport(
   req: AuthRequest,
   res: Response
 ): Promise<void> {
   const { target_type, target_id, reason } = req.body;
-
-  if (!target_type) {
-    error(res, 'target_type is required.', 400);
-    return;
-  }
-
-  if (!target_id) {
-    error(res, 'target_id is required.', 400);
-    return;
-  }
-
-  if (!reason || !reason.trim()) {
-    error(res, 'reason is required and must be non-empty.', 400);
-    return;
-  }
 
   const report = await Report.create({
     reported_by: req.user!.id,
@@ -36,9 +18,6 @@ export async function createReport(
   success(res, report, 'Report created successfully.', 201);
 }
 
-/**
- * List pending reports (moderator/admin only).
- */
 export async function listReports(
   req: AuthRequest,
   res: Response
@@ -68,9 +47,6 @@ export async function listReports(
   });
 }
 
-/**
- * Resolve a report (moderator/admin only).
- */
 export async function resolveReport(
   req: AuthRequest,
   res: Response
@@ -100,25 +76,11 @@ const ROLE_HIERARCHY: Record<string, number> = {
   [UserRole.ADMIN]: 2,
 };
 
-/**
- * Ban a user (moderator/admin only).
- * Moderators cannot ban moderators or admins.
- */
 export async function createBan(
   req: AuthRequest,
   res: Response
 ): Promise<void> {
   const { user_id, reason, expires_at } = req.body;
-
-  if (!user_id) {
-    error(res, 'user_id is required.', 400);
-    return;
-  }
-
-  if (!reason || !reason.trim()) {
-    error(res, 'reason is required.', 400);
-    return;
-  }
 
   const targetUser = await UserModel.findByPk(user_id);
   if (!targetUser) {
@@ -144,9 +106,6 @@ export async function createBan(
   success(res, ban, 'User banned successfully.', 201);
 }
 
-/**
- * Unban a user (admin only).
- */
 export async function deleteBan(
   req: AuthRequest,
   res: Response
@@ -170,9 +129,6 @@ export async function deleteBan(
   success(res, null, 'User unbanned successfully.');
 }
 
-/**
- * List active bans (moderator/admin only).
- */
 export async function listBans(
   req: AuthRequest,
   res: Response

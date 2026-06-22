@@ -3,8 +3,8 @@ import { success, error, AuthRequest } from '@breezy/shared';
 
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
 const VIDEO_TYPES = ['video/mp4', 'video/webm'];
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
 
 export async function uploadMedia(
   req: AuthRequest,

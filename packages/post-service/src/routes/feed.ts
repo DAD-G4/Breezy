@@ -4,7 +4,6 @@ import { getFeed } from '../controllers/feedController';
 
 const router = Router();
 
-// All routes require authentication
 router.use(authenticateToken);
 router.use(checkBan(createBanChecker(Ban)));
 

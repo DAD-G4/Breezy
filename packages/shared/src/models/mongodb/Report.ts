@@ -1,7 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-// ── Document Interface ───────────────────────────────────────────────────────
-
 export interface IReportDocument extends Document {
   reported_by: number;
   target_type: 'post' | 'comment';
@@ -10,8 +8,6 @@ export interface IReportDocument extends Document {
   status: 'pending' | 'resolved';
   created_at: Date;
 }
-
-// ── Schema ───────────────────────────────────────────────────────────────────
 
 const ReportSchema = new Schema({
   reported_by: {
@@ -46,8 +42,6 @@ const ReportSchema = new Schema({
 
 // Compound index: pending reports for moderation queue
 ReportSchema.index({ status: 1, created_at: -1 });
-
-// ── Model Export ─────────────────────────────────────────────────────────────
 
 const Report: Model<IReportDocument> =
   (mongoose.models as any).Report ||

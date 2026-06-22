@@ -1,10 +1,6 @@
 import { Response } from 'express';
 import { NotificationModel as Notification, Follower, success, error, AuthRequest } from '@breezy/shared';
 
-/**
- * POST /api/users/follow/:id
- * Follow a user. Prevents self-follow (400) and duplicate follow (409).
- */
 export async function followUser(req: AuthRequest, res: Response): Promise<void> {
   if (!req.user) {
     error(res, 'Authentication required', 401);
@@ -47,10 +43,6 @@ export async function followUser(req: AuthRequest, res: Response): Promise<void>
   success(res, follow, 'Successfully followed user');
 }
 
-/**
- * DELETE /api/users/unfollow/:id
- * Unfollow a user. Returns 404 if not currently following.
- */
 export async function unfollowUser(req: AuthRequest, res: Response): Promise<void> {
   if (!req.user) {
     error(res, 'Authentication required', 401);

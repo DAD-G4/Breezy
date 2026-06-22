@@ -1,11 +1,6 @@
 import { Request, Response } from 'express';
 import { PostModel as Post, success, error } from '@breezy/shared';
 
-/**
- * GET /api/tags/search?q=monTag&page=1&limit=20
- * Search posts by tag (case-insensitive), paginated, reverse chronological.
- * Public endpoint — no authentication required.
- */
 export async function searchPostsByTag(req: Request, res: Response): Promise<void> {
   const q = req.query.q;
 

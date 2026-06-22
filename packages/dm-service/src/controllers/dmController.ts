@@ -15,26 +15,6 @@ export async function sendMessage(req: AuthRequest, res: Response): Promise<void
 
   const { recipient_id, message_text } = req.body;
 
-  if (!recipient_id || typeof recipient_id !== 'number') {
-    error(res, 'Recipient ID is required and must be a number', 400);
-    return;
-  }
-
-  if (!message_text || typeof message_text !== 'string') {
-    error(res, 'Message text is required', 400);
-    return;
-  }
-
-  if (message_text.trim().length === 0) {
-    error(res, 'Message text cannot be empty', 400);
-    return;
-  }
-
-  if (message_text.length > 1000) {
-    error(res, 'Message text cannot exceed 1000 characters', 400);
-    return;
-  }
-
   const senderId = req.user.id;
   const conversationId = generateConversationId(senderId, recipient_id);
 
