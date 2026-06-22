@@ -12,20 +12,24 @@ const mockProfileModel = {
   create: jest.fn(),
 };
 
-jest.mock('@breezy/shared', () => ({
-  UserModel: mockUserModel,
-  ProfileModel: mockProfileModel,
-  getJwtSecret: jest.fn(() => process.env.JWT_SECRET || 'default-secret'),
-  success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
-    const code = statusCode || 200;
-    const body: any = { data };
-    if (message) body.message = message;
-    return res.status(code).json(body);
-  }),
-  error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
-    return res.status(statusCode).json({ error: errorMessage, statusCode });
-  }),
-}));
+jest.mock('@breezy/shared', () => {
+  const actual = jest.requireActual('@breezy/shared');
+  return {
+    ...actual,
+    UserModel: mockUserModel,
+    ProfileModel: mockProfileModel,
+    getJwtSecret: jest.fn(() => process.env.JWT_SECRET || 'default-secret'),
+    success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
+      const code = statusCode || 200;
+      const body: any = { data };
+      if (message) body.message = message;
+      return res.status(code).json(body);
+    }),
+    error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
+      return res.status(statusCode).json({ error: errorMessage, statusCode });
+    }),
+  };
+});
 
 import authRoutes from '../src/routes/auth';
 

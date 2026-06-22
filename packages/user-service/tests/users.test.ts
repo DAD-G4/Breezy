@@ -19,31 +19,35 @@ const mockPostModel = {
 
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
 
-jest.mock('@breezy/shared', () => ({
-  UserModel: mockUserModel,
-  ProfileModel: mockProfileModel,
-  Follower: mockFollowerModel,
-  PostModel: mockPostModel,
-  Ban: { findOne: jest.fn().mockResolvedValue(null) },
-  success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
-    const code = statusCode || 200;
-    const body: any = { data };
-    if (message) body.message = message;
-    return res.status(code).json(body);
-  }),
-  error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
-    return res.status(statusCode).json({ error: errorMessage, statusCode });
-  }),
-  authenticateToken: jest.fn((req: any, res: any, next: any) => {
-    if (mockAuthenticatedUser) {
-      req.user = { ...mockAuthenticatedUser };
-      next();
-    } else {
-      res.status(401).json({ error: 'Access denied. No token provided.' });
-    }
-  }),
-  checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
-}));
+jest.mock('@breezy/shared', () => {
+  const actual = jest.requireActual('@breezy/shared');
+  return {
+    ...actual,
+    UserModel: mockUserModel,
+    ProfileModel: mockProfileModel,
+    Follower: mockFollowerModel,
+    PostModel: mockPostModel,
+    Ban: { findOne: jest.fn().mockResolvedValue(null) },
+    success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
+      const code = statusCode || 200;
+      const body: any = { data };
+      if (message) body.message = message;
+      return res.status(code).json(body);
+    }),
+    error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
+      return res.status(statusCode).json({ error: errorMessage, statusCode });
+    }),
+    authenticateToken: jest.fn((req: any, res: any, next: any) => {
+      if (mockAuthenticatedUser) {
+        req.user = { ...mockAuthenticatedUser };
+        next();
+      } else {
+        res.status(401).json({ error: 'Access denied. No token provided.' });
+      }
+    }),
+    checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
+  };
+});
 
 import userRoutes from '../src/routes/users';
 

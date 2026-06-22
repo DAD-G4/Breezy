@@ -13,7 +13,9 @@
     "test:all": "npm run test:unit && npm run test:integration",
     "build": "npm run build -w packages/shared && npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint:fix": "eslint . --ext .ts --fix",
+    "clean": "rm -rf packages/*/dist/",
+    "rebuild": "npm run clean && npm run build"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

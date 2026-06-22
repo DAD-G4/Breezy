@@ -13,36 +13,42 @@ const mockNotificationModel = {
 
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
 
-jest.mock('@breezy/shared', () => ({
-  Follower: mockFollowerModel,
-  NotificationModel: mockNotificationModel,
-  Ban: { findOne: jest.fn().mockResolvedValue(null) },
-  success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
-    const code = statusCode || 200;
-    const body: any = { data };
-    if (message) body.message = message;
-    return res.status(code).json(body);
-  }),
-  error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
-    return res.status(statusCode).json({ error: errorMessage, statusCode });
-  }),
-  authenticateToken: jest.fn((req: any, res: any, next: any) => {
-    if (mockAuthenticatedUser) {
-      req.user = { ...mockAuthenticatedUser };
-      next();
-    } else {
-      res.status(401).json({ error: 'Access denied. No token provided.' });
-    }
-  }),
-  checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
-}));
+jest.mock('@breezy/shared', () => {
+  const actual = jest.requireActual('@breezy/shared');
+  return {
+    ...actual,
+    Follower: mockFollowerModel,
+    NotificationModel: mockNotificationModel,
+    Ban: { findOne: jest.fn().mockResolvedValue(null) },
+    success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
+      const code = statusCode || 200;
+      const body: any = { data };
+      if (message) body.message = message;
+      return res.status(code).json(body);
+    }),
+    error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
+      return res.status(statusCode).json({ error: errorMessage, statusCode });
+    }),
+    authenticateToken: jest.fn((req: any, res: any, next: any) => {
+      if (mockAuthenticatedUser) {
+        req.user = { ...mockAuthenticatedUser };
+        next();
+      } else {
+        res.status(401).json({ error: 'Access denied. No token provided.' });
+      }
+    }),
+    checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
+  };
+});
 
 import followRoutes from '../src/routes/follows';
+import { errorHandler } from '@breezy/shared';
 
 function buildApp() {
   const app = express();
   app.use(express.json());
   app.use('/api/users', followRoutes);
+  app.use(errorHandler);
   return app;
 }
 
@@ -136,7 +142,7 @@ describe('Follow Routes', () => {
       const res = await request(app).post('/api/users/follow/2');
 
       expect(res.status).toBe(409);
-      expect(res.body.error).toBe('Already following');
+      expect(res.body.error).toBe('Resource already exists');
     });
 
     it('should return 500 on unexpected database error', async () => {
@@ -147,7 +153,7 @@ describe('Follow Routes', () => {
       const res = await request(app).post('/api/users/follow/2');
 
       expect(res.status).toBe(500);
-      expect(res.body.error).toBe('Internal server error');
+      expect(res.body.error).toBe('Internal server error.');
     });
   });
 
@@ -193,7 +199,7 @@ describe('Follow Routes', () => {
       const res = await request(app).delete('/api/users/unfollow/2');
 
       expect(res.status).toBe(500);
-      expect(res.body.error).toBe('Internal server error');
+      expect(res.body.error).toBe('Internal server error.');
     });
   });
 });
