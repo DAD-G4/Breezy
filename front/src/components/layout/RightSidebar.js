@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link"; 
 import BreezyBadge from "../ui/BreezyBadge";
 
 // Colonne droite : visible uniquement sur très grand écran (xl+).
@@ -59,15 +60,16 @@ export default function RightSidebar() {
           <ul>
             {suggestions.map((s) => (
               <li key={s.username} className="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold shrink-0">
+                
+                <Link href={`/profile/${s.username}`} className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold shrink-0 group-hover:opacity-90 transition-opacity">
                     {s.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip truncate">{s.name}</p>
+                    <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip truncate group-hover:text-steel-blue transition-colors">{s.name}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{s.username}</p>
                   </div>
-                </div>
+                </Link>
                 <button className="ml-2 px-4 py-1.5 text-sm font-bold rounded-full bg-steel-blue text-white hover:bg-deep-space-blue transition-colors shrink-0">
                   Suivre
                 </button>

@@ -18,7 +18,7 @@ function NavItem({ href, label, icon, active, onClick }) {
   );
 
   // Certaines destinations n'ont pas encore de page → simple bouton (parité avec BottomNav)
-  if (!href) {
+  if (!href) {  
     return (
       <button onClick={onClick} className={`${base} ${state} w-full`} aria-label={label}>
         {content}
@@ -61,10 +61,30 @@ export default function LeftSidebar() {
 
       {/* Navigation */}
       <nav className="flex flex-col gap-1 mt-2">
-        <NavItem href="/" label="Accueil" icon={iconHome} active={pathname === "/"} />
-        <NavItem label="Recherche" icon={iconSearch} onClick={() => {}} />
-        <NavItem label="Messages" icon={iconMessages} onClick={() => {}} />
-        <NavItem href="/profile" label="Profil" icon={iconProfile} active={pathname?.startsWith("/profile")} />
+        <NavItem 
+          href="/" 
+          label="Accueil" 
+          icon={iconHome} 
+          active={pathname === "/"} 
+        />
+        <NavItem 
+          href="/search" 
+          label="Recherche" 
+          icon={iconSearch} 
+          active={pathname === "/search"} 
+        />
+        <NavItem 
+          href="/messages" 
+          label="Messages" 
+          icon={iconMessages} 
+          active={pathname?.startsWith("/messages")} 
+        />
+        <NavItem 
+          href="/profile" 
+          label="Profil" 
+          icon={iconProfile} 
+          active={pathname?.startsWith("/profile")} 
+        />
       </nav>
 
       {/* Créer un post (CTA) */}
