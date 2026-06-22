@@ -120,7 +120,17 @@ export default function PostCard({ post, disableProfileLink = false }) {
 
       {post.imageUrl && (
         <div className="mb-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-          <img src={post.imageUrl} alt="Contenu du post" className="w-full h-auto object-cover" />
+          <img
+            src={post.imageUrl}
+            alt="Contenu du post"
+            className="w-full h-auto object-cover"
+            onError={(e) => {
+              // Repli local si l'image externe ne charge pas (ex. hors-ligne)
+              if (e.currentTarget.src.indexOf("/sample-post.jpg") === -1) {
+                e.currentTarget.src = "/sample-post.jpg";
+              }
+            }}
+          />
         </div>
       )}
 
