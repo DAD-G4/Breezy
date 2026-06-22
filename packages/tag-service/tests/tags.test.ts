@@ -1,8 +1,6 @@
 import express from 'express';
 import request from 'supertest';
 
-// ── Mocks ─────────────────────────────────────────────────────────────────────
-
 const mockPostModel = {
   find: jest.fn(),
   countDocuments: jest.fn(),
@@ -15,23 +13,29 @@ jest.mock('@breezy/shared/src/models/mongodb/Post', () => ({
 
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
 
-jest.mock('@breezy/shared', () => ({
-  PostModel: mockPostModel,
-  success: jest.fn((res: any, data: any) => {
-    return res.status(200).json({ data });
-  }),
-  error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
-    return res.status(statusCode).json({ error: errorMessage, statusCode });
-  }),
-  authenticateToken: jest.fn((req: any, res: any, next: any) => {
-    if (mockAuthenticatedUser) {
-      req.user = { ...mockAuthenticatedUser };
-      next();
-    } else {
-      res.status(401).json({ error: 'Access denied. No token provided.' });
-    }
-  }),
-}));
+jest.mock('@breezy/shared', () => {
+  const actual = jest.requireActual('@breezy/shared');
+  return {
+    ...actual,
+    PostModel: mockPostModel,
+    success: jest.fn((res: any, data: any) => {
+      return res.status(200).json({ data });
+    }),
+    error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
+      return res.status(statusCode).json({ error: errorMessage, statusCode });
+    }),
+    authenticateToken: jest.fn((req: any, res: any, next: any) => {
+      if (mockAuthenticatedUser) {
+        req.user = { ...mockAuthenticatedUser };
+        next();
+      } else {
+        res.status(401).json({ error: 'Access denied. No token provided.' });
+      }
+    }),
+    checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
+    Ban: { findOne: jest.fn().mockResolvedValue(null) },
+  };
+});
 
 import tagRoutes from '../src/routes/tags';
 
@@ -41,8 +45,6 @@ function buildApp() {
   app.use('/api/tags', tagRoutes);
   return app;
 }
-
-// ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('Tag Routes', () => {
   const app = buildApp();

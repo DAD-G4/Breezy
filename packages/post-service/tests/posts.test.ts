@@ -1,8 +1,6 @@
 import express from 'express';
 import request from 'supertest';
 
-// ── Mocks ─────────────────────────────────────────────────────────────────────
-
 const mockPostModel = {
   create: jest.fn(),
   find: jest.fn(),
@@ -22,30 +20,34 @@ const mockNotificationModel = {
   create: jest.fn(),
 };
 
-jest.mock('@breezy/shared', () => ({
-  PostModel: mockPostModel,
-  UserModel: mockUserModel,
-  NotificationModel: mockNotificationModel,
-  Ban: { findOne: jest.fn().mockResolvedValue(null) },
-  success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
-    const code = statusCode || 200;
-    const body: any = { data };
-    if (message) body.message = message;
-    return res.status(code).json(body);
-  }),
-  error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
-    return res.status(statusCode).json({ error: errorMessage, statusCode });
-  }),
-  authenticateToken: jest.fn((req: any, res: any, next: any) => {
-    if (mockAuthenticatedUser) {
-      req.user = { ...mockAuthenticatedUser };
-      next();
-    } else {
-      res.status(401).json({ error: 'Access denied. No token provided.' });
-    }
-  }),
-  checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
-}));
+jest.mock('@breezy/shared', () => {
+  const actual = jest.requireActual('@breezy/shared');
+  return {
+    ...actual,
+    PostModel: mockPostModel,
+    UserModel: mockUserModel,
+    NotificationModel: mockNotificationModel,
+    Ban: { findOne: jest.fn().mockResolvedValue(null) },
+    success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
+      const code = statusCode || 200;
+      const body: any = { data };
+      if (message) body.message = message;
+      return res.status(code).json(body);
+    }),
+    error: jest.fn((res: any, errorMessage: string, statusCode: number) => {
+      return res.status(statusCode).json({ error: errorMessage, statusCode });
+    }),
+    authenticateToken: jest.fn((req: any, res: any, next: any) => {
+      if (mockAuthenticatedUser) {
+        req.user = { ...mockAuthenticatedUser };
+        next();
+      } else {
+        res.status(401).json({ error: 'Access denied. No token provided.' });
+      }
+    }),
+    checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
+  };
+});
 
 import postRoutes from '../src/routes/posts';
 
@@ -55,8 +57,6 @@ function buildApp() {
   app.use('/api/posts', postRoutes);
   return app;
 }
-
-// ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('Post Routes', () => {
   const app = buildApp();

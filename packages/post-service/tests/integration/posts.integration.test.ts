@@ -72,8 +72,6 @@ describe('Post Integration Tests', () => {
     });
   });
 
-  // ── Create Post ──────────────────────────────────────────────────────────
-
   describe('POST /api/posts — Create Post', () => {
     it('should create a post and persist it in real MongoDB', async () => {
       const res = await request(app)
@@ -141,8 +139,6 @@ describe('Post Integration Tests', () => {
     });
   });
 
-  // ── Get User Posts ───────────────────────────────────────────────────────
-
   describe('GET /api/posts/user/:id — User Posts', () => {
     it('should return user posts with pagination metadata', async () => {
       // Create 3 posts
@@ -191,8 +187,6 @@ describe('Post Integration Tests', () => {
     });
   });
 
-  // ── Update Post ──────────────────────────────────────────────────────────
-
   describe('PUT /api/posts/:id — Update Post', () => {
     it('should update own post content and re-extract tags', async () => {
       const createRes = await request(app)
@@ -218,8 +212,6 @@ describe('Post Integration Tests', () => {
       expect(mongoPost!.tags).toEqual(['newtag']);
     });
   });
-
-  // ── Delete Post ──────────────────────────────────────────────────────────
 
   describe('DELETE /api/posts/:id — Delete Post', () => {
     it('should delete own post and remove it from MongoDB', async () => {
@@ -277,8 +269,6 @@ describe('Post Integration Tests', () => {
       expect(mongoPost!.content).toBe('Not my post');
     });
   });
-
-  // ── Like / Unlike ────────────────────────────────────────────────────────
 
   describe('POST /api/posts/:id/like — Like / Unlike', () => {
     it('should like a post and persist the like in MongoDB', async () => {
@@ -355,8 +345,6 @@ describe('Post Integration Tests', () => {
       expect(mongoPost!.likes).not.toContain(liker.id);
     });
   });
-
-  // ── Feed ─────────────────────────────────────────────────────────────────
 
   describe('GET /api/posts — Feed', () => {
     it('should return posts from followed users', async () => {

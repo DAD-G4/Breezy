@@ -57,8 +57,6 @@ describe('Moderation Integration Tests', () => {
     adminToken = generateToken({ id: testAdmin.id, username: testAdmin.username, email: 'admin@test.com', role: 'admin' });
   });
 
-  // ── Reports ──────────────────────────────────────────────────────────────
-
   describe('POST /api/moderation/report', () => {
     it('should create a report and return 201', async () => {
       const res = await request(app)
@@ -229,8 +227,6 @@ describe('Moderation Integration Tests', () => {
       expect(res.status).toBe(403);
     });
   });
-
-  // ── Bans ─────────────────────────────────────────────────────────────────
 
   describe('POST /api/moderation/ban', () => {
     it('should allow admin to ban a user and verify in PostgreSQL', async () => {

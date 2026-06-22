@@ -4,8 +4,6 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
 
-// ── Mocks ────────────────────────────────────────────────────────────────────
-
 const mockReport = {
   create: jest.fn(),
   find: jest.fn(),
@@ -51,8 +49,6 @@ jest.mock('@breezy/shared/src/models/mongodb/Report', () => ({
 
 import moderationRoutes from '../src/routes/moderation';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
 function buildApp() {
   const app = express();
   app.use(express.json());
@@ -68,16 +64,12 @@ const userToken = generateToken({ id: 1, username: 'user1', email: 'user1@test.c
 const modToken = generateToken({ id: 2, username: 'mod1', email: 'mod1@test.com', role: 'moderator' });
 const adminToken = generateToken({ id: 3, username: 'admin1', email: 'admin1@test.com', role: 'admin' });
 
-// ── Tests ────────────────────────────────────────────────────────────────────
-
 describe('Moderation Routes', () => {
   const app = buildApp();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  // ── createReport ──────────────────────────────────────────────────────────
 
   describe('POST /api/moderation/report', () => {
     it('should create a report successfully (201)', async () => {
@@ -157,8 +149,6 @@ describe('Moderation Routes', () => {
     });
   });
 
-  // ── listReports ──────────────────────────────────────────────────────────
-
   describe('GET /api/moderation/reports', () => {
     it('should list reports as moderator (200)', async () => {
       mockReport.find.mockReturnValue({
@@ -204,8 +194,6 @@ describe('Moderation Routes', () => {
     });
   });
 
-  // ── resolveReport ────────────────────────────────────────────────────────
-
   describe('PUT /api/moderation/reports/:id/resolve', () => {
     it('should resolve a report successfully (200)', async () => {
       mockReport.findByIdAndUpdate.mockResolvedValue({
@@ -240,8 +228,6 @@ describe('Moderation Routes', () => {
       expect(res.status).toBe(403);
     });
   });
-
-  // ── createBan ────────────────────────────────────────────────────────────
 
   describe('POST /api/moderation/ban', () => {
     it('should ban a user as admin (201)', async () => {
@@ -373,8 +359,6 @@ describe('Moderation Routes', () => {
     });
   });
 
-  // ── deleteBan ────────────────────────────────────────────────────────────
-
   describe('DELETE /api/moderation/ban/:userId', () => {
     it('should unban a user as admin (200)', async () => {
       const mockBanInstance = {
@@ -448,8 +432,6 @@ describe('Moderation Routes', () => {
       expect(res.body.error).toContain('Invalid user ID');
     });
   });
-
-  // ── listBans ─────────────────────────────────────────────────────────────
 
   describe('GET /api/moderation/bans', () => {
     it('should list bans as moderator (200)', async () => {
