@@ -44,7 +44,7 @@ const ReportSchema = new Schema({
 ReportSchema.index({ status: 1, created_at: -1 });
 
 const Report: Model<IReportDocument> =
-  (mongoose.models as any).Report ||
+  (mongoose.models['Report'] as Model<IReportDocument>) ||
   mongoose.model<IReportDocument>('Report', ReportSchema);
 
 export default Report;

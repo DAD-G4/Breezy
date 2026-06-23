@@ -1,5 +1,35 @@
 import { Request, Response, NextFunction } from 'express';
 
+interface SequelizeValidationErrorDetail {
+  message: string;
+  path: string;
+}
+
+interface SequelizeValidationError extends Error {
+  name: 'SequelizeValidationError';
+  errors: SequelizeValidationErrorDetail[];
+}
+
+interface SequelizeUniqueConstraintError extends Error {
+  name: 'SequelizeUniqueConstraintError';
+  errors: SequelizeValidationErrorDetail[];
+}
+
+interface MongooseValidationErrorDetail {
+  message: string;
+}
+
+interface MongooseValidationError extends Error {
+  name: 'ValidationError';
+  errors: Record<string, MongooseValidationErrorDetail>;
+}
+
+interface MongooseCastError extends Error {
+  name: 'CastError';
+  path: string;
+  value: string;
+}
+
 export class AppError extends Error {
   statusCode: number;
 
@@ -27,34 +57,34 @@ export function errorHandler(
   }
 
   if (err.name === 'SequelizeValidationError') {
-    const sequelizeErr = err as any;
+    const sequelizeErr = err as SequelizeValidationError;
     const message = sequelizeErr.errors
-      ? sequelizeErr.errors.map((e: any) => e.message).join(', ')
+      ? sequelizeErr.errors.map((e) => e.message).join(', ')
       : 'Validation failed';
     res.status(400).json({ error: message, statusCode: 400 });
     return;
   }
 
   if (err.name === 'SequelizeUniqueConstraintError') {
-    const sequelizeErr = err as any;
+    const sequelizeErr = err as SequelizeUniqueConstraintError;
     const message = sequelizeErr.errors
-      ? sequelizeErr.errors.map((e: any) => e.message).join(', ')
+      ? sequelizeErr.errors.map((e) => e.message).join(', ')
       : 'Resource already exists';
     res.status(409).json({ error: message, statusCode: 409 });
     return;
   }
 
   if (err.name === 'ValidationError' && 'errors' in err) {
-    const mongooseErr = err as any;
+    const mongooseErr = err as MongooseValidationError;
     const message = Object.values(mongooseErr.errors)
-      .map((e: any) => e.message)
+      .map((e) => e.message)
       .join(', ');
     res.status(400).json({ error: message, statusCode: 400 });
     return;
   }
 
   if (err.name === 'CastError') {
-    const castErr = err as any;
+    const castErr = err as MongooseCastError;
     const message = `Invalid ${castErr.path}: ${castErr.value}`;
     res.status(400).json({ error: message, statusCode: 400 });
     return;
