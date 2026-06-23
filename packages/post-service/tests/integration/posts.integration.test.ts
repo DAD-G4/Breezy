@@ -298,7 +298,6 @@ describe('Post Integration Tests', () => {
         .post(`/api/posts/${postId}/like`)
         .set('Authorization', `Bearer ${likerToken}`);
 
-      console.log('[LIKE DEBUG] status:', likeRes.status, 'body:', JSON.stringify(likeRes.body));
       expect(likeRes.status).toBe(200);
       expect(likeRes.body.data.liked).toBe(true);
       expect(likeRes.body.data.likesCount).toBe(1);

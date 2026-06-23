@@ -24,7 +24,7 @@ export async function toggleLike(req: AuthRequest, res: Response): Promise<void>
         },
       },
     }],
-    { new: true },
+    { new: true, updatePipeline: true },
   );
 
   if (!updatedPost) {
