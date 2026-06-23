@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -36,8 +37,17 @@ import authRoutes from '../src/routes/auth';
 function buildApp() {
   const app = express();
   app.use(express.json());
+  app.use(cookieParser());
   app.use('/api/auth', authRoutes);
   return app;
+}
+
+function extractCookie(res: request.Response, name: string): string | undefined {
+  const setCookie: string[] = (res.headers as any)['set-cookie'];
+  if (!setCookie) return undefined;
+  const match = setCookie.find((c: string) => c.startsWith(`${name}=`));
+  if (!match) return undefined;
+  return match.split(';')[0].split('=')[1];
 }
 
 describe('Auth Routes', () => {
@@ -49,7 +59,7 @@ describe('Auth Routes', () => {
   });
 
   describe('POST /api/auth/register', () => {
-    it('should register a new user successfully (201)', async () => {
+    it('should register a new user and set auth cookies (201)', async () => {
       mockUserModel.findOne.mockResolvedValue(null);
       mockUserModel.create.mockResolvedValue({
         id: 1,
@@ -81,6 +91,22 @@ describe('Auth Routes', () => {
 
       expect(mockProfileModel.create).toHaveBeenCalledTimes(1);
       expect(mockProfileModel.create.mock.calls[0][0].user_id).toBe(1);
+
+      const accessToken = extractCookie(res, 'accessToken');
+      expect(accessToken).toBeDefined();
+      const decoded = jwt.verify(accessToken!, JWT_SECRET) as any;
+      expect(decoded.id).toBe(1);
+      expect(decoded.username).toBe('testuser');
+
+      const refreshToken = extractCookie(res, 'refreshToken');
+      expect(refreshToken).toBeDefined();
+
+      expect(res.body.data.user).toEqual({
+        id: 1,
+        username: 'testuser',
+        email: 'test@test.com',
+        role: 'user',
+      });
     });
 
     it('should return 400 for missing fields', async () => {
@@ -154,7 +180,7 @@ describe('Auth Routes', () => {
   });
 
   describe('POST /api/auth/login', () => {
-    it('should login successfully and return JWT (200)', async () => {
+    it('should login successfully and set auth cookies (200)', async () => {
       const passwordHash = await bcrypt.hash('SecurePass123!', 10);
       mockUserModel.findOne.mockResolvedValue({
         id: 1,
@@ -172,10 +198,11 @@ describe('Auth Routes', () => {
         });
 
       expect(res.status).toBe(200);
-      expect(res.body.data).toBeDefined();
-      expect(res.body.data.token).toBeDefined();
 
-      const decoded = jwt.verify(res.body.data.token, JWT_SECRET) as any;
+      const accessToken = extractCookie(res, 'accessToken');
+      expect(accessToken).toBeDefined();
+
+      const decoded = jwt.verify(accessToken!, JWT_SECRET) as any;
       expect(decoded.id).toBe(1);
       expect(decoded.username).toBe('testuser');
       expect(decoded.email).toBe('test@test.com');
@@ -184,6 +211,9 @@ describe('Auth Routes', () => {
       const now = Math.floor(Date.now() / 1000);
       expect(decoded.exp).toBeGreaterThan(now);
       expect(decoded.exp).toBeLessThanOrEqual(now + 3600 + 10);
+
+      const refreshToken = extractCookie(res, 'refreshToken');
+      expect(refreshToken).toBeDefined();
 
       expect(res.body.data.user).toEqual({
         id: 1,
@@ -238,6 +268,60 @@ describe('Auth Routes', () => {
       expect(res.status).toBe(401);
       expect(res.body.error).toBe('Invalid credentials');
       expect(res.body.data).toBeUndefined();
+    });
+  });
+
+  describe('GET /api/auth/me', () => {
+    it('should return user data for valid accessToken cookie', async () => {
+      const token = jwt.sign(
+        { id: 1, username: 'testuser', email: 'test@test.com', role: 'user' },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      const res = await request(app)
+        .get('/api/auth/me')
+        .set('Cookie', `accessToken=${token}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.user).toEqual({
+        id: 1,
+        username: 'testuser',
+        email: 'test@test.com',
+        role: 'user',
+      });
+    });
+
+    it('should return 401 when no cookie is provided', async () => {
+      const res = await request(app).get('/api/auth/me');
+
+      expect(res.status).toBe(401);
+    });
+
+    it('should return 401 for expired token', async () => {
+      const token = jwt.sign(
+        { id: 1, username: 'testuser', email: 'test@test.com', role: 'user' },
+        JWT_SECRET,
+        { expiresIn: '0s' }
+      );
+
+      const res = await request(app)
+        .get('/api/auth/me')
+        .set('Cookie', `accessToken=${token}`);
+
+      expect(res.status).toBe(401);
+    });
+  });
+
+  describe('POST /api/auth/logout', () => {
+    it('should clear auth cookies', async () => {
+      const res = await request(app).post('/api/auth/logout');
+
+      expect(res.status).toBe(200);
+      const setCookie: string[] = (res.headers as any)['set-cookie'];
+      expect(setCookie).toBeDefined();
+      expect(setCookie.some((c: string) => c.startsWith('accessToken=;'))).toBe(true);
+      expect(setCookie.some((c: string) => c.startsWith('refreshToken=;'))).toBe(true);
     });
   });
 });

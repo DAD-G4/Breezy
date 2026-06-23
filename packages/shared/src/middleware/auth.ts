@@ -35,10 +35,13 @@ export function authenticateToken(
   res: Response,
   next: NextFunction
 ): void {
+  // Support both httpOnly cookie (primary) and Authorization header (backward compat)
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.startsWith('Bearer ')
+  const tokenFromHeader = authHeader && authHeader.startsWith('Bearer ')
     ? authHeader.slice(7)
     : null;
+  const tokenFromCookie = (req as any).cookies?.accessToken;
+  const token = tokenFromHeader || tokenFromCookie;
 
   if (!token) {
     res.status(401).json({ error: 'Access denied. No token provided.' });

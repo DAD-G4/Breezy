@@ -7,24 +7,10 @@ import axios from "axios";
 // Défaut = nginx local (docker-compose), port 80.
 const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost/api";
 
-// Clés de stockage du JWT et de l'utilisateur courant (LocalStorage).
-export const TOKEN_KEY = "breezy_token";
-export const USER_KEY = "breezy_user";
-
 const api = axios.create({
   baseURL,
+  withCredentials: true,
   headers: { "Content-Type": "application/json" },
-});
-
-// Requête : on injecte le JWT (Authorization: Bearer ...) s'il est présent.
-api.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
 });
 
 // Réponse : si le backend renvoie 401 (token absent/expiré), on purge la session
@@ -37,8 +23,6 @@ api.interceptors.response.use(
       error.response?.status === 401 &&
       !window.location.pathname.startsWith("/login")
     ) {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
       window.location.href = "/login";
     }
     return Promise.reject(error);
