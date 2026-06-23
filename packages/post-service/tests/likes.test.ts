@@ -88,7 +88,7 @@ describe('Like Routes', () => {
       expect(mockPostModel.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: 'post123' },
         togglePipeline(1),
-        { new: true },
+        { new: true, updatePipeline: true },
       );
     });
 
@@ -108,7 +108,7 @@ describe('Like Routes', () => {
       expect(mockPostModel.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: 'post123' },
         togglePipeline(1),
-        { new: true },
+        { new: true, updatePipeline: true },
       );
     });
 
