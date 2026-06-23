@@ -21,6 +21,11 @@ export function LanguageProvider({ children }) {
     }
   }, []);
 
+  // Sync <html lang="…"> pour accessibilité / SEO.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   // pour changer la langue
   const changeLanguage = (lang) => {
     setLanguage(lang);
