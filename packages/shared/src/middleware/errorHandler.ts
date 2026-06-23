@@ -22,9 +22,7 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ): void {
-  const isDev = process.env.NODE_ENV === 'development';
-
-  if (isDev) {
+  if (process.env.NODE_ENV !== 'production') {
     console.error('[ErrorHandler]', err);
   }
 
