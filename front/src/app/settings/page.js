@@ -2,17 +2,24 @@
 
 import { useState, useEffect } from "react";
 import AppShell from "@/components/layout/AppShell";
-import { useRequireAuth } from "@/context/AuthContext";
+import { updateSettings } from "@/services/users";
+import { useAuth, useRequireAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function SettingsPage() {
   useRequireAuth();
+  const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const { language, changeLanguage, t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
 
-// État pour savoir quel menu déroulant est ouvert (null si aucun)
+  const persist = (fields) => {
+    if (user?.id) updateSettings(user.id, fields).catch(() => {});
+  };
+
   const [openDropdown, setOpenDropdown] = useState(null);
 
-  // ÉTATS DES PARAMÈTRES
-  // A lier a la base de données
   const [settings, setSettings] = useState({
     darkMode: true,
     notifications: true,
@@ -22,26 +29,17 @@ export default function SettingsPage() {
     location: true,
   });
 
-  // INITIALISATION MODE SOMBRE 
   useEffect(() => {
-    const isDark = document.documentElement.classList.contains('dark') || localStorage.getItem('theme') === 'dark';
-    setSettings(prev => ({ ...prev, darkMode: isDark }));
-  }, []);
+    setSettings(prev => ({ ...prev, darkMode: theme === "dark", language }));
+  }, [theme, language]);
 
-  // FONCTION POUR BASCULER UN PARAMÈTRE 
   const toggleSetting = (key) => {
     setSettings(prev => {
       const newValue = !prev[key];
 
-      // SPÉCIFIQUE AU MODE SOMBRE 
       if (key === "darkMode") {
-        if (newValue) {
-          document.documentElement.classList.add("dark");
-          localStorage.setItem("theme", "dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-          localStorage.setItem("theme", "light");
-        }
+        toggleTheme();
+        persist({ theme_preference: newValue ? "dark" : "light" });
       }
       return {
         ...prev,
@@ -52,6 +50,10 @@ export default function SettingsPage() {
 
   const handleSelectOption = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+    if (key === "language") {
+      changeLanguage(value);
+      persist({ language_preference: value });
+    }
   }
 
   // LISTE DES PARAMÈTRES MOCK DATA

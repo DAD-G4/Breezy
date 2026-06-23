@@ -2,13 +2,16 @@
 
 import { useState, useRef } from "react";
 import PostCard from "../feed/PostCard";
-import { follow, unfollow } from "../../services/users";
+import { follow, unfollow, updateProfile } from "../../services/users";
+import { upload } from "../../services/media";
+import { useLanguage } from "../../context/LanguageContext";
 
 // composant reçoit les infos de base (initialUser) et un booléen (isOwnProfile)
 export default function ProfileView({ initialUser, isOwnProfile }) {
+  const { t } = useLanguage();
   const [name, setName] = useState(initialUser.name);
   const [bio, setBio] = useState(initialUser.bio);
-  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(initialUser.avatarUrl || null);
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
@@ -20,9 +23,38 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
 
   const fileInputRef = useRef(null);
 
-  const handleAvatarChange = (e) => {
+  // Fx10 — Photo de profil : upload média puis sauvegarde de l'avatar_url.
+  const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
-    if (file) setAvatarPreview(URL.createObjectURL(file));
+    if (!file) return;
+    const localPreview = URL.createObjectURL(file);
+    setAvatarPreview(localPreview); // aperçu immédiat
+    try {
+      const media = await upload(file);
+      await updateProfile(initialUser.id, { avatar_url: media.url });
+      setAvatarPreview(media.url);
+    } catch {
+      // on garde l'aperçu local si l'upload échoue
+    }
+  };
+
+  // Édition du nom / de la bio (propriétaire) : PUT /api/users/profile/:id
+  const handleSaveName = async () => {
+    setIsEditingName(false);
+    try {
+      await updateProfile(initialUser.id, { display_name: name });
+    } catch {
+      /* silencieux */
+    }
+  };
+
+  const handleSaveBio = async () => {
+    setIsEditingBio(false);
+    try {
+      await updateProfile(initialUser.id, { bio });
+    } catch {
+      /* silencieux */
+    }
   };
 
   // Fx9 — Suivre/Ne plus suivre.
@@ -92,7 +124,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                     className="flex-1 px-3 py-1 text-lg font-bold rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none border border-steel-blue"
                     autoFocus
                   />
-                  <button onClick={() => setIsEditingName(false)} className="p-1.5 bg-steel-blue text-white rounded-lg hover:bg-deep-space-blue transition-colors">
+                  <button onClick={handleSaveName} className="p-1.5 bg-steel-blue text-white rounded-lg hover:bg-deep-space-blue transition-colors">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
                   </button>
                 </div>
@@ -101,7 +133,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                   <h1 className="text-2xl font-bold text-deep-space-blue dark:text-papaya-whip">{name}</h1>
                   {/* Modifier apparait QUE si isOwnProfile est true */}
                   {isOwnProfile && (
-                    <button onClick={() => setIsEditingName(true)} className="text-gray-400 opacity-0 group-hover:opacity-100 hover:text-steel-blue transition-all" aria-label="Éditer le nom">
+                    <button onClick={() => setIsEditingName(true)} className="text-gray-400 opacity-0 group-hover:opacity-100 hover:text-steel-blue transition-all" aria-label={t('profileView.editNameAria')}>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                     </button>
                   )}
@@ -120,7 +152,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                   : "bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
               }`}
             >
-              {isFollowing ? "Abonné" : "S'abonner"}
+              {isFollowing ? t('profileView.following') : t('profileView.follow')}
             </button>
           )}
 
@@ -131,12 +163,12 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
           
           <div className="flex items-baseline gap-1.5">
             <span className="font-bold text-base text-deep-space-blue dark:text-papaya-whip">{followers}</span>
-            <span className="text-gray-500 dark:text-gray-400">Abonnés</span>
+            <span className="text-gray-500 dark:text-gray-400">{t('profileView.followersLabel')}</span>
           </div>
           
           <div className="flex items-baseline gap-1.5">
             <span className="font-bold text-base text-deep-space-blue dark:text-papaya-whip">{following}</span>
-            <span className="text-gray-500 dark:text-gray-400">Abonnements</span>
+            <span className="text-gray-500 dark:text-gray-400">{t('profileView.followingLabel')}</span>
           </div>
 
         </div>
@@ -153,8 +185,8 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                 className="w-full p-3 text-sm rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none border border-steel-blue resize-none min-h-[80px]"
                 autoFocus
               />
-              <button onClick={() => setIsEditingBio(false)} className="self-end px-4 py-1.5 bg-steel-blue text-white text-sm font-bold rounded-lg hover:bg-deep-space-blue transition-colors">
-                Sauvegarder
+              <button onClick={handleSaveBio} className="self-end px-4 py-1.5 bg-steel-blue text-white text-sm font-bold rounded-lg hover:bg-deep-space-blue transition-colors">
+                {t('profileView.saveButton')}
               </button>
             </div>
           ) : (
@@ -163,7 +195,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                 {bio}
               </p>
               {isOwnProfile && (
-                <button onClick={() => setIsEditingBio(true)} className="absolute top-0 right-0 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-steel-blue transition-all bg-white dark:bg-deep-space-blue pl-1" aria-label="Éditer la bio">
+                <button onClick={() => setIsEditingBio(true)} className="absolute top-0 right-0 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-steel-blue transition-all bg-white dark:bg-deep-space-blue pl-1" aria-label={t('profileView.editBioAria')}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                 </button>
               )}
@@ -176,7 +208,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
       {/* Historique des posts */}
       <section className="flex flex-col gap-4">
         <h2 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip px-2">
-          {isOwnProfile ? "Vos posts :" : `Posts de ${name} :`}
+          {isOwnProfile ? t('profileView.yourPosts') : t('profileView.userPosts').replace('{{name}}', name)}
         </h2>
         {initialUser.posts.map((post) => (
           <PostCard key={post.id} post={post} disableProfileLink={true} />

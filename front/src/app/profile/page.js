@@ -8,10 +8,12 @@ import { mapPost } from "../../lib/mappers";
 import { getProfile } from "../../services/users";
 import { getUserPosts } from "../../services/posts";
 import { useAuth, useRequireAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function MyProfilePage() {
   useRequireAuth();
   const { user, loading: authLoading, logout } = useAuth();
+  const { t, language } = useLanguage();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -38,7 +40,7 @@ export default function MyProfilePage() {
 
         const displayName = u.profile?.display_name || u.username;
         const posts = userPosts.posts.map((p) =>
-          mapPost(p, { authorLabel: displayName, currentUserId: user.id })
+          mapPost(p, { authorLabel: displayName, currentUserId: user.id, locale: language })
         );
 
         if (active) {
@@ -46,6 +48,7 @@ export default function MyProfilePage() {
             id: u.id,
             name: displayName,
             bio: u.profile?.bio || "",
+            avatarUrl: u.profile?.avatar_url || null,
             followers: u.followers_count ?? 0,
             following: u.following_count ?? 0,
             posts,
@@ -67,7 +70,7 @@ export default function MyProfilePage() {
     <AppShell>
       <div className="p-4">
         {loading && (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-8">Chargement du profil…</p>
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">{t('common.loading')}</p>
         )}
         {!loading && error && (
           <p className="text-center text-brick-red font-semibold py-8">{error}</p>
