@@ -33,27 +33,31 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
       const media = await upload(file);
       await updateProfile(initialUser.id, { avatar_url: media.url });
       setAvatarPreview(media.url);
-    } catch {
-      // on garde l'aperçu local si l'upload échoue
+    } catch (err) {
+      console.debug('[Profile] Avatar upload cancelled');
     }
   };
 
   // Édition du nom / de la bio (propriétaire) : PUT /api/users/profile/:id
   const handleSaveName = async () => {
+    const originalDisplayName = initialUser.name;
     setIsEditingName(false);
     try {
       await updateProfile(initialUser.id, { display_name: name });
-    } catch {
-      /* silencieux */
+    } catch (err) {
+      console.error('[Profile] Failed to update name:', err);
+      setName(originalDisplayName);
     }
   };
 
   const handleSaveBio = async () => {
+    const originalBio = initialUser.bio;
     setIsEditingBio(false);
     try {
       await updateProfile(initialUser.id, { bio });
-    } catch {
-      /* silencieux */
+    } catch (err) {
+      console.error('[Profile] Failed to update bio:', err);
+      setBio(originalBio);
     }
   };
 

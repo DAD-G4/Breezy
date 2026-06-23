@@ -80,7 +80,8 @@ export default function ConversationPage({ params }) {
     try {
       const created = await sendMessage(otherUser.id, text);
       setMessages((m) => m.map((msg) => (msg.id === optimistic.id ? { ...msg, id: created._id || msg.id } : msg)));
-    } catch {
+    } catch (err) {
+      console.error('[Messages] Failed to send:', err);
       // Rollback du message optimiste en cas d'échec.
       setMessages((m) => m.filter((msg) => msg.id !== optimistic.id));
       setNewMessage(text);

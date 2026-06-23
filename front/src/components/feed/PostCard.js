@@ -19,8 +19,9 @@ export default function PostCard({ post, disableProfileLink = false }) {
     try {
       await report({ targetType: "post", targetId: post.id, reason: "Contenu inapproprié" });
       setReported(true);
-    } catch {
-      // silencieux : on n'interrompt pas l'utilisateur
+    } catch (err) {
+      console.error('[PostCard] Failed to report:', err);
+      setReported(false);
     }
   };
 

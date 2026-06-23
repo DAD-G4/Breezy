@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TOKEN_KEY, USER_KEY } from "../lib/api";
 import * as authService from "../services/auth";
 
 const AuthContext = createContext();
@@ -12,37 +11,35 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Au chargement, on restaure la session (utilisateur) depuis le LocalStorage.
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(USER_KEY);
-      if (stored) setUser(JSON.parse(stored));
-    } catch {
-      // données corrompues → on ignore
-    }
-    setLoading(false);
+    authService
+      .me()
+      .then((data) => {
+        if (data?.user) setUser(data.user);
+      })
+      .catch(() => {
+        // Not authenticated or cookie expired — stay null
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  // POST /api/auth/login → { data: { token, user } }
-  // Stocke le JWT + l'utilisateur, met à jour le state. La redirection est
-  // gérée par l'appelant (page de login) pour rester souple.
   const login = async (email, password) => {
-    const { token, user: loggedUser } = await authService.login(email, password);
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(loggedUser));
-    setUser(loggedUser);
-    return loggedUser;
+    const data = await authService.login(email, password);
+    setUser(data.user);
+    return data.user;
   };
 
-  // POST /api/auth/register → 201 (pas de token : il faut ensuite se connecter).
   const register = async (credentials) => {
-    await authService.register(credentials);
+    const data = await authService.register(credentials);
+    if (data?.user) setUser(data.user);
   };
 
-  // Déconnexion : purge le stockage et renvoie vers /login.
-  const logout = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // Best effort — clear local state even if request fails
+    }
     setUser(null);
     router.push("/login");
   };

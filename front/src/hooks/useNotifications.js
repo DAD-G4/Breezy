@@ -36,8 +36,8 @@ export function useNotifications(t, locale) {
           })
         );
         if (active) setNotifications(mapped);
-      } catch {
-        // silencieux : pas de notifications affichées si l'appel échoue
+      } catch (err) {
+        console.error('[Notifications] Failed to fetch:', err);
       }
     })();
     return () => {
