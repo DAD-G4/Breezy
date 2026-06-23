@@ -3,4 +3,5 @@ module.exports = {
   projects: ['<rootDir>/packages/*'],
   forceExit: true,
   detectOpenHandles: true,
+  maxWorkers: 2,
 };

@@ -1,5 +1,6 @@
 import express from 'express';
 import { connectPostgres, connectMongo, errorHandler, notFound, healthRouter } from '@breezy/shared';
+import publicPosts from './routes/publicPosts';
 import postRoutes from './routes/posts';
 import feedRoutes from './routes/feed';
 import likeRoutes from './routes/likes';
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use('/api/health', healthRouter);
 
+app.use('/api/posts', publicPosts);
 app.use('/api/posts', postRoutes);
 app.use('/api/posts', feedRoutes);
 app.use('/api/posts', likeRoutes);

@@ -2,17 +2,13 @@ import express from 'express';
 import request from 'supertest';
 
 const mockPostModel = {
-  findById: jest.fn().mockReturnValue({
-    select: jest.fn().mockResolvedValue(null),
-  }),
-  findByIdAndUpdate: jest.fn(),
+  findOneAndUpdate: jest.fn(),
 };
 
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
 
 const mockNotificationModel = {
-  create: jest.fn().mockResolvedValue(true),
-  findOne: jest.fn().mockResolvedValue(null),
+  findOneAndUpdate: jest.fn().mockResolvedValue(true),
 };
 
 jest.mock('@breezy/shared', () => {
@@ -52,35 +48,36 @@ function buildApp() {
   return app;
 }
 
+const togglePipeline = (userId: number) => [{
+  $set: {
+    likes: {
+      $cond: {
+        if: { $in: [userId, '$likes'] },
+        then: { $setDifference: ['$likes', [userId]] },
+        else: { $setUnion: ['$likes', [userId]] },
+      },
+    },
+  },
+}];
+
 describe('Like Routes', () => {
   const app = buildApp();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthenticatedUser = null;
-    // Reset default mock behavior (post not found)
-    mockPostModel.findById.mockReturnValue({
-      select: jest.fn().mockResolvedValue(null),
-    });
-    mockPostModel.findByIdAndUpdate.mockReset();
+    mockPostModel.findOneAndUpdate.mockReset();
+    mockNotificationModel.findOneAndUpdate.mockReset();
+    mockNotificationModel.findOneAndUpdate.mockResolvedValue(true);
   });
 
   describe('POST /api/posts/:id/like', () => {
     it('should like a post that has not been liked yet', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      const mockPost = {
+      mockPostModel.findOneAndUpdate.mockResolvedValue({
         _id: 'post123',
         user_id: 2,
-        likes: [] as number[],
-      };
-
-      mockPostModel.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockPost),
-      });
-
-      mockPostModel.findByIdAndUpdate.mockResolvedValue({
-        ...mockPost,
         likes: [1],
       });
 
@@ -88,9 +85,9 @@ describe('Like Routes', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual({ liked: true, likesCount: 1 });
-      expect(mockPostModel.findByIdAndUpdate).toHaveBeenCalledWith(
-        'post123',
-        { $addToSet: { likes: 1 } },
+      expect(mockPostModel.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: 'post123' },
+        togglePipeline(1),
         { new: true },
       );
     });
@@ -98,18 +95,9 @@ describe('Like Routes', () => {
     it('should unlike a post that was already liked (toggle)', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      const mockPost = {
+      mockPostModel.findOneAndUpdate.mockResolvedValue({
         _id: 'post123',
         user_id: 2,
-        likes: [1, 3, 5] as number[],
-      };
-
-      mockPostModel.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockPost),
-      });
-
-      mockPostModel.findByIdAndUpdate.mockResolvedValue({
-        ...mockPost,
         likes: [3, 5],
       });
 
@@ -117,9 +105,9 @@ describe('Like Routes', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual({ liked: false, likesCount: 2 });
-      expect(mockPostModel.findByIdAndUpdate).toHaveBeenCalledWith(
-        'post123',
-        { $pull: { likes: 1 } },
+      expect(mockPostModel.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: 'post123' },
+        togglePipeline(1),
         { new: true },
       );
     });
@@ -127,9 +115,7 @@ describe('Like Routes', () => {
     it('should return 404 if the post does not exist', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      mockPostModel.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(null),
-      });
+      mockPostModel.findOneAndUpdate.mockResolvedValue(null);
 
       const res = await request(app).post('/api/posts/nonexistent/like');
 
@@ -149,76 +135,60 @@ describe('Like Routes', () => {
     it('should create a notification when a user likes another user\'s post', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      const mockPost = {
+      mockPostModel.findOneAndUpdate.mockResolvedValue({
         _id: 'post123',
         user_id: 2,
-        likes: [] as number[],
-      };
-
-      mockPostModel.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockPost),
-      });
-
-      mockPostModel.findByIdAndUpdate.mockResolvedValue({
-        ...mockPost,
         likes: [1],
       });
 
       await request(app).post('/api/posts/post123/like');
 
-      expect(mockNotificationModel.create).toHaveBeenCalledWith({
-        recipient_id: 2,
-        sender_id: 1,
-        type: 'like',
-        post_id: 'post123',
-        is_read: false,
-      });
+      expect(mockNotificationModel.findOneAndUpdate).toHaveBeenCalledWith(
+        {
+          recipient_id: 2,
+          sender_id: 1,
+          type: 'like',
+          post_id: 'post123',
+        },
+        {
+          $setOnInsert: {
+            recipient_id: 2,
+            sender_id: 1,
+            type: 'like',
+            post_id: 'post123',
+            is_read: false,
+          },
+        },
+        { upsert: true },
+      );
     });
 
     it('should not create a notification when a user likes their own post', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      const mockPost = {
+      mockPostModel.findOneAndUpdate.mockResolvedValue({
         _id: 'post123',
         user_id: 1,
-        likes: [] as number[],
-      };
-
-      mockPostModel.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockPost),
-      });
-
-      mockPostModel.findByIdAndUpdate.mockResolvedValue({
-        ...mockPost,
         likes: [1],
       });
 
       await request(app).post('/api/posts/post123/like');
 
-      expect(mockNotificationModel.create).not.toHaveBeenCalled();
+      expect(mockNotificationModel.findOneAndUpdate).not.toHaveBeenCalled();
     });
 
     it('should not create a notification when unliking a post', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      const mockPost = {
+      mockPostModel.findOneAndUpdate.mockResolvedValue({
         _id: 'post123',
         user_id: 2,
-        likes: [1] as number[],
-      };
-
-      mockPostModel.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockPost),
-      });
-
-      mockPostModel.findByIdAndUpdate.mockResolvedValue({
-        ...mockPost,
         likes: [],
       });
 
       await request(app).post('/api/posts/post123/like');
 
-      expect(mockNotificationModel.create).not.toHaveBeenCalled();
+      expect(mockNotificationModel.findOneAndUpdate).not.toHaveBeenCalled();
     });
   });
 });

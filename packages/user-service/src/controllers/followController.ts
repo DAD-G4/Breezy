@@ -15,32 +15,28 @@ export async function followUser(req: AuthRequest, res: Response): Promise<void>
     return;
   }
 
-  const existingFollow = await Follower.findOne({
-    where: {
+  try {
+    const follow = await Follower.create({
       follower_id: req.user.id,
       following_id: followingId,
-    },
-  });
+    });
 
-  if (existingFollow) {
-    error(res, 'Already following', 409);
-    return;
+    await Notification.create({
+      recipient_id: followingId,
+      sender_id: req.user.id,
+      type: 'follow',
+      post_id: null,
+      is_read: false,
+    });
+
+    success(res, follow, 'Successfully followed user');
+  } catch (err: any) {
+    if (err.name === 'SequelizeUniqueConstraintError') {
+      error(res, 'Already following', 409);
+      return;
+    }
+    throw err;
   }
-
-  const follow = await Follower.create({
-    follower_id: req.user.id,
-    following_id: followingId,
-  });
-
-  await Notification.create({
-    recipient_id: followingId,
-    sender_id: req.user.id,
-    type: 'follow',
-    post_id: null,
-    is_read: false,
-  });
-
-  success(res, follow, 'Successfully followed user');
 }
 
 export async function unfollowUser(req: AuthRequest, res: Response): Promise<void> {

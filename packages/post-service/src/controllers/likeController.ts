@@ -10,43 +10,54 @@ export async function toggleLike(req: AuthRequest, res: Response): Promise<void>
   const { id } = req.params;
   const userId = req.user.id;
 
-  const post = await Post.findById(id).select('user_id likes');
-  if (!post) {
+  // Atomic toggle: single findOneAndUpdate with $cond aggregation
+  const updatedPost = await Post.findOneAndUpdate(
+    { _id: id },
+    [{
+      $set: {
+        likes: {
+          $cond: {
+            if: { $in: [userId, '$likes'] },
+            then: { $setDifference: ['$likes', [userId]] },
+            else: { $setUnion: ['$likes', [userId]] },
+          },
+        },
+      },
+    }],
+    { new: true },
+  );
+
+  if (!updatedPost) {
     error(res, 'Post not found', 404);
     return;
   }
 
-  const hasLiked = post.likes?.includes(userId) ?? false;
+  const liked = updatedPost.likes.includes(userId);
 
-  const updatedPost = await Post.findByIdAndUpdate(
-    id,
-    hasLiked
-      ? { $pull: { likes: userId } }
-      : { $addToSet: { likes: userId } },
-    { new: true },
-  );
-
-  if (!hasLiked && userId !== post.user_id) {
-    const alreadyNotified = await Notification.findOne({
-      recipient_id: post.user_id,
-      sender_id: userId,
-      type: 'like',
-      post_id: post._id,
-    });
-
-    if (!alreadyNotified) {
-      await Notification.create({
-        recipient_id: post.user_id,
+  // Atomic notification dedup: upsert prevents duplicates without TOCTOU
+  if (liked && userId !== updatedPost.user_id) {
+    await Notification.findOneAndUpdate(
+      {
+        recipient_id: updatedPost.user_id,
         sender_id: userId,
         type: 'like',
-        post_id: post._id,
-        is_read: false,
-      });
-    }
+        post_id: updatedPost._id,
+      },
+      {
+        $setOnInsert: {
+          recipient_id: updatedPost.user_id,
+          sender_id: userId,
+          type: 'like',
+          post_id: updatedPost._id,
+          is_read: false,
+        },
+      },
+      { upsert: true },
+    );
   }
 
   success(res, {
-    liked: !hasLiked,
-    likesCount: updatedPost!.likes.length,
+    liked,
+    likesCount: updatedPost.likes.length,
   });
 }

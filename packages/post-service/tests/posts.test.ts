@@ -50,11 +50,19 @@ jest.mock('@breezy/shared', () => {
 });
 
 import postRoutes from '../src/routes/posts';
+import publicPosts from '../src/routes/publicPosts';
 
 function buildApp() {
   const app = express();
   app.use(express.json());
   app.use('/api/posts', postRoutes);
+  return app;
+}
+
+function buildPublicApp() {
+  const app = express();
+  app.use(express.json());
+  app.use('/api/posts', publicPosts);
   return app;
 }
 
@@ -578,6 +586,62 @@ describe('Post Routes', () => {
 
       expect(res.status).toBe(201);
       expect(mockNotificationModel.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('GET /api/posts/:id (public)', () => {
+    const publicApp = buildPublicApp();
+
+    it('should return 200 with post data when post exists', async () => {
+      const mockPost = {
+        _id: 'abc123',
+        user_id: 1,
+        content: 'Hello world',
+        tags: [],
+        likes: [],
+        comments: [],
+        media: null,
+        created_at: new Date(),
+      };
+
+      mockPostModel.findById.mockResolvedValue(mockPost);
+
+      const res = await request(publicApp).get('/api/posts/abc123');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data._id).toBe('abc123');
+      expect(res.body.data.content).toBe('Hello world');
+      expect(res.body.data.user_id).toBe(1);
+      expect(mockPostModel.findById).toHaveBeenCalledWith('abc123');
+    });
+
+    it('should return 404 when post does not exist', async () => {
+      mockPostModel.findById.mockResolvedValue(null);
+
+      const res = await request(publicApp).get('/api/posts/nonexistent');
+
+      expect(res.status).toBe(404);
+      expect(res.body.error).toBe('Post not found');
+    });
+
+    it('should work without Authorization header', async () => {
+      const mockPost = {
+        _id: 'abc999',
+        user_id: 2,
+        content: 'Public post',
+        tags: ['public'],
+        likes: [1],
+        comments: [],
+        media: null,
+        created_at: new Date(),
+      };
+
+      mockPostModel.findById.mockResolvedValue(mockPost);
+
+      const res = await request(publicApp).get('/api/posts/abc999');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.content).toBe('Public post');
     });
   });
 });

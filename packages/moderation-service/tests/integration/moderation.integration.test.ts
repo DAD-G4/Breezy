@@ -157,7 +157,7 @@ describe('Moderation Integration Tests', () => {
       expect(res.body.data.pagination.total).toBe(2);
       expect(res.body.data.pagination.page).toBe(1);
       expect(res.body.data.pagination.limit).toBe(10);
-      expect(res.body.data.pagination.pages).toBe(1);
+      expect(res.body.data.pagination.totalPages).toBe(1);
     });
 
     it('should return 403 for non-moderator users', async () => {
@@ -397,7 +397,7 @@ describe('Moderation Integration Tests', () => {
       expect(res.body.data.bans).toHaveLength(2);
       expect(res.body.data.pagination.total).toBe(2);
       expect(res.body.data.pagination.page).toBe(1);
-      expect(res.body.data.pagination.pages).toBe(1);
+      expect(res.body.data.pagination.totalPages).toBe(1);
     });
 
     it('should filter bans by user_id', async () => {
