@@ -163,6 +163,9 @@
     "statusBanned": "Banned",
     "actionActive": "Activate account",
     "actionSuspend": "Suspend account",
-    "actionBan": "Ban permanently"
+    "actionBan": "Ban permanently",
+    "filterStatus": "Filter by status:",
+    "filterAll": "All",
+    "noUsers": "No users match this filter."
   }
 }

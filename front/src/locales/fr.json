@@ -163,6 +163,9 @@
     "statusBanned": "Banni",
     "actionActive": "Activer le compte",
     "actionSuspend": "Suspendre le compte",
-    "actionBan": "Bannir définitivement"
+    "actionBan": "Bannir définitivement",
+    "filterStatus": "Filtrer par statut :",
+    "filterAll": "Tous",
+    "noUsers": "Aucun utilisateur ne correspond à ce filtre."
   }
 }

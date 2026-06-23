@@ -7,6 +7,9 @@ import { useLanguage } from "@/context/LanguageContext";
 export default function ModerationPage() {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("reports"); // "reports" | "users"
+  
+  // NOUVEAU : État pour le filtre des utilisateurs
+  const [userFilter, setUserFilter] = useState("all"); // "all" | "active" | "suspended" | "banned"
 
   // MOCK DATA - Signalements (Fx20)
   const [reports, setReports] = useState([
@@ -35,11 +38,16 @@ export default function ModerationPage() {
     setUsers(users.map(u => u.id === id ? { ...u, status: newStatus } : u));
   };
 
+  // NOUVEAU : Logique de filtrage des utilisateurs
+  const filteredUsers = userFilter === "all" 
+    ? users 
+    : users.filter(user => user.status === userFilter);
+
   return (
     <AppShell>
       <div className="flex flex-col p-4 gap-6">
         
-        {/* EN-TÊTE */}
+        {/* EN-TÊTE DE MODÉRATION */}
         <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-steel-blue/40">
           <div className="p-3 bg-brick-red/10 rounded-full text-brick-red">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,40 +117,65 @@ export default function ModerationPage() {
 
         {/* CONTENU : UTILISATEURS (Fx21) */}
         {activeTab === "users" && (
-          <div className="flex flex-col gap-3">
-            {users.map((user) => (
-              <div key={user.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm">
-                
-                <div className="flex flex-col">
-                  <span className="font-bold text-deep-space-blue dark:text-papaya-whip">@{user.username}</span>
-                  <span className="text-xs text-gray-500">{user.reportsCount} signalement(s)</span>
-                </div>
+          <div className="flex flex-col gap-4">
+            
+            {/* NOUVEAU : UI DU FILTRE UTILISATEURS */}
+            <div className="flex items-center justify-between bg-gray-50 dark:bg-black/20 p-3 rounded-xl border border-gray-100 dark:border-white/10">
+              <span className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip">
+                {t('moderation.filterStatus')}
+              </span>
+              <select 
+                value={userFilter}
+                onChange={(e) => setUserFilter(e.target.value)}
+                className="text-sm bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-lg px-3 py-1.5 outline-none text-deep-space-blue dark:text-papaya-whip cursor-pointer shadow-sm"
+              >
+                <option value="all">{t('moderation.filterAll')}</option>
+                <option value="active">{t('moderation.statusActive')}</option>
+                <option value="suspended">{t('moderation.statusSuspended')}</option>
+                <option value="banned">{t('moderation.statusBanned')}</option>
+              </select>
+            </div>
 
-                <div className="flex items-center gap-3">
-                  {/* Badge de statut */}
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                    user.status === "active" ? "bg-green-100 text-green-700" :
-                    user.status === "suspended" ? "bg-orange-100 text-orange-700" :
-                    "bg-red-100 text-red-700"
-                  }`}>
-                    {user.status === "active" ? t('moderation.statusActive') : 
-                     user.status === "suspended" ? t('moderation.statusSuspended') : 
-                     t('moderation.statusBanned')}
-                  </span>
+            {/* LISTE FILTRÉE */}
+            <div className="flex flex-col gap-3">
+              {filteredUsers.length === 0 ? (
+                <p className="text-center py-10 text-gray-500">{t('moderation.noUsers')}</p>
+              ) : (
+                filteredUsers.map((user) => (
+                  <div key={user.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm">
+                    
+                    <div className="flex flex-col">
+                      <span className="font-bold text-deep-space-blue dark:text-papaya-whip">@{user.username}</span>
+                      <span className="text-xs text-gray-500">{user.reportsCount} signalement(s)</span>
+                    </div>
 
-                  {/* Actions rapides */}
-                  <select 
-                    value={user.status}
-                    onChange={(e) => handleUpdateUserStatus(user.id, e.target.value)}
-                    className="text-sm bg-gray-100 dark:bg-black/30 border border-gray-200 dark:border-steel-blue/40 rounded-lg px-2 py-1.5 outline-none text-deep-space-blue dark:text-papaya-whip cursor-pointer"
-                  >
-                    <option value="active">{t('moderation.actionActive')}</option>
-                    <option value="suspended">{t('moderation.actionSuspend')}</option>
-                    <option value="banned">{t('moderation.actionBan')}</option>
-                  </select>
-                </div>
-              </div>
-            ))}
+                    <div className="flex items-center gap-3">
+                      {/* Badge de statut */}
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                        user.status === "active" ? "bg-green-100 text-green-700" :
+                        user.status === "suspended" ? "bg-orange-100 text-orange-700" :
+                        "bg-red-100 text-red-700"
+                      }`}>
+                        {user.status === "active" ? t('moderation.statusActive') : 
+                         user.status === "suspended" ? t('moderation.statusSuspended') : 
+                         t('moderation.statusBanned')}
+                      </span>
+
+                      {/* Actions rapides */}
+                      <select 
+                        value={user.status}
+                        onChange={(e) => handleUpdateUserStatus(user.id, e.target.value)}
+                        className="text-sm bg-gray-100 dark:bg-black/30 border border-gray-200 dark:border-steel-blue/40 rounded-lg px-2 py-1.5 outline-none text-deep-space-blue dark:text-papaya-whip cursor-pointer"
+                      >
+                        <option value="active">{t('moderation.actionActive')}</option>
+                        <option value="suspended">{t('moderation.actionSuspend')}</option>
+                        <option value="banned">{t('moderation.actionBan')}</option>
+                      </select>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         )}
 
