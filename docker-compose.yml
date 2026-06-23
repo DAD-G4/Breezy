@@ -1,0 +1,178 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: breezy-postgres
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-breezy}
+      POSTGRES_USER: ${POSTGRES_USER:-breezy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mongo:
+    image: mongo:6
+    container_name: breezy-mongo
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_* est inliné au build → passé en build arg.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost/api}
+    container_name: breezy-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nginx
+
+  nginx:
+    image: nginx:alpine
+    container_name: breezy-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth-service
+      - user-service
+      - post-service
+      - tag-service
+      - notification-service
+      - dm-service
+      - media-service
+      - moderation-service
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: packages/auth-service/Dockerfile
+    container_name: breezy-auth
+    restart: unless-stopped
+    environment:
+      PORT: 3001
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
+    depends_on:
+      - postgres
+
+  user-service:
+    build:
+      context: .
+      dockerfile: packages/user-service/Dockerfile
+    container_name: breezy-user
+    restart: unless-stopped
+    environment:
+      PORT: 3002
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
+    depends_on:
+      - postgres
+      - mongo
+
+  post-service:
+    build:
+      context: .
+      dockerfile: packages/post-service/Dockerfile
+    container_name: breezy-post
+    restart: unless-stopped
+    environment:
+      PORT: 3003
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
+    depends_on:
+      - postgres
+      - mongo
+
+  tag-service:
+    build:
+      context: .
+      dockerfile: packages/tag-service/Dockerfile
+    container_name: breezy-tag
+    restart: unless-stopped
+    environment:
+      PORT: 3004
+      # tag-service n'utilise que Mongo, mais @breezy/shared exige POSTGRES_URI à l'import.
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
+    depends_on:
+      - postgres
+      - mongo
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: packages/notification-service/Dockerfile
+    container_name: breezy-notification
+    restart: unless-stopped
+    environment:
+      PORT: 3005
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
+    depends_on:
+      - postgres
+      - mongo
+
+  dm-service:
+    build:
+      context: .
+      dockerfile: packages/dm-service/Dockerfile
+    container_name: breezy-dm
+    restart: unless-stopped
+    environment:
+      PORT: 3006
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
+    depends_on:
+      - postgres
+      - mongo
+
+  media-service:
+    build:
+      context: .
+      dockerfile: packages/media-service/Dockerfile
+    container_name: breezy-media
+    restart: unless-stopped
+    environment:
+      PORT: 3007
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
+    depends_on:
+      - postgres
+    volumes:
+      - media_uploads:/app/packages/media-service/uploads
+
+  moderation-service:
+    build:
+      context: .
+      dockerfile: packages/moderation-service/Dockerfile
+    container_name: breezy-moderation
+    restart: unless-stopped
+    environment:
+      PORT: 3008
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
+    depends_on:
+      - postgres
+      - mongo
+
+volumes:
+  postgres_data:
+  mongo_data:
+  media_uploads:
