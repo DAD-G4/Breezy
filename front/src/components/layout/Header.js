@@ -4,14 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import BreezyBadge from "../ui/BreezyBadge";
 import { useLanguage } from "@/context/LanguageContext";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotificationsContext } from "@/context/NotificationsContext";
 
 export default function Header() {
   const { t } = useLanguage();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
-  // Fx14-16 — notifications réelles (GET /api/notifications)
-  const { notifications, unreadCount, markAllRead } = useNotifications(t);
+  const { notifications, unreadCount, markAllRead } = useNotificationsContext();
 
   // LOGIQUE DE REDIRECTION POUR LES NOTIFS
   const getNotifLink = (notif) => {

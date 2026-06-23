@@ -4,7 +4,6 @@ import { getNotifications, markAllRead as svcMarkAllRead } from "../services/not
 import { resolveUser } from "../services/users";
 import { relativeTime } from "../lib/mappers";
 
-// type backend → clé de traduction de l'action
 const ACTION_KEY = {
   like: "header.notif.liked",
   follow: "header.notif.followed",
@@ -12,9 +11,7 @@ const ACTION_KEY = {
   comment: "header.notif.commented",
 };
 
-// Hook partagé Header (mobile) / LeftSidebar (desktop).
-// `t` : fonction de traduction (useLanguage) pour le texte de l'action.
-export function useNotifications(t) {
+export function useNotifications(t, locale = "fr") {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
@@ -33,7 +30,7 @@ export function useNotifications(t) {
               user: sender.displayName,
               avatar: (sender.displayName || "?").charAt(0).toUpperCase(),
               action: t(ACTION_KEY[n.type] || ACTION_KEY.like),
-              time: relativeTime(n.created_at),
+              time: relativeTime(n.created_at, locale),
               unread: !n.is_read,
             };
           })
@@ -46,8 +43,6 @@ export function useNotifications(t) {
     return () => {
       active = false;
     };
-    // On charge une fois au montage (t capturé à cet instant).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const unreadCount = notifications.filter((n) => n.unread).length;

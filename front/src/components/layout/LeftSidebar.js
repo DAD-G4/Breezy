@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "@/context/ThemeContext";
 import BreezyBadge from "@/components/ui/BreezyBadge";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotificationsContext } from "@/context/NotificationsContext";
 import { useAuth } from "@/context/AuthContext";
 
 
@@ -50,8 +50,7 @@ export default function LeftSidebar() {
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
-  // Fx14-16 — notifications réelles (GET /api/notifications)
-  const { notifications, unreadCount, markAllRead } = useNotifications(t);
+  const { notifications, unreadCount, markAllRead } = useNotificationsContext();
 
   const getNotifLink = (notif) => {
     if (notif.type === "follow") return `/profile/${notif.username}`;
