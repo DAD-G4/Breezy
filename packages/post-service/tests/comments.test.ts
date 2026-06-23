@@ -3,6 +3,8 @@ import request from 'supertest';
 
 const mockPostModel = {
   findById: jest.fn(),
+  findByIdAndUpdate: jest.fn(),
+  findOneAndUpdate: jest.fn(),
 };
 
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
@@ -55,16 +57,14 @@ describe('Comment Routes', () => {
     it('should add a comment successfully', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      const mockComments: any[] = [];
       const mockPost = {
         _id: 'post123',
         user_id: 2,
         content: 'Original post',
-        comments: mockComments,
-        save: jest.fn().mockResolvedValue(true),
+        comments: [],
       };
 
-      mockPostModel.findById.mockResolvedValue(mockPost);
+      mockPostModel.findByIdAndUpdate.mockResolvedValue(mockPost);
 
       const res = await request(app)
         .post('/api/posts/post123/comment')
@@ -76,8 +76,11 @@ describe('Comment Routes', () => {
       expect(res.body.data.user_id).toBe(1);
       expect(res.body.data.replies).toEqual([]);
       expect(res.body.message).toBe('Comment added successfully');
-      expect(mockComments).toHaveLength(1);
-      expect(mockPost.save).toHaveBeenCalled();
+      expect(mockPostModel.findByIdAndUpdate).toHaveBeenCalledWith(
+        'post123',
+        { $push: { comments: expect.objectContaining({ content: 'Great post!', user_id: 1 }) } },
+        { new: true }
+      );
     });
 
     it('should return 400 if content is empty', async () => {
@@ -105,7 +108,7 @@ describe('Comment Routes', () => {
     it('should return 404 if post not found', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      mockPostModel.findById.mockResolvedValue(null);
+      mockPostModel.findByIdAndUpdate.mockResolvedValue(null);
 
       const res = await request(app)
         .post('/api/posts/nonexistent/comment')
@@ -121,24 +124,21 @@ describe('Comment Routes', () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
       const commentId = 'comment456';
-      const mockReplies: any[] = [];
-      const mockComments = [
-        {
-          comment_id: { toString: () => commentId },
-          user_id: 2,
-          content: 'Original comment',
-          replies: mockReplies,
-        },
-      ];
       const mockPost = {
         _id: 'post123',
         user_id: 2,
         content: 'Original post',
-        comments: mockComments,
-        save: jest.fn().mockResolvedValue(true),
+        comments: [
+          {
+            comment_id: { toString: () => commentId },
+            user_id: 2,
+            content: 'Original comment',
+            replies: [],
+          },
+        ],
       };
 
-      mockPostModel.findById.mockResolvedValue(mockPost);
+      mockPostModel.findOneAndUpdate.mockResolvedValue(mockPost);
 
       const res = await request(app)
         .post(`/api/posts/post123/comment/${commentId}/reply`)
@@ -149,30 +149,24 @@ describe('Comment Routes', () => {
       expect(res.body.data.content).toBe('I agree!');
       expect(res.body.data.user_id).toBe(1);
       expect(res.body.message).toBe('Reply added successfully');
-      expect(mockReplies).toHaveLength(1);
-      expect(mockPost.save).toHaveBeenCalled();
+      expect(mockPostModel.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: 'post123', 'comments.comment_id': commentId },
+        { $push: { 'comments.$.replies': expect.objectContaining({ content: 'I agree!', user_id: 1 }) } },
+        { new: true }
+      );
     });
 
     it('should return 404 if comment not found', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      const mockPost = {
-        _id: 'post123',
-        user_id: 2,
-        content: 'Original post',
-        comments: [],
-        save: jest.fn(),
-      };
-
-      mockPostModel.findById.mockResolvedValue(mockPost);
+      mockPostModel.findOneAndUpdate.mockResolvedValue(null);
 
       const res = await request(app)
         .post('/api/posts/post123/comment/nonexistent/reply')
         .send({ content: 'Reply here' });
 
       expect(res.status).toBe(404);
-      expect(res.body.error).toBe('Comment not found');
-      expect(mockPost.save).not.toHaveBeenCalled();
+      expect(res.body.error).toBe('Post or comment not found');
     });
 
     it('should return 400 if reply content is empty', async () => {
@@ -189,14 +183,14 @@ describe('Comment Routes', () => {
     it('should return 404 if post not found for reply', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      mockPostModel.findById.mockResolvedValue(null);
+      mockPostModel.findOneAndUpdate.mockResolvedValue(null);
 
       const res = await request(app)
         .post('/api/posts/nonexistent/comment/comment456/reply')
         .send({ content: 'Reply' });
 
       expect(res.status).toBe(404);
-      expect(res.body.error).toBe('Post not found');
+      expect(res.body.error).toBe('Post or comment not found');
     });
   });
 });

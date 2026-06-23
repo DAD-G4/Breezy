@@ -1,5 +1,6 @@
 import express from 'express';
 import { connectPostgres, connectMongo, errorHandler, notFound, healthRouter } from '@breezy/shared';
+import publicUsers from './routes/publicUsers';
 import userRoutes from './routes/users';
 import followRoutes from './routes/follows';
 
@@ -9,6 +10,7 @@ const PORT = process.env.PORT || 3002;
 app.use(express.json());
 
 app.use('/api/health', healthRouter);
+app.use('/api/users', publicUsers);
 app.use('/api/users', userRoutes);
 app.use('/api/users', followRoutes);
 app.use(notFound);

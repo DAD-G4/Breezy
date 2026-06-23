@@ -81,6 +81,20 @@ export async function getUserPosts(req: AuthRequest, res: Response): Promise<voi
   });
 }
 
+/** GET /api/posts/:id — public, no auth required */
+export async function getPostById(req: AuthRequest, res: Response): Promise<void> {
+  const { id } = req.params;
+
+  const post = await PostModel.findById(id);
+
+  if (!post) {
+    error(res, 'Post not found', 404);
+    return;
+  }
+
+  success(res, post);
+}
+
 /** DELETE /api/posts/:id — owner only */
 export async function deletePost(req: AuthRequest, res: Response): Promise<void> {
   if (!req.user) {

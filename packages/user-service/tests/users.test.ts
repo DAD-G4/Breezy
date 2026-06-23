@@ -3,6 +3,7 @@ import request from 'supertest';
 
 const mockUserModel = {
   findByPk: jest.fn(),
+  findOne: jest.fn(),
 };
 
 const mockProfileModel = {
@@ -50,10 +51,12 @@ jest.mock('@breezy/shared', () => {
 });
 
 import userRoutes from '../src/routes/users';
+import publicUsers from '../src/routes/publicUsers';
 
 function buildApp() {
   const app = express();
   app.use(express.json());
+  app.use('/api/users', publicUsers);
   app.use('/api/users', userRoutes);
   return app;
 }
@@ -235,6 +238,133 @@ describe('User Routes', () => {
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Profile not found');
+    });
+  });
+
+  describe('GET /api/users/username/:username (public, no auth)', () => {
+    it('should return 200 with full profile when username exists', async () => {
+      const mockUserData = {
+        id: 1,
+        username: 'alice',
+        email: 'alice@test.com',
+        role: 'user',
+        profile: {
+          id: 1,
+          user_id: 1,
+          display_name: 'Alice',
+          bio: 'Hello world',
+          avatar_url: 'https://example.com/avatar.jpg',
+          language_preference: 'en',
+          theme_preference: 'light',
+        },
+        toJSON() {
+          return { ...this };
+        },
+        get(field: string) {
+          if (field === 'id') return this.id;
+          return undefined;
+        },
+      };
+
+      mockUserModel.findOne.mockResolvedValue(mockUserData);
+      mockFollowerModel.count.mockResolvedValueOnce(10);
+      mockFollowerModel.count.mockResolvedValueOnce(5);
+      mockPostModel.countDocuments.mockResolvedValue(3);
+
+      // No auth header — public route
+      const res = await request(app).get('/api/users/username/alice');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.id).toBe(1);
+      expect(res.body.data.username).toBe('alice');
+      expect(res.body.data.profile).toBeDefined();
+      expect(res.body.data.followers_count).toBe(10);
+      expect(res.body.data.following_count).toBe(5);
+      expect(res.body.data.post_count).toBe(3);
+      expect(mockUserModel.findOne).toHaveBeenCalledWith({
+        where: { username: 'alice' },
+        include: [{ model: expect.anything(), as: 'profile' }],
+        attributes: { exclude: ['password_hash'] },
+      });
+    });
+
+    it('should return 404 when username does not exist', async () => {
+      mockUserModel.findOne.mockResolvedValue(null);
+
+      const res = await request(app).get('/api/users/username/nonexistent');
+
+      expect(res.status).toBe(404);
+      expect(res.body.error).toBe('User not found');
+    });
+
+    it('should work WITHOUT Authorization header (public)', async () => {
+      mockAuthenticatedUser = null;
+
+      const mockUserData = {
+        id: 2,
+        username: 'bob',
+        email: 'bob@test.com',
+        role: 'user',
+        profile: null,
+        toJSON() {
+          return { ...this };
+        },
+        get(field: string) {
+          if (field === 'id') return this.id;
+          return undefined;
+        },
+      };
+
+      mockUserModel.findOne.mockResolvedValue(mockUserData);
+      mockFollowerModel.count.mockResolvedValueOnce(0);
+      mockFollowerModel.count.mockResolvedValueOnce(0);
+      mockPostModel.countDocuments.mockResolvedValue(0);
+
+      const res = await request(app).get('/api/users/username/bob');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.username).toBe('bob');
+      expect(res.body.data.followers_count).toBe(0);
+      expect(res.body.data.following_count).toBe(0);
+      expect(res.body.data.post_count).toBe(0);
+    });
+
+    it('should include followers_count, following_count, post_count in response', async () => {
+      const mockUserData = {
+        id: 3,
+        username: 'carol',
+        email: 'carol@test.com',
+        role: 'user',
+        profile: {
+          id: 3,
+          user_id: 3,
+          display_name: 'Carol',
+          bio: null,
+          avatar_url: null,
+          language_preference: 'en',
+          theme_preference: 'light',
+        },
+        toJSON() {
+          return { ...this };
+        },
+        get(field: string) {
+          if (field === 'id') return this.id;
+          return undefined;
+        },
+      };
+
+      mockUserModel.findOne.mockResolvedValue(mockUserData);
+      mockFollowerModel.count.mockResolvedValueOnce(42);
+      mockFollowerModel.count.mockResolvedValueOnce(17);
+      mockPostModel.countDocuments.mockResolvedValue(88);
+
+      const res = await request(app).get('/api/users/username/carol');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.followers_count).toBe(42);
+      expect(res.body.data.following_count).toBe(17);
+      expect(res.body.data.post_count).toBe(88);
     });
   });
 });

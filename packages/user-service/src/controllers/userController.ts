@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { UserModel, ProfileModel, Follower, PostModel, success, error, AuthRequest } from '@breezy/shared';
 
 /**
@@ -19,6 +19,35 @@ export async function getProfile(req: AuthRequest, res: Response): Promise<void>
   }
 
   const userId = parseInt(id, 10);
+
+  const [followersCount, followingCount, postsCount] = await Promise.all([
+    Follower.count({ where: { following_id: userId } }),
+    Follower.count({ where: { follower_id: userId } }),
+    PostModel.countDocuments({ user_id: userId }),
+  ]);
+
+  success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount });
+}
+
+/**
+ * GET /api/users/username/:username
+ * Returns user + profile by username, 404 if not found. Public route — no auth required.
+ */
+export async function getProfileByUsername(req: Request, res: Response): Promise<void> {
+  const { username } = req.params;
+
+  const user = await UserModel.findOne({
+    where: { username },
+    include: [{ model: ProfileModel, as: 'profile' }],
+    attributes: { exclude: ['password_hash'] },
+  });
+
+  if (!user) {
+    error(res, 'User not found', 404);
+    return;
+  }
+
+  const userId = user.get('id') as number;
 
   const [followersCount, followingCount, postsCount] = await Promise.all([
     Follower.count({ where: { following_id: userId } }),
