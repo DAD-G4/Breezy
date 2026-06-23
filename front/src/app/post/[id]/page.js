@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "../../../components/layout/AppShell";
 import PostCard from "../../../components/feed/PostCard";
 import { getApiErrorMessage } from "../../../lib/api";
-import { addComment, addReply } from "../../../services/posts";
+import { mapPost, relativeTime } from "../../../lib/mappers";
+import { getPost, addComment, addReply } from "../../../services/posts";
+import { resolveUser } from "../../../services/users";
 import { useAuth, useRequireAuth } from "../../../context/AuthContext";
 
 export default function PostDetailsPage({ params }) {
@@ -13,24 +15,14 @@ export default function PostDetailsPage({ params }) {
   const router = useRouter();
   const { user } = useAuth();
 
-  // etats pour gérer les likes et les commentaires
   const resolvedParams = use(params);
   const postId = resolvedParams.id;
 
-  // Mock datas A REMPLACER PAR UN APPEL API VERS LE BACK-END POUR RÉCUPÉRER LES DONNÉES DU POST
-  const mainPost = {
-    id: postId,
-    username: "Jane Doe",
-    time: "1h",
-    content: "Voici le détail de ce post ! On peut maintenant lire les commentaires en dessous.",
-    likesCount: 12,
-    commentsCount: 2,
-  };
+  const [mainPost, setMainPost] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
-  const [comments, setComments] = useState([
-    { id: 1, username: "Alice", time: "45min", content: "Super post, totalement d'accord ! 🔥", replies: [] },
-    { id: 2, username: "Bob", time: "30min", content: "Intéressant, merci du partage.", replies: [] },
-  ]);
   const [newComment, setNewComment] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -40,6 +32,45 @@ export default function PostDetailsPage({ params }) {
   const [replyText, setReplyText] = useState("");
 
   const myName = user?.username || "Moi";
+
+  // GET /api/posts/:id — post réel + ses commentaires (auteurs résolus).
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setLoading(true);
+      setLoadError("");
+      try {
+        const post = await getPost(postId);
+        const author = await resolveUser(post.user_id);
+        const mapped = mapPost(post, { authorLabel: author.displayName, currentUserId: user?.id });
+
+        const mappedComments = await Promise.all(
+          (post.comments || []).map(async (c) => {
+            const ca = await resolveUser(c.user_id);
+            const replies = await Promise.all(
+              (c.replies || []).map(async (r) => {
+                const ra = await resolveUser(r.user_id);
+                return { id: r.reply_id, username: ra.displayName, time: relativeTime(r.created_at), content: r.content };
+              })
+            );
+            return { id: c.comment_id, username: ca.displayName, time: relativeTime(c.created_at), content: c.content, replies };
+          })
+        );
+
+        if (active) {
+          setMainPost(mapped);
+          setComments(mappedComments);
+        }
+      } catch (err) {
+        if (active) setLoadError(getApiErrorMessage(err, "Impossible de charger le post."));
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [postId, user]);
 
   // Fx7 — Commenter : POST /api/posts/:id/comment { content }
   const handleAddComment = async (e) => {
@@ -111,8 +142,19 @@ export default function PostDetailsPage({ params }) {
           </svg>
         </button>
 
-        <PostCard post={mainPost} />
+        {loading && (
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">Chargement du post…</p>
+        )}
+        {!loading && loadError && (
+          <p className="text-center text-brick-red font-semibold py-8">{loadError}</p>
+        )}
 
+        {!loading && !loadError && mainPost && (
+          <PostCard post={mainPost} />
+        )}
+
+        {!loading && !loadError && mainPost && (
+        <>
         <div className="h-px bg-gray-200 dark:bg-steel-blue/30 my-2"></div>
 
         {/* Formulaire Commentaire */}
@@ -202,6 +244,8 @@ export default function PostDetailsPage({ params }) {
             </div>
           ))}
         </div>
+        </>
+        )}
 
       </div>
     </AppShell>

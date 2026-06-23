@@ -7,6 +7,12 @@ export async function getFeed({ page = 1, limit = 20 } = {}) {
   return res.data.data;
 }
 
+// GET /api/posts/:id (public) → un post seul (document MongoDB complet)
+export async function getPost(postId) {
+  const res = await api.get(`/posts/${postId}`);
+  return res.data.data;
+}
+
 // GET /api/posts/user/:id → posts d'un utilisateur : { posts, pagination }
 export async function getUserPosts(userId, { page = 1, limit = 20 } = {}) {
   const res = await api.get(`/posts/user/${userId}`, { params: { page, limit } });

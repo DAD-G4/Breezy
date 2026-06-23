@@ -11,6 +11,13 @@ export async function getProfile(userId) {
   return res.data.data;
 }
 
+// GET /api/users/username/:username (public) → { id, username, profile, followers_count, following_count, post_count }
+// Résout un username en profil complet (requis par Fx9 sur le profil public).
+export async function getProfileByUsername(username) {
+  const res = await api.get(`/users/username/${encodeURIComponent(username)}`);
+  return res.data.data;
+}
+
 // Fx9 — POST /api/users/follow/:id
 export async function follow(userId) {
   const res = await api.post(`/users/follow/${userId}`);
