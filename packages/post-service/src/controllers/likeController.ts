@@ -10,7 +10,7 @@ export async function toggleLike(req: AuthRequest, res: Response): Promise<void>
   const { id } = req.params;
   const userId = req.user.id;
 
-  const post = await Post.findById(id).select('user_id');
+  const post = await Post.findById(id).select('user_id likes');
   if (!post) {
     error(res, 'Post not found', 404);
     return;
