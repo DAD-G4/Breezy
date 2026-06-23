@@ -14,6 +14,7 @@ import { sequelize } from '@breezy/shared/src/config/connection';
 import PostModel from '@breezy/shared/src/models/mongodb/Post';
 import NotificationModel from '@breezy/shared/src/models/mongodb/Notification';
 import { Follower } from '@breezy/shared/src/models/postgres';
+import { errorHandler } from '@breezy/shared';
 import postRoutes from '../../src/routes/posts';
 import feedRoutes from '../../src/routes/feed';
 import likeRoutes from '../../src/routes/likes';
@@ -28,6 +29,7 @@ function buildApp() {
   app.use('/api/posts', feedRoutes);
   app.use('/api/posts', likeRoutes);
   app.use('/api/posts', commentRoutes);
+  app.use(errorHandler);
   return app;
 }
 
