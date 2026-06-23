@@ -18,6 +18,18 @@ export async function getProfileByUsername(username) {
   return res.data.data;
 }
 
+// PUT /api/users/profile/:id { display_name?, bio?, avatar_url? } (propriétaire uniquement)
+export async function updateProfile(userId, fields) {
+  const res = await api.put(`/users/profile/${userId}`, fields);
+  return res.data.data;
+}
+
+// PUT /api/users/settings/:id { language_preference?, theme_preference? }
+export async function updateSettings(userId, fields) {
+  const res = await api.put(`/users/settings/${userId}`, fields);
+  return res.data.data;
+}
+
 // Fx9 — POST /api/users/follow/:id
 export async function follow(userId) {
   const res = await api.post(`/users/follow/${userId}`);

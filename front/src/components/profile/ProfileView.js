@@ -2,13 +2,14 @@
 
 import { useState, useRef } from "react";
 import PostCard from "../feed/PostCard";
-import { follow, unfollow } from "../../services/users";
+import { follow, unfollow, updateProfile } from "../../services/users";
+import { upload } from "../../services/media";
 
 // composant reçoit les infos de base (initialUser) et un booléen (isOwnProfile)
 export default function ProfileView({ initialUser, isOwnProfile }) {
   const [name, setName] = useState(initialUser.name);
   const [bio, setBio] = useState(initialUser.bio);
-  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(initialUser.avatarUrl || null);
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
@@ -20,9 +21,38 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
 
   const fileInputRef = useRef(null);
 
-  const handleAvatarChange = (e) => {
+  // Fx10 — Photo de profil : upload média puis sauvegarde de l'avatar_url.
+  const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
-    if (file) setAvatarPreview(URL.createObjectURL(file));
+    if (!file) return;
+    const localPreview = URL.createObjectURL(file);
+    setAvatarPreview(localPreview); // aperçu immédiat
+    try {
+      const media = await upload(file);
+      await updateProfile(initialUser.id, { avatar_url: media.url });
+      setAvatarPreview(media.url);
+    } catch {
+      // on garde l'aperçu local si l'upload échoue
+    }
+  };
+
+  // Édition du nom / de la bio (propriétaire) : PUT /api/users/profile/:id
+  const handleSaveName = async () => {
+    setIsEditingName(false);
+    try {
+      await updateProfile(initialUser.id, { display_name: name });
+    } catch {
+      /* silencieux */
+    }
+  };
+
+  const handleSaveBio = async () => {
+    setIsEditingBio(false);
+    try {
+      await updateProfile(initialUser.id, { bio });
+    } catch {
+      /* silencieux */
+    }
   };
 
   // Fx9 — Suivre/Ne plus suivre.
@@ -92,7 +122,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                     className="flex-1 px-3 py-1 text-lg font-bold rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none border border-steel-blue"
                     autoFocus
                   />
-                  <button onClick={() => setIsEditingName(false)} className="p-1.5 bg-steel-blue text-white rounded-lg hover:bg-deep-space-blue transition-colors">
+                  <button onClick={handleSaveName} className="p-1.5 bg-steel-blue text-white rounded-lg hover:bg-deep-space-blue transition-colors">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
                   </button>
                 </div>
@@ -153,7 +183,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                 className="w-full p-3 text-sm rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none border border-steel-blue resize-none min-h-[80px]"
                 autoFocus
               />
-              <button onClick={() => setIsEditingBio(false)} className="self-end px-4 py-1.5 bg-steel-blue text-white text-sm font-bold rounded-lg hover:bg-deep-space-blue transition-colors">
+              <button onClick={handleSaveBio} className="self-end px-4 py-1.5 bg-steel-blue text-white text-sm font-bold rounded-lg hover:bg-deep-space-blue transition-colors">
                 Sauvegarder
               </button>
             </div>

@@ -46,6 +46,7 @@ export default function MyProfilePage() {
             id: u.id,
             name: displayName,
             bio: u.profile?.bio || "",
+            avatarUrl: u.profile?.avatar_url || null,
             followers: u.followers_count ?? 0,
             following: u.following_count ?? 0,
             posts,
