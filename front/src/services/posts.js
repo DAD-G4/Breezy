@@ -42,3 +42,9 @@ export async function addReply(postId, commentId, content) {
   const res = await api.post(`/posts/${postId}/comment/${commentId}/reply`, { content });
   return res.data.data;
 }
+
+// DELETE /api/posts/:id — supprime un post (modération / propriétaire).
+export async function deletePost(postId) {
+  const res = await api.delete(`/posts/${postId}`);
+  return res.data.data;
+}

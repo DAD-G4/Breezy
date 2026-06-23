@@ -5,20 +5,29 @@ import AppShell from "@/components/layout/AppShell";
 import { useLanguage } from "@/context/LanguageContext";
 import { getApiErrorMessage } from "@/lib/api";
 import { listReports, resolveReport, banUser, unbanUser, listBans } from "@/services/moderation";
-import { getPost } from "@/services/posts";
+import { getPost, deletePost } from "@/services/posts";
 import { resolveUser } from "@/services/users";
 import { useRequireAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function ModerationPage() {
-  useRequireAuth();
+  const { user, loading } = useRequireAuth();
+  const router = useRouter();
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState("reports"); // "reports" | "users"
+  const [activeTab, setActiveTab] = useState("reports");
   const [userFilter, setUserFilter] = useState("all");
   const [reports, setReports] = useState([]);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
 
-  // Signalements réels (GET /api/moderation/reports) — réservé modérateur/admin.
+  const isStaff = user?.role === "moderator" || user?.role === "admin";
+
+  useEffect(() => {
+    if (!loading && user && !isStaff) {
+      router.replace("/");
+    }
+  }, [loading, user, isStaff, router]);
+
   useEffect(() => {
     let active = true;
     (async () => {
@@ -40,7 +49,7 @@ export default function ModerationPage() {
             } else if (r.target_type === "user") {
               postAuthor = (await resolveUser(r.target_id)).username;
             }
-            return { id: r._id, reason: r.reason, reporter: reporter.username, postAuthor, content, status: r.status };
+            return { id: r._id, targetId: r.target_id, targetType: r.target_type, reason: r.reason, reporter: reporter.username, postAuthor, content, status: r.status };
           })
         );
         if (active) setReports(mapped);
@@ -73,13 +82,16 @@ export default function ModerationPage() {
     return () => { active = false; };
   }, []);
 
-  // Résolution d'un signalement (Ignorer / Traiter → PUT /reports/:id/resolve).
   const handleResolve = async (id) => {
     setReports((rs) => rs.filter((r) => r.id !== id));
     try { await resolveReport(id); } catch { /* silencieux */ }
   };
   const handleIgnoreReport = handleResolve;
-  const handleDeletePost = handleResolve;
+
+  const handleDeletePost = async (report) => {
+    setReports((rs) => rs.filter((r) => r.id !== report.id));
+    try { await deletePost(report.targetId); } catch { /* silencieux */ }
+  };
 
   // Ban / unban (POST /ban, DELETE /ban/:userId).
   const handleUpdateUserStatus = async (id, newStatus) => {
@@ -166,7 +178,7 @@ export default function ModerationPage() {
                     <button onClick={() => handleIgnoreReport(report.id)} className="px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors">
                       {t('moderation.ignore')}
                     </button>
-                    <button onClick={() => handleDeletePost(report.id)} className="px-4 py-2 text-sm font-bold text-white bg-brick-red hover:bg-red-700 rounded-lg transition-colors shadow-sm">
+                    <button onClick={() => handleDeletePost(report)} className="px-4 py-2 text-sm font-bold text-white bg-brick-red hover:bg-red-700 rounded-lg transition-colors shadow-sm">
                       {t('moderation.deletePost')}
                     </button>
                   </div>
