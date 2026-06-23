@@ -7,11 +7,13 @@ import { getApiErrorMessage } from "@/lib/api";
 import { getProfileByUsername } from "@/services/users";
 import { getConversation, sendMessage, markConversationRead } from "@/services/dm";
 import { useAuth, useRequireAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ConversationPage({ params }) {
   useRequireAuth();
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const resolvedParams = use(params);
   const username = decodeURIComponent(resolvedParams.username);
@@ -117,7 +119,7 @@ export default function ConversationPage({ params }) {
         {/* ZONE MESSAGES */}
         <div className="flex flex-col gap-4">
           {loading && (
-            <p className="text-center text-gray-500 dark:text-gray-400 py-8">Chargement…</p>
+            <p className="text-center text-gray-500 dark:text-gray-400 py-8">{t('common.loading')}</p>
           )}
           {!loading && error && (
             <p className="text-center text-brick-red font-semibold py-8">{error}</p>
@@ -151,7 +153,7 @@ export default function ConversationPage({ params }) {
         <div className="relative flex items-center">
           <input
             type="text"
-            placeholder="Votre message..."
+            placeholder={t('conversation.placeholder')}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             className="w-full pl-4 pr-12 py-3 rounded-2xl border border-gray-300 dark:border-steel-blue/50 bg-white dark:bg-deep-space-blue text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue shadow-sm"

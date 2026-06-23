@@ -9,11 +9,13 @@ import { mapPost } from "@/lib/mappers";
 import { getProfileByUsername } from "@/services/users";
 import { getUserPosts } from "@/services/posts";
 import { useAuth, useRequireAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function PublicProfilePage({ params }) {
   useRequireAuth();
   const router = useRouter();
   const { user } = useAuth();
+  const { t, language } = useLanguage();
 
   const resolvedParams = use(params);
   const username = decodeURIComponent(resolvedParams.username);
@@ -35,7 +37,7 @@ export default function PublicProfilePage({ params }) {
         // Posts publics de cet utilisateur.
         const userPosts = await getUserPosts(u.id);
         const posts = (userPosts.posts || []).map((p) =>
-          mapPost(p, { authorLabel: displayName, currentUserId: user?.id })
+          mapPost(p, { authorLabel: displayName, currentUserId: user?.id, locale: language })
         );
 
         if (active) {
@@ -68,7 +70,7 @@ export default function PublicProfilePage({ params }) {
         <button
           onClick={() => router.back()}
           className="p-2 -ml-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all w-fit"
-          aria-label="Retour"
+            aria-label={t('common.back')}
         >
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -76,7 +78,7 @@ export default function PublicProfilePage({ params }) {
         </button>
 
         {loading && (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-8">Chargement du profil…</p>
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">{t('common.loading')}</p>
         )}
         {!loading && error && (
           <p className="text-center text-brick-red font-semibold py-8">{error}</p>

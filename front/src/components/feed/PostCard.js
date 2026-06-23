@@ -3,8 +3,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { toggleLike } from "../../services/posts";
 import { report } from "../../services/moderation";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function PostCard({ post, disableProfileLink = false }) {
+  const { t } = useLanguage();
   // Etats pour gérer le like (initialisés depuis les données du post)
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
@@ -111,7 +113,7 @@ export default function PostCard({ post, disableProfileLink = false }) {
                   <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                   </svg>
-                  {reported ? "Post signalé ✓" : "Signaler le post"}
+                  {reported ? t('postCard.reported') : t('postCard.report')}
                 </button>
 
                 {/* Séparateur */}
@@ -120,7 +122,7 @@ export default function PostCard({ post, disableProfileLink = false }) {
                 {/* Bloquer*/}
                 <button 
                   onClick={() => {
-                    alert(`Vous avez bloqué ${post.username}.`);
+                    alert(t('postCard.blockAlert').replace('{{username}}', post.username));
                     setIsMenuOpen(false);
                   }}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brick-red hover:bg-brick-red/10 dark:hover:bg-brick-red/40 transition-colors"
@@ -128,7 +130,7 @@ export default function PostCard({ post, disableProfileLink = false }) {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                   </svg>
-                  Bloquer {post.username}
+                  {t('postCard.block').replace('{{username}}', post.username)}
                 </button>
 
               </div>
@@ -143,7 +145,7 @@ export default function PostCard({ post, disableProfileLink = false }) {
 
       {post.imageUrl && (
         <div className="mb-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-          <img src={post.imageUrl} alt="Contenu du post" className="w-full h-auto object-cover" />
+          <img src={post.imageUrl} alt={t('postCard.imageAlt')} className="w-full h-auto object-cover" />
         </div>
       )}
 

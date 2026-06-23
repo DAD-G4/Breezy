@@ -8,9 +8,11 @@ import { relativeTime } from "../../lib/mappers";
 import { getConversations } from "../../services/dm";
 import { resolveUser } from "../../services/users";
 import { useRequireAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function MessagesInboxPage() {
   useRequireAuth();
+  const { t, language } = useLanguage();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -49,11 +51,11 @@ export default function MessagesInboxPage() {
   return (
     <AppShell>
       <div className="flex flex-col p-4 gap-6">
-        <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip px-1">Messages</h1>
+        <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip px-1">{t('sidebar.messages')}</h1>
 
         <div className="flex flex-col gap-3">
           {loading && (
-            <p className="text-center text-gray-500 dark:text-gray-400 py-8">Chargement…</p>
+            <p className="text-center text-gray-500 dark:text-gray-400 py-8">{t('common.loading')}</p>
           )}
           {!loading && error && (
             <p className="text-center text-brick-red font-semibold py-8">{error}</p>

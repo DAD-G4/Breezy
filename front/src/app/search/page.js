@@ -8,10 +8,12 @@ import { mapPost } from "../../lib/mappers";
 import { searchByTag } from "../../services/tags";
 import { resolveUser } from "../../services/users";
 import { useAuth, useRequireAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function SearchPage() {
   useRequireAuth();
   const { user } = useAuth();
+  const { t, language } = useLanguage();
 
   const [query, setQuery] = useState("");
   const [posts, setPosts] = useState([]);
@@ -33,7 +35,7 @@ export default function SearchPage() {
       const mapped = await Promise.all(
         (raw || []).map(async (p) => {
           const author = await resolveUser(p.user_id);
-          return mapPost(p, { authorLabel: author.displayName, currentUserId: user?.id });
+          return mapPost(p, { authorLabel: author.displayName, currentUserId: user?.id, locale: language });
         })
       );
       setPosts(mapped);
@@ -57,7 +59,7 @@ export default function SearchPage() {
           </div>
           <input
             type="text"
-            placeholder="Rechercher un tag (ex. dev)…"
+            placeholder={t('search.placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue dark:focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all shadow-sm"
@@ -67,14 +69,14 @@ export default function SearchPage() {
         {/* RESULTATS */}
         <div className="flex flex-col gap-4">
           {loading && (
-            <p className="text-center text-gray-500 dark:text-gray-400 py-8">Recherche…</p>
+            <p className="text-center text-gray-500 dark:text-gray-400 py-8">{t('common.loading')}</p>
           )}
           {!loading && error && (
             <p className="text-center text-brick-red font-semibold py-8">{error}</p>
           )}
           {!loading && !error && searched && posts.length === 0 && (
             <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-              Aucun post trouvé pour « {query.trim().replace(/^#/, "")} ».
+              {t('search.noResults')} « {query.trim().replace(/^#/, "")} ».
             </p>
           )}
           {!loading && !error && posts.map((post) => (
