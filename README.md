@@ -5,7 +5,7 @@
 ### Réseau Social Léger & Scalable — Twitter/X Clone
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-4.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
 [![Next.js](https://img.shields.io/badge/Next.js-React-000000?logo=next.js&logoColor=white)](https://nextjs.org)
@@ -334,7 +334,7 @@ Toutes les requêtes passent par l'**API Gateway (Nginx)**. Les routes protégé
 ### Prérequis
 
 - [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/)
-- [Node.js](https://nodejs.org/) ≥ 18 (pour le développement local)
+- [Node.js](https://nodejs.org/) ≥ 20 (pour le développement local)
 
 ### Lancement rapide
 
