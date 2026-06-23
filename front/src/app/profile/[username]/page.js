@@ -52,7 +52,7 @@ export default function PublicProfilePage({ params }) {
           });
         }
       } catch (err) {
-        if (active) setError(getApiErrorMessage(err, "Profil introuvable."));
+        if (active) setError(getApiErrorMessage(err, t('profile.notFound')));
       } finally {
         if (active) setLoading(false);
       }

@@ -8,10 +8,12 @@ import { mapPost } from "../lib/mappers";
 import { getFeed } from "../services/posts";
 import { resolveUser } from "../services/users";
 import { useAuth, useRequireAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function FeedPage() {
   useRequireAuth();
   const { user, loading: authLoading } = useAuth();
+  const { t, language } = useLanguage();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -21,7 +23,7 @@ export default function FeedPage() {
     if (authLoading) return;
 
     if (!user) {
-      setError("Connectez-vous pour voir votre feed.");
+      setError(t('feed.loginRequired'));
       setLoading(false);
       return;
     }
@@ -37,12 +39,12 @@ export default function FeedPage() {
         const mapped = await Promise.all(
           raw.map(async (p) => {
             const author = await resolveUser(p.user_id);
-            return mapPost(p, { authorLabel: author.displayName, currentUserId: user.id });
+            return mapPost(p, { authorLabel: author.displayName, currentUserId: user.id, locale: language });
           })
         );
         if (active) setPosts(mapped);
       } catch (err) {
-        if (active) setError(getApiErrorMessage(err, "Impossible de charger le feed."));
+        if (active) setError(getApiErrorMessage(err, t('feed.loadError')));
       } finally {
         if (active) setLoading(false);
       }
@@ -57,12 +59,12 @@ export default function FeedPage() {
     <AppShell>
       {/* En-tête de section, collant en haut du feed sur desktop */}
       <div className="sticky top-0 z-30 bg-slate-50/80 dark:bg-deep-space-blue/80 backdrop-blur border-b border-gray-200 dark:border-white/10 px-4 py-3 hidden md:block">
-        <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">Accueil</h1>
+        <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">{t('sidebar.home')}</h1>
       </div>
 
       <div className="flex flex-col p-4 gap-4">
         {loading && (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-8">Chargement du feed…</p>
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">{t('feed.loading')}</p>
         )}
 
         {!loading && error && (
@@ -71,7 +73,7 @@ export default function FeedPage() {
 
         {!loading && !error && posts.length === 0 && (
           <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-            Aucun post pour le moment. Suivez des utilisateurs pour voir leur activité.
+            {t('feed.empty')}
           </p>
         )}
 

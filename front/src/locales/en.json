@@ -42,11 +42,16 @@
     "followButton": "Follow"
   },
   "feed": {
-    "title": "Home"
+    "title": "Home",
+    "loginRequired": "Log in to see your feed.",
+    "loading": "Loading feed…",
+    "empty": "No posts yet. Follow users to see their activity.",
+    "loadError": "Could not load the feed."
   },
   "createPost": {
     "title": "New post",
     "placeholder": "What's happening on Breezy?",
+    "error": "Error while posting.",
     "tools": {
       "addImage": "Add an image"
     },
@@ -69,6 +74,8 @@
     "title": "Register",
     "displayNamePlaceholder": "display name:",
     "usernamePlaceholder": "Username (@):",
+    "emailPlaceholder": "email address:",
+    "passwordPlaceholder": "password:",
     "errorMessage": "Error during registration. Please check your information.",
     "submitButton": "Sign up",
     "loginButton": "Login",
@@ -76,13 +83,33 @@
   },
   "search": {
     "placeholder": "Username...",
-    "noResults": "No users found for"
+    "noResults": "No users found for",
+    "error": "Search failed."
   },
   "conversation": {
     "placeholder": "Your message..."
   },
   "messagesInbox": {
     "searchPlaceholder": "Search for a message..."
+  },
+  "messages": {
+    "loadError": "Could not load conversations.",
+    "empty": "No conversations yet.",
+    "notFound": "Conversation not found.",
+    "noMessages": "No messages. Start the conversation!"
+  },
+  "post": {
+    "loadError": "Could not load the post.",
+    "justNow": "Just now",
+    "commentError": "Could not add the comment.",
+    "replyError": "Could not add the reply.",
+    "send": "Send"
+  },
+  "profile": {
+    "loginRequired": "Log in to see your profile.",
+    "logout": "Log out",
+    "notFound": "Profile not found.",
+    "loadError": "Could not load the profile."
   },
   "postDetails": {
     "commentPosted": "New comment posted:",
@@ -168,6 +195,11 @@
     "filterStatus": "Filter by status:",
     "filterAll": "All",
     "noUsers": "No users match this filter.",
-    "deletedContent": "Content unavailable"
+    "deletedContent": "Content unavailable",
+    "accessDenied": "Moderation access only.",
+    "decision": "Moderation decision",
+    "reportedBy": "Reported by",
+    "author": "Author:",
+    "reports": "report(s)"
   }
 }

@@ -11,7 +11,7 @@ const ACTION_KEY = {
   comment: "header.notif.commented",
 };
 
-export function useNotifications(t, locale = "fr") {
+export function useNotifications(t, locale) {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {

@@ -31,14 +31,14 @@ export default function MessagesInboxPage() {
               username: other.username,
               displayName: other.displayName,
               lastMessage: c.last_message?.message_text || "",
-              time: relativeTime(c.last_message?.created_at),
+              time: relativeTime(c.last_message?.created_at, language),
               unread: (c.unread_count ?? 0) > 0,
             };
           })
         );
         if (active) setConversations(list);
       } catch (err) {
-        if (active) setError(getApiErrorMessage(err, "Impossible de charger les conversations."));
+        if (active) setError(getApiErrorMessage(err, t('messages.loadError')));
       } finally {
         if (active) setLoading(false);
       }
@@ -62,7 +62,7 @@ export default function MessagesInboxPage() {
           )}
           {!loading && !error && conversations.length === 0 && (
             <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-              Aucune conversation pour le moment.
+              {t('messages.empty')}
             </p>
           )}
           {!loading && !error && conversations.map((conv) => (

@@ -54,7 +54,7 @@ export default function ModerationPage() {
         );
         if (active) setReports(mapped);
       } catch (err) {
-        if (active) setError(getApiErrorMessage(err, "Accès réservé à la modération."));
+        if (active) setError(getApiErrorMessage(err, t('moderation.accessDenied')));
       }
     })();
     return () => { active = false; };
@@ -100,7 +100,7 @@ export default function ModerationPage() {
       try { await unbanUser(id); } catch { /* silencieux */ }
     } else {
       setUsers((us) => us.map((u) => (u.id === id ? { ...u, status: "banned" } : u)));
-      try { await banUser(id, "Décision de modération"); } catch { /* silencieux */ }
+      try { await banUser(id, t('moderation.decision')); } catch { /* silencieux */ }
     }
   };
 
@@ -167,9 +167,9 @@ export default function ModerationPage() {
                     <span className="px-3 py-1 bg-brick-red/10 text-brick-red text-xs font-bold rounded-full">
                       {report.reason}
                     </span>
-                    <span className="text-xs text-gray-500">Signalé par @{report.reporter}</span>
+                    <span className="text-xs text-gray-500">{t('moderation.reportedBy')} @{report.reporter}</span>
                   </div>
-                  <p className="text-sm font-medium text-deep-space-blue dark:text-papaya-whip mt-2 mb-1">Auteur : @{report.postAuthor}</p>
+                  <p className="text-sm font-medium text-deep-space-blue dark:text-papaya-whip mt-2 mb-1">{t('moderation.author')} @{report.postAuthor}</p>
                   <div className="p-3 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-white/10 text-sm text-gray-600 dark:text-gray-300 italic mb-4">
                     "{report.content}"
                   </div>
@@ -219,7 +219,7 @@ export default function ModerationPage() {
                     
                     <div className="flex flex-col">
                       <span className="font-bold text-deep-space-blue dark:text-papaya-whip">@{user.username}</span>
-                      <span className="text-xs text-gray-500">{user.reportsCount} signalement(s)</span>
+                      <span className="text-xs text-gray-500">{user.reportsCount} {t('moderation.reports')}</span>
                     </div>
 
                     <div className="flex items-center gap-3">

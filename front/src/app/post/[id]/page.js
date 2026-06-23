@@ -64,7 +64,7 @@ export default function PostDetailsPage({ params }) {
           setComments(mappedComments);
         }
       } catch (err) {
-        if (active) setLoadError(getApiErrorMessage(err, "Impossible de charger le post."));
+        if (active) setLoadError(getApiErrorMessage(err, t('post.loadError')));
       } finally {
         if (active) setLoading(false);
       }
@@ -88,7 +88,7 @@ export default function PostDetailsPage({ params }) {
         {
           id: created.comment_id,
           username: myName,
-          time: "À l'instant",
+          time: t('post.justNow'),
           content: created.content,
           replies: [],
         },
@@ -96,7 +96,7 @@ export default function PostDetailsPage({ params }) {
       ]);
       setNewComment("");
     } catch (err) {
-      setError(getApiErrorMessage(err, "Impossible d'ajouter le commentaire."));
+      setError(getApiErrorMessage(err, t('post.commentError')));
     } finally {
       setSubmitting(false);
     }
@@ -117,7 +117,7 @@ export default function PostDetailsPage({ params }) {
                 ...c,
                 replies: [
                   ...(c.replies || []),
-                  { id: created.reply_id, username: myName, time: "À l'instant", content: created.content },
+                  { id: created.reply_id, username: myName, time: t('post.justNow'), content: created.content },
                 ],
               }
             : c
@@ -126,7 +126,7 @@ export default function PostDetailsPage({ params }) {
       setReplyText("");
       setReplyingTo(null);
     } catch (err) {
-      setError(getApiErrorMessage(err, "Impossible d'ajouter la réponse."));
+      setError(getApiErrorMessage(err, t('post.replyError')));
     }
   };
 
@@ -239,7 +239,7 @@ export default function PostDetailsPage({ params }) {
                     className="flex-1 px-3 py-1.5 text-sm rounded-full border border-gray-300 dark:border-steel-blue/40 bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue transition-colors"
                   />
                   <button type="submit" disabled={!replyText.trim()}                     className="px-3 py-1.5 text-sm bg-steel-blue hover:bg-deep-space-blue text-white rounded-full font-semibold transition-colors disabled:opacity-50">
-                    Envoyer
+                    {t('post.send')}
                   </button>
                 </form>
               )}

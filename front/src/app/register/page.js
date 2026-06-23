@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Header from "../../components/layout/Header";
 import BreezyBadge from "../../components/ui/BreezyBadge";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { getApiErrorMessage } from "../../lib/api";
 
 const inputClass =
@@ -13,6 +14,7 @@ const inputClass =
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
+  const { t } = useLanguage();
 
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
@@ -33,7 +35,7 @@ export default function RegisterPage() {
       router.push("/login");
     } catch (err) {
       setError(
-        getApiErrorMessage(err, "Erreur lors de l'inscription. Veuillez vérifier vos informations.")
+        getApiErrorMessage(err, t('register.errorMessage'))
       );
     } finally {
       setLoading(false);
@@ -59,7 +61,7 @@ export default function RegisterPage() {
               <input
                 type="text"
                 required
-                placeholder="nom d'affichage :"
+                placeholder={t('register.displayNamePlaceholder')}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 className={inputClass}
@@ -70,7 +72,7 @@ export default function RegisterPage() {
               <input
                 type="text"
                 required
-                placeholder="Identifiant (@) :"
+                placeholder={t('register.usernamePlaceholder')}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className={inputClass}
@@ -81,7 +83,7 @@ export default function RegisterPage() {
               <input
                 type="email"
                 required
-                placeholder="adresse mail :"
+                placeholder={t('register.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={inputClass}
@@ -92,7 +94,7 @@ export default function RegisterPage() {
               <input
                 type="password"
                 required
-                placeholder="mot de passe :"
+                placeholder={t('register.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={inputClass}
@@ -110,7 +112,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full py-3 mt-4 rounded-full border-2 border-deep-space-blue dark:border-papaya-whip font-bold text-lg hover:bg-deep-space-blue hover:text-papaya-whip dark:hover:bg-papaya-whip dark:hover:text-deep-space-blue transition-all disabled:opacity-50"
             >
-              {loading ? "Chargement..." : "S'inscrire"}
+              {loading ? t('common.loading') : t('register.submitButton')}
             </button>
 
             <div className="mt-4 text-center text-sm font-semibold flex flex-col items-center">
@@ -122,7 +124,7 @@ export default function RegisterPage() {
                 Login
               </button>
               <span className="text-gray-500 dark:text-gray-400 text-xs mt-1">
-                Vous avez déjà un compte ?
+                {t('register.alreadyHaveAccount')}
               </span>
             </div>
           </form>

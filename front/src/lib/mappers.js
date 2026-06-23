@@ -8,7 +8,7 @@ const RELATIVE_TIME_STRINGS = {
 };
 
 // Temps relatif court à partir d'une date ISO ("à l'instant", "3 min", "2 h", "5 j").
-export function relativeTime(dateInput, locale = "fr") {
+export function relativeTime(dateInput, locale) {
   const date = new Date(dateInput);
   const diff = Math.floor((Date.now() - date.getTime()) / 1000);
   const strings = RELATIVE_TIME_STRINGS[locale] || RELATIVE_TIME_STRINGS.fr;

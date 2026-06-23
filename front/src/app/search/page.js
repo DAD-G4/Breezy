@@ -40,7 +40,7 @@ export default function SearchPage() {
       );
       setPosts(mapped);
     } catch (err) {
-      setError(getApiErrorMessage(err, "Recherche impossible."));
+      setError(getApiErrorMessage(err, t('search.error')));
       setPosts([]);
     } finally {
       setLoading(false);

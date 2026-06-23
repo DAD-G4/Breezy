@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import Header from "../../components/layout/Header";
 import BreezyBadge from "../../components/ui/BreezyBadge";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { getApiErrorMessage } from "../../lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -25,7 +27,7 @@ export default function LoginPage() {
       await login(email, password);
       router.push("/");
     } catch (err) {
-      setError(getApiErrorMessage(err, "Identifiants incorrects. Veuillez réessayer."));
+      setError(getApiErrorMessage(err, t('login.errorMessage')));
     } finally {
       setLoading(false);
     }
@@ -52,7 +54,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 required
-                placeholder="adresse mail :"
+                placeholder={t('login.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-transparent focus:border-steel-blue focus:outline-none transition-colors placeholder:text-gray-400 font-medium"
@@ -63,7 +65,7 @@ export default function LoginPage() {
               <input
                 type="password"
                 required
-                placeholder="mot de passe :"
+                placeholder={t('login.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-transparent focus:border-steel-blue focus:outline-none transition-colors placeholder:text-gray-400 font-medium"
@@ -82,7 +84,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full py-3 mt-4 rounded-full border-2 border-deep-space-blue dark:border-papaya-whip font-bold text-lg hover:bg-deep-space-blue hover:text-papaya-whip dark:hover:bg-papaya-whip dark:hover:text-deep-space-blue transition-all disabled:opacity-50"
             >
-              {loading ? "Chargement..." : "Se Connecter"}
+              {loading ? t('common.loading') : t('login.submitButton')}
             </button>
 
             <div className="mt-6 text-center text-sm font-semibold flex flex-col items-center">
@@ -91,10 +93,10 @@ export default function LoginPage() {
                 onClick={() => router.push("/register")}
                 className="px-6 py-2 rounded-full border-2 border-deep-space-blue dark:border-papaya-whip hover:bg-steel-blue hover:text-white hover:border-steel-blue transition-colors mb-2"
               >
-                S'inscrire
+                {t('login.registerButton')}
               </button>
               <span className="text-gray-500 dark:text-gray-400 text-xs mt-1">
-                Pas encore de compte ?
+                {t('login.noAccount')}
               </span>
             </div>
           </form>

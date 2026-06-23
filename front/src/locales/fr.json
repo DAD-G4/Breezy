@@ -42,11 +42,16 @@
     "followButton": "Suivre"
   },
   "feed": {
-    "title": "Accueil"
+    "title": "Accueil",
+    "loginRequired": "Connectez-vous pour voir votre feed.",
+    "loading": "Chargement du feed…",
+    "empty": "Aucun post pour le moment. Suivez des utilisateurs pour voir leur activité.",
+    "loadError": "Impossible de charger le feed."
   },
   "createPost": {
     "title": "Nouvelle publication",
     "placeholder": "Quoi de neuf sur Breezy ?",
+    "error": "Erreur lors de la publication.",
     "tools": {
       "addImage": "Ajouter une image"
     },
@@ -69,6 +74,8 @@
     "title": "Inscription",
     "displayNamePlaceholder": "nom d'affichage :",
     "usernamePlaceholder": "Identifiant (@) :",
+    "emailPlaceholder": "adresse mail :",
+    "passwordPlaceholder": "mot de passe :",
     "errorMessage": "Erreur lors de l'inscription. Veuillez vérifier vos informations.",
     "submitButton": "S'inscrire",
     "loginButton": "Connexion",
@@ -76,13 +83,33 @@
   },
   "search": {
     "placeholder": "Nom d'utilisateur...",
-    "noResults": "Aucun utilisateur trouvé pour"
+    "noResults": "Aucun utilisateur trouvé pour",
+    "error": "Recherche impossible."
   },
   "conversation": {
     "placeholder": "Votre message..."
   },
   "messagesInbox": {
     "searchPlaceholder": "Rechercher un message..."
+  },
+  "messages": {
+    "loadError": "Impossible de charger les conversations.",
+    "empty": "Aucune conversation pour le moment.",
+    "notFound": "Conversation introuvable.",
+    "noMessages": "Aucun message. Démarrez la conversation !"
+  },
+  "post": {
+    "loadError": "Impossible de charger le post.",
+    "justNow": "À l'instant",
+    "commentError": "Impossible d'ajouter le commentaire.",
+    "replyError": "Impossible d'ajouter la réponse.",
+    "send": "Envoyer"
+  },
+  "profile": {
+    "loginRequired": "Connectez-vous pour voir votre profil.",
+    "logout": "Se déconnecter",
+    "notFound": "Profil introuvable.",
+    "loadError": "Impossible de charger le profil."
   },
   "postDetails": {
     "commentPosted": "Nouveau commentaire posté :",
@@ -168,6 +195,11 @@
     "filterStatus": "Filtrer par statut :",
     "filterAll": "Tous",
     "noUsers": "Aucun utilisateur ne correspond à ce filtre.",
-    "deletedContent": "Contenu indisponible"
+    "deletedContent": "Contenu indisponible",
+    "accessDenied": "Accès réservé à la modération.",
+    "decision": "Décision de modération",
+    "reportedBy": "Signalé par",
+    "author": "Auteur :",
+    "reports": "signalement(s)"
   }
 }

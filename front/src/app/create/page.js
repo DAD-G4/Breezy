@@ -62,7 +62,7 @@ export default function CreatePostPage() {
       // Retour feed apres publication
       router.push("/");
     } catch (err) {
-      setError(getApiErrorMessage(err, "Erreur lors de la publication."));
+      setError(getApiErrorMessage(err, t('createPost.error')));
     } finally {
       setIsLoading(false);
     }

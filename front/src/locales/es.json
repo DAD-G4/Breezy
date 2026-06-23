@@ -42,11 +42,16 @@
     "followButton": "Seguir"
   },
   "feed": {
-    "title": "Inicio"
+    "title": "Inicio",
+    "loginRequired": "Inicia sesión para ver tu feed.",
+    "loading": "Cargando feed…",
+    "empty": "No hay publicaciones aún. Sigue a usuarios para ver su actividad.",
+    "loadError": "No se pudo cargar el feed."
   },
   "createPost": {
     "title": "Nueva publicación",
     "placeholder": "¿Qué está pasando en Breezy?",
+    "error": "Error al publicar.",
     "tools": {
       "addImage": "Añadir imagen"
     },
@@ -69,6 +74,8 @@
     "title": "Registrarse",
     "displayNamePlaceholder": "nombre de pantalla:",
     "usernamePlaceholder": "Usuario (@):",
+    "emailPlaceholder": "correo electrónico:",
+    "passwordPlaceholder": "contraseña:",
     "errorMessage": "Error al registrarse. Por favor verifique su información.",
     "submitButton": "Registrarse",
     "loginButton": "Iniciar sesión",
@@ -76,13 +83,33 @@
   },
   "search": {
     "placeholder": "Nombre de usuario...",
-    "noResults": "No se encontraron usuarios para"
+    "noResults": "No se encontraron usuarios para",
+    "error": "Búsqueda fallida."
   },
   "conversation": {
     "placeholder": "Tu mensaje..."
   },
   "messagesInbox": {
     "searchPlaceholder": "Buscar un mensaje..."
+  },
+  "messages": {
+    "loadError": "No se pudieron cargar las conversaciones.",
+    "empty": "No hay conversaciones aún.",
+    "notFound": "Conversación no encontrada.",
+    "noMessages": "Sin mensajes. ¡Empieza la conversación!"
+  },
+  "post": {
+    "loadError": "No se pudo cargar la publicación.",
+    "justNow": "Ahora mismo",
+    "commentError": "No se pudo agregar el comentario.",
+    "replyError": "No se pudo agregar la respuesta.",
+    "send": "Enviar"
+  },
+  "profile": {
+    "loginRequired": "Inicia sesión para ver tu perfil.",
+    "logout": "Cerrar sesión",
+    "notFound": "Perfil no encontrado.",
+    "loadError": "No se pudo cargar el perfil."
   },
   "postDetails": {
     "commentPosted": "Nuevo comentario publicado:",
@@ -168,6 +195,11 @@
     "filterStatus": "Filtrar por estado:",
     "filterAll": "Todos",
     "noUsers": "Ningún usuario coincide con este filtro.",
-    "deletedContent": "Contenido no disponible"
+    "deletedContent": "Contenido no disponible",
+    "accessDenied": "Acceso reservado a moderación.",
+    "decision": "Decisión de moderación",
+    "reportedBy": "Denunciado por",
+    "author": "Autor:",
+    "reports": "denuncia(s)"
   }
 }

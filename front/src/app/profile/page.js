@@ -22,7 +22,7 @@ export default function MyProfilePage() {
     if (authLoading) return;
 
     if (!user) {
-      setError("Connectez-vous pour voir votre profil.");
+      setError(t('profile.loginRequired'));
       setLoading(false);
       return;
     }
@@ -55,7 +55,7 @@ export default function MyProfilePage() {
           });
         }
       } catch (err) {
-        if (active) setError(getApiErrorMessage(err, "Impossible de charger le profil."));
+        if (active) setError(getApiErrorMessage(err, t('profile.loadError')));
       } finally {
         if (active) setLoading(false);
       }
@@ -85,7 +85,7 @@ export default function MyProfilePage() {
               className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-full font-bold text-brick-red border border-brick-red/40 hover:bg-brick-red/10 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-              Se déconnecter
+              {t('profile.logout')}
             </button>
           </>
         )}
