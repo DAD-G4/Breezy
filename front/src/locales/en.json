@@ -1,0 +1,171 @@
+{
+  "common": {
+    "back": "Back",
+    "removeImage": "Remove image",
+    "me": "Me",
+    "loading": "Loading..."
+  },
+  "sidebar": {
+    "home": "Home",
+    "search": "Search",
+    "messages": "Messages",
+    "profile": "Profile",
+    "settings": "Settings",
+    "createPost": "Post",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "notifications": "Notifications",
+    "moderation": "Moderation"
+  },
+  "header": {
+    "createPostAria": "Create a post",
+    "notificationsAria": "Notifications",
+    "notificationsTitle": "Notifications",
+    "markAllRead": "Mark all as read",
+    "profileAria": "My profile",
+    "notif": {
+      "liked": "liked your post.",
+      "followed": "started following you.",
+      "mentioned": "mentioned you in a comment.",
+      "commented": "commented: \"Great photo!\"",
+      "time5m": "5 min ago",
+      "time1h": "1h",
+      "timeYesterday": "Yesterday",
+      "time2d": "2 days ago"
+    }
+  },
+  "rightSidebar": {
+    "posts": "posts",
+    "searchPlaceholder": "Search",
+    "trendsTitle": "Trends",
+    "suggestionsTitle": "Suggestions",
+    "followButton": "Follow"
+  },
+  "feed": {
+    "title": "Home"
+  },
+  "createPost": {
+    "title": "New post",
+    "placeholder": "What's happening on Breezy?",
+    "tools": {
+      "addImage": "Add an image"
+    },
+    "submit": {
+      "loading": "Posting...",
+      "default": "Post"
+    },
+    "imagePreviewAlt": "Preview"
+  },
+  "login": {
+    "title": "Login",
+    "emailPlaceholder": "email address:",
+    "passwordPlaceholder": "password:",
+    "errorMessage": "Incorrect credentials. Please try again.",
+    "submitButton": "Log In",
+    "registerButton": "Sign Up",
+    "noAccount": "Don't have an account yet?"
+  },
+  "register": {
+    "title": "Register",
+    "displayNamePlaceholder": "display name:",
+    "usernamePlaceholder": "Username (@):",
+    "errorMessage": "Error during registration. Please check your information.",
+    "submitButton": "Sign Up",
+    "loginButton": "Login",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "search": {
+    "placeholder": "Username...",
+    "noResults": "No users found for"
+  },
+  "conversation": {
+    "placeholder": "Your message..."
+  },
+  "messagesInbox": {
+    "searchPlaceholder": "Search for a message..."
+  },
+  "postDetails": {
+    "commentPosted": "New comment posted:",
+    "addCommentPlaceholder": "Add a comment..."
+  },
+  "publicProfile": {
+    "unknownUser": "Unknown User",
+    "defaultBio": "Hi! I am {{name}} and this is my public profile.",
+    "defaultPost": "A post on my public profile."
+  },
+  "myProfile": {
+    "bio": "Passionate Front-End Developer 🍃. I love creating smooth interfaces!",
+    "post1": "I just finished the integration!",
+    "post2": "First post on Breezy."
+  },
+  "profileView": {
+    "editNameAria": "Edit name",
+    "editBioAria": "Edit bio",
+    "following": "Following",
+    "follow": "Follow",
+    "followersLabel": "Followers",
+    "followingLabel": "Following",
+    "saveButton": "Save",
+    "yourPosts": "Your posts:",
+    "userPosts": "{{name}}'s posts:"
+  },
+  "postCard": {
+    "report": "Report post",
+    "reportAlert": "{{username}}'s post has been reported.",
+    "block": "Block {{username}}",
+    "blockAlert": "You have blocked {{username}}.",
+    "imageAlt": "Post content"
+  },
+  "commentSection": {
+    "reply": "Reply",
+    "replySent": "Your reply has been sent!",
+    "replyTo": "Reply to {{user}}...",
+    "comments": "Comments"
+  },
+  "settingsPage": {
+    "searchPlaceholder": "Search for a setting...",
+    "noResults": "No settings found for",
+    "darkMode": {
+      "title": "Dark Mode",
+      "desc": "Activate the application's dark theme."
+    },
+    "notifications": {
+      "title": "Push Notifications",
+      "desc": "Receive alerts for new messages and likes."
+    },
+    "privateProfile": {
+      "title": "Private Profile",
+      "desc": "Only your followers can see your posts."
+    },
+    "language": {
+      "title": "Language",
+      "desc": "Choose the application language."
+    },
+    "dataSaver": {
+      "title": "Data Saver",
+      "desc": "Reduce image quality to save mobile data."
+    },
+    "location": {
+      "title": "Location Service",
+      "desc": "Allow adding a location to your publications."
+    }
+  },
+  "moderation": {
+    "title": "Moderation Center",
+    "subtitle": "Manage Breezy security, reports, and users.",
+    "tabReports": "Reports",
+    "tabUsers": "Users",
+    "noReports": "No pending reports. Good job!",
+    "ignore": "Ignore",
+    "deletePost": "Delete post",
+    "statusActive": "Active",
+    "statusSuspended": "Suspended",
+    "statusBanned": "Banned",
+    "actionActive": "Activate account",
+    "actionSuspend": "Suspend account",
+    "actionBan": "Ban permanently",
+    "filterStatus": "Filter by status:",
+    "filterAll": "All",
+    "noUsers": "No users match this filter."
+  }
+}
