@@ -6,7 +6,7 @@ import AppShell from "../../components/layout/AppShell";
 import { getApiErrorMessage } from "../../lib/api";
 import { relativeTime } from "../../lib/mappers";
 import { getConversations } from "../../services/dm";
-import { resolveUser } from "../../services/users";
+import { resolveUsers } from "../../services/users";
 import { useRequireAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
@@ -24,18 +24,18 @@ export default function MessagesInboxPage() {
       setError("");
       try {
         const { conversations: raw } = await getConversations();
-        const list = await Promise.all(
-          (raw || []).map(async (c) => {
-            const other = await resolveUser(c.other_user_id);
-            return {
-              username: other.username,
-              displayName: other.displayName,
-              lastMessage: c.last_message?.message_text || "",
-              time: relativeTime(c.last_message?.created_at, language),
-              unread: (c.unread_count ?? 0) > 0,
-            };
-          })
-        );
+        const otherIds = (raw || []).map((c) => c.other_user_id);
+        const others = await resolveUsers(otherIds);
+        const list = (raw || []).map((c, i) => {
+          const other = others[i];
+          return {
+            username: other?.username,
+            displayName: other?.displayName,
+            lastMessage: c.last_message?.message_text || "",
+            time: relativeTime(c.last_message?.created_at, language),
+            unread: (c.unread_count ?? 0) > 0,
+          };
+        });
         if (active) setConversations(list);
       } catch (err) {
         if (active) setError(getApiErrorMessage(err, t('messages.loadError')));

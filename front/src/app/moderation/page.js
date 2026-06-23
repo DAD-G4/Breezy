@@ -6,7 +6,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { getApiErrorMessage } from "@/lib/api";
 import { listReports, resolveReport, banUser, unbanUser, listBans } from "@/services/moderation";
 import { getPost, deletePost } from "@/services/posts";
-import { resolveUser } from "@/services/users";
+import { resolveUsers } from "@/services/users";
 import { useRequireAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -33,25 +33,54 @@ export default function ModerationPage() {
     (async () => {
       try {
         const { reports: raw } = await listReports();
-        const mapped = await Promise.all(
-          (raw || []).map(async (r) => {
-            const reporter = await resolveUser(r.reported_by);
-            let postAuthor = "—";
-            let content = "";
-            if (r.target_type === "post") {
-              try {
-                const post = await getPost(r.target_id);
-                content = post.content;
-                postAuthor = (await resolveUser(post.user_id)).username;
-              } catch {
-                content = t("moderation.deletedContent") || "(contenu indisponible)";
-              }
-            } else if (r.target_type === "user") {
-              postAuthor = (await resolveUser(r.target_id)).username;
+        const reportsList = raw || [];
+
+        const reporterIds = reportsList.map((r) => r.reported_by);
+        const reporters = await resolveUsers(reporterIds);
+        const reporterMap = {};
+        reporterIds.forEach((id, i) => { reporterMap[id] = reporters[i]; });
+
+        const posts = {};
+        for (const r of reportsList) {
+          if (r.target_type === "post" && !posts[r.target_id]) {
+            try {
+              posts[r.target_id] = await getPost(r.target_id);
+            } catch {
+              posts[r.target_id] = null;
             }
-            return { id: r._id, targetId: r.target_id, targetType: r.target_type, reason: r.reason, reporter: reporter.username, postAuthor, content, status: r.status };
-          })
-        );
+          }
+        }
+
+        const authorIds = [];
+        reportsList.forEach((r) => {
+          if (r.target_type === "post" && posts[r.target_id]) {
+            authorIds.push(posts[r.target_id].user_id);
+          } else if (r.target_type === "user") {
+            authorIds.push(r.target_id);
+          }
+        });
+        const uniqueAuthorIds = [...new Set(authorIds.map(String))];
+        const authors = await resolveUsers(uniqueAuthorIds);
+        const authorMap = {};
+        uniqueAuthorIds.forEach((id, i) => { authorMap[id] = authors[i]; });
+
+        const mapped = reportsList.map((r) => {
+          const reporter = reporterMap[r.reported_by];
+          let postAuthor = "—";
+          let content = "";
+          if (r.target_type === "post") {
+            const post = posts[r.target_id];
+            if (post) {
+              content = post.content;
+              postAuthor = authorMap[String(post.user_id)]?.username || "—";
+            } else {
+              content = t("moderation.deletedContent") || "(contenu indisponible)";
+            }
+          } else if (r.target_type === "user") {
+            postAuthor = authorMap[String(r.target_id)]?.username || "—";
+          }
+          return { id: r._id, targetId: r.target_id, targetType: r.target_type, reason: r.reason, reporter: reporter?.username || "—", postAuthor, content, status: r.status };
+        });
         if (active) setReports(mapped);
       } catch (err) {
         if (active) setError(getApiErrorMessage(err, t('moderation.accessDenied')));
@@ -66,14 +95,15 @@ export default function ModerationPage() {
     (async () => {
       try {
         const { bans } = await listBans();
-        const mapped = await Promise.all(
-          (bans || []).map(async (b) => ({
-            id: b.user_id,
-            username: (await resolveUser(b.user_id)).username,
-            status: "banned",
-            reportsCount: 0,
-          }))
-        );
+        const banList = bans || [];
+        const banUserIds = banList.map((b) => b.user_id);
+        const banUsers = await resolveUsers(banUserIds);
+        const mapped = banList.map((b, i) => ({
+          id: b.user_id,
+          username: banUsers[i]?.username || `user${b.user_id}`,
+          status: "banned",
+          reportsCount: 0,
+        }));
         if (active) setUsers(mapped);
       } catch {
         /* géré par le chargement des signalements */
@@ -83,24 +113,47 @@ export default function ModerationPage() {
   }, []);
 
   const handleResolve = async (id) => {
+    const report = reports.find((r) => r.id === id);
     setReports((rs) => rs.filter((r) => r.id !== id));
-    try { await resolveReport(id); } catch { /* silencieux */ }
+    try {
+      await resolveReport(id);
+    } catch (err) {
+      console.error('[Moderation] Failed to resolve report:', err);
+      if (report) setReports(prev => [...prev, report]);
+    }
   };
   const handleIgnoreReport = handleResolve;
 
   const handleDeletePost = async (report) => {
     setReports((rs) => rs.filter((r) => r.id !== report.id));
-    try { await deletePost(report.targetId); } catch { /* silencieux */ }
+    try {
+      await deletePost(report.targetId);
+    } catch (err) {
+      console.error('[Moderation] Failed to delete post:', err);
+      setReports(prev => [...prev, report]);
+    }
   };
 
   // Ban / unban (POST /ban, DELETE /ban/:userId).
   const handleUpdateUserStatus = async (id, newStatus) => {
     if (newStatus === "active") {
+      const ban = users.find((u) => u.id === id);
       setUsers((us) => us.filter((u) => u.id !== id));
-      try { await unbanUser(id); } catch { /* silencieux */ }
+      try {
+        await unbanUser(id);
+      } catch (err) {
+        console.error('[Moderation] Failed to unban user:', err);
+        if (ban) setUsers(prev => [...prev, ban]);
+      }
     } else {
+      const previousUser = users.find((u) => u.id === id);
       setUsers((us) => us.map((u) => (u.id === id ? { ...u, status: "banned" } : u)));
-      try { await banUser(id, t('moderation.decision')); } catch { /* silencieux */ }
+      try {
+        await banUser(id, t('moderation.decision'));
+      } catch (err) {
+        console.error('[Moderation] Failed to ban user:', err);
+        setUsers(prev => prev.map((u) => (u.id === id && previousUser ? { ...u, status: previousUser.status } : u)));
+      }
     }
   };
 

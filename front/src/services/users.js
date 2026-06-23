@@ -1,9 +1,8 @@
 // Service des utilisateurs — endpoints /api/users/*
 import api from "../lib/api";
+import { LRUCache } from "../lib/lruCache";
 
-// Cache mémoire (id -> infos) : le backend n'a pas de lookup d'utilisateurs en
-// lot, on résout au cas par cas et on garde le résultat.
-const userCache = new Map();
+const userCache = new LRUCache(200, 300_000);
 
 // GET /api/users/profile/:id → { ...user, profile, followers_count, ... }
 export async function getProfile(userId) {
@@ -59,4 +58,44 @@ export async function resolveUser(userId) {
     userCache.set(userId, fallback);
     return fallback;
   }
+}
+
+const BATCH_SIZE = 100;
+
+function mapUser(u) {
+  return {
+    username: u.username,
+    displayName: u.profile?.display_name || u.username,
+    avatarUrl: u.profile?.avatar_url || null,
+  };
+}
+
+export async function resolveUsers(ids) {
+  const strIds = ids.map(String);
+  const uncachedIds = strIds.filter((id) => !userCache.has(id));
+
+  if (uncachedIds.length === 0) {
+    return strIds.map((id) => userCache.get(id));
+  }
+
+  for (let i = 0; i < uncachedIds.length; i += BATCH_SIZE) {
+    const chunk = uncachedIds.slice(i, i + BATCH_SIZE);
+    try {
+      const response = await api.post("/users/batch", { ids: chunk });
+      const users = response.data.data.users;
+      users.forEach((u) => userCache.set(String(u.id), mapUser(u)));
+    } catch {
+      const fallbacks = await Promise.allSettled(chunk.map((id) => getProfile(id)));
+      fallbacks.forEach((result, idx) => {
+        const id = chunk[idx];
+        if (result.status === "fulfilled") {
+          userCache.set(String(id), mapUser(result.value));
+        } else {
+          userCache.set(String(id), { username: `user${id}`, displayName: `Utilisateur ${id}`, avatarUrl: null });
+        }
+      });
+    }
+  }
+
+  return strIds.map((id) => userCache.get(id));
 }

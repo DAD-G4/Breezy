@@ -7,7 +7,7 @@ import PostCard from "../../../components/feed/PostCard";
 import { getApiErrorMessage } from "../../../lib/api";
 import { mapPost, relativeTime } from "../../../lib/mappers";
 import { getPost, addComment, addReply } from "../../../services/posts";
-import { resolveUser } from "../../../services/users";
+import { resolveUsers } from "../../../services/users";
 import { useAuth, useRequireAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
 
@@ -43,21 +43,28 @@ export default function PostDetailsPage({ params }) {
       setLoadError("");
       try {
         const post = await getPost(postId);
-        const author = await resolveUser(post.user_id);
-        const mapped = mapPost(post, { authorLabel: author.displayName, currentUserId: user?.id, locale: language });
 
-        const mappedComments = await Promise.all(
-          (post.comments || []).map(async (c) => {
-            const ca = await resolveUser(c.user_id);
-            const replies = await Promise.all(
-              (c.replies || []).map(async (r) => {
-                const ra = await resolveUser(r.user_id);
-                return { id: r.reply_id, username: ra.displayName, time: relativeTime(r.created_at, language), content: r.content };
-              })
-            );
-            return { id: c.comment_id, username: ca.displayName, time: relativeTime(c.created_at, language), content: c.content, replies };
-          })
-        );
+        const allUserIds = [post.user_id];
+        (post.comments || []).forEach((c) => {
+          allUserIds.push(c.user_id);
+          (c.replies || []).forEach((r) => allUserIds.push(r.user_id));
+        });
+        const allAuthors = await resolveUsers(allUserIds);
+
+        const authorMap = {};
+        allUserIds.forEach((id, i) => { authorMap[id] = allAuthors[i]; });
+
+        const author = authorMap[post.user_id];
+        const mapped = mapPost(post, { authorLabel: author?.displayName, currentUserId: user?.id, locale: language });
+
+        const mappedComments = (post.comments || []).map((c) => {
+          const ca = authorMap[c.user_id];
+          const replies = (c.replies || []).map((r) => {
+            const ra = authorMap[r.user_id];
+            return { id: r.reply_id, username: ra?.displayName, time: relativeTime(r.created_at, language), content: r.content };
+          });
+          return { id: c.comment_id, username: ca?.displayName, time: relativeTime(c.created_at, language), content: c.content, replies };
+        });
 
         if (active) {
           setMainPost(mapped);

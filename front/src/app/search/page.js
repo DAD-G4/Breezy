@@ -6,7 +6,7 @@ import PostCard from "../../components/feed/PostCard";
 import { getApiErrorMessage } from "../../lib/api";
 import { mapPost } from "../../lib/mappers";
 import { searchByTag } from "../../services/tags";
-import { resolveUser } from "../../services/users";
+import { resolveUsers } from "../../services/users";
 import { useAuth, useRequireAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
@@ -32,11 +32,10 @@ export default function SearchPage() {
     setSearched(true);
     try {
       const { posts: raw } = await searchByTag(q);
-      const mapped = await Promise.all(
-        (raw || []).map(async (p) => {
-          const author = await resolveUser(p.user_id);
-          return mapPost(p, { authorLabel: author.displayName, currentUserId: user?.id, locale: language });
-        })
+      const userIds = (raw || []).map((p) => p.user_id);
+      const authors = await resolveUsers(userIds);
+      const mapped = (raw || []).map((p, i) =>
+        mapPost(p, { authorLabel: authors[i]?.displayName, currentUserId: user?.id, locale: language })
       );
       setPosts(mapped);
     } catch (err) {

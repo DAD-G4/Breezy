@@ -6,7 +6,7 @@ import AppShell from "../components/layout/AppShell";
 import { getApiErrorMessage } from "../lib/api";
 import { mapPost } from "../lib/mappers";
 import { getFeed } from "../services/posts";
-import { resolveUser } from "../services/users";
+import { resolveUsers } from "../services/users";
 import { useAuth, useRequireAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -35,12 +35,10 @@ export default function FeedPage() {
       try {
         // Feed des utilisateurs suivis (paginé).
         const { posts: raw } = await getFeed();
-        // Le backend renvoie user_id (pas le nom) → on résout chaque auteur.
-        const mapped = await Promise.all(
-          raw.map(async (p) => {
-            const author = await resolveUser(p.user_id);
-            return mapPost(p, { authorLabel: author.displayName, currentUserId: user.id, locale: language });
-          })
+        const userIds = raw.map((p) => p.user_id);
+        const authors = await resolveUsers(userIds);
+        const mapped = raw.map((p, i) =>
+          mapPost(p, { authorLabel: authors[i]?.displayName, currentUserId: user.id, locale: language })
         );
         if (active) setPosts(mapped);
       } catch (err) {
