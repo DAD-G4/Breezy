@@ -111,6 +111,7 @@
   },
   "postCard": {
     "report": "Denunciar publicación",
+    "reported": "Publicación denunciada ✓",
     "reportAlert": "La publicación de {{username}} ha sido denunciada.",
     "block": "Bloquear a {{username}}",
     "blockAlert": "Has bloqueado a {{username}}.",
@@ -166,6 +167,7 @@
     "actionBan": "Banear permanentemente",
     "filterStatus": "Filtrar por estado:",
     "filterAll": "Todos",
-    "noUsers": "Ningún usuario coincide con este filtro."
+    "noUsers": "Ningún usuario coincide con este filtro.",
+    "deletedContent": "Contenido no disponible"
   }
 }

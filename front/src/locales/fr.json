@@ -111,6 +111,7 @@
   },
   "postCard": {
     "report": "Signaler le post",
+    "reported": "Post signalé ✓",
     "reportAlert": "Le post de {{username}} a été signalé.",
     "block": "Bloquer {{username}}",
     "blockAlert": "Vous avez bloqué {{username}}.",
@@ -166,6 +167,7 @@
     "actionBan": "Bannir définitivement",
     "filterStatus": "Filtrer par statut :",
     "filterAll": "Tous",
-    "noUsers": "Aucun utilisateur ne correspond à ce filtre."
+    "noUsers": "Aucun utilisateur ne correspond à ce filtre.",
+    "deletedContent": "Contenu indisponible"
   }
 }

@@ -111,6 +111,7 @@
   },
   "postCard": {
     "report": "Report post",
+    "reported": "Post reported ✓",
     "reportAlert": "{{username}}'s post has been reported.",
     "block": "Block {{username}}",
     "blockAlert": "You have blocked {{username}}.",
@@ -166,6 +167,7 @@
     "actionBan": "Ban permanently",
     "filterStatus": "Filter by status:",
     "filterAll": "All",
-    "noUsers": "No users match this filter."
+    "noUsers": "No users match this filter.",
+    "deletedContent": "Content unavailable"
   }
 }
