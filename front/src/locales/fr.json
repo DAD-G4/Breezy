@@ -61,7 +61,7 @@
     "emailPlaceholder": "adresse mail :",
     "passwordPlaceholder": "mot de passe :",
     "errorMessage": "Identifiants incorrects. Veuillez réessayer.",
-    "submitButton": "Se Connecter",
+    "submitButton": "Se connecter",
     "registerButton": "S'inscrire",
     "noAccount": "Pas encore de compte ?"
   },

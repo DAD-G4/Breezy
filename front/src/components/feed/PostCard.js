@@ -147,6 +147,12 @@ export default function PostCard({ post, disableProfileLink = false }) {
         </div>
       )}
 
+      {post.videoUrl && (
+        <div className="mb-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+          <video src={post.videoUrl} controls className="w-full h-auto max-h-[480px] bg-black" />
+        </div>
+      )}
+
       <div className="flex gap-6 mt-2 text-gray-500 dark:text-gray-400">
         
         {/* Bouton Commentaire */}

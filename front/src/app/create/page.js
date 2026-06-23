@@ -16,23 +16,26 @@ export default function CreatePostPage() {
   const [content, setContent] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const [mediaType, setMediaType] = useState(null); // "image" | "video"
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   // simuler le clic sur l'input file caché
   const fileInputRef = useRef(null);
 
-  // gérer l'ajout d'une image (aperçu local + fichier conservé pour l'upload)
+  // gérer l'ajout d'un média image OU vidéo (aperçu local + fichier conservé)
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImageFile(file);
+      setMediaType(file.type.startsWith("video") ? "video" : "image");
       setImagePreview(URL.createObjectURL(file));
     }
   };
 
   const removeImage = () => {
     setImageFile(null);
+    setMediaType(null);
     setImagePreview(null);
   };
 
@@ -108,16 +111,20 @@ export default function CreatePostPage() {
             required={!imagePreview} // uniquement s'il y a pas d'image
           />
 
-          {/* Aperçu de l'image */}
+          {/* Aperçu du média (image ou vidéo) */}
           {imagePreview && (
             <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 mt-2">
-              <img src={imagePreview} alt="Aperçu" className="w-full h-auto object-cover" />
-              {/* retirer l'image */}
+              {mediaType === "video" ? (
+                <video src={imagePreview} controls className="w-full h-auto max-h-[420px] bg-black" />
+              ) : (
+                <img src={imagePreview} alt="Aperçu" className="w-full h-auto object-cover" />
+              )}
+              {/* retirer le média */}
               <button
                 type="button"
                 onClick={removeImage}
                 className="absolute top-2 right-2 bg-black/70 text-white p-2 rounded-full hover:bg-brick-red transition-colors"
-                aria-label="Supprimer l'image"
+                aria-label="Supprimer le média"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -142,7 +149,7 @@ export default function CreatePostPage() {
                 type="button" 
                 onClick={() => fileInputRef.current?.click()}
                 className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors group"
-                title="Ajouter une image"
+                title="Ajouter une image ou une vidéo"
               >
                 <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -150,12 +157,12 @@ export default function CreatePostPage() {
               </button>
               
               {/* Input de fichier caché */}
-              <input 
-                type="file" 
-                accept="image/*" 
-                ref={fileInputRef} 
-                onChange={handleImageChange} 
-                className="hidden" 
+              <input
+                type="file"
+                accept="image/*,video/*"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                className="hidden"
               />
             </div>
 

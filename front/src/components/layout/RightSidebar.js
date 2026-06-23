@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link"; 
-import BreezyBadge from "@/components/ui/BreezyBadge";
+import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function RightSidebar() {
@@ -81,8 +80,8 @@ export default function RightSidebar() {
           </ul>
         </section>
 
-        <p className="px-4 text-xs text-gray-400 flex items-center gap-1.5">
-          © 2026 Breezy <BreezyBadge className="w-5 h-5" />
+        <p className="px-4 text-xs text-gray-400">
+          © 2026 Breezy
         </p>
       </div>
     </aside>

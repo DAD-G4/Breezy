@@ -23,6 +23,7 @@ export function mapPost(post, { authorLabel, currentUserId } = {}) {
     time: relativeTime(post.created_at),
     content: post.content,
     imageUrl: post.media?.type === "image" ? post.media.url : undefined,
+    videoUrl: post.media?.type === "video" ? post.media.url : undefined,
     likesCount: post.likes?.length || 0,
     commentsCount: post.comments?.length || 0,
     isLiked: currentUserId != null && (post.likes?.includes(currentUserId) ?? false),

@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "@/context/ThemeContext";
 import BreezyBadge from "@/components/ui/BreezyBadge";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useAuth } from "@/context/AuthContext";
 
 
 function NavItem({ href, label, icon, active, onClick, hasNotif }) {
@@ -43,6 +44,9 @@ export default function LeftSidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const { t } = useLanguage();
+  const { user } = useAuth();
+  // Le lien Modération n'est visible que pour modérateurs / admins.
+  const isStaff = user?.role === "moderator" || user?.role === "admin";
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
@@ -122,8 +126,10 @@ export default function LeftSidebar() {
         <NavItem href="/messages" label={t('sidebar.messages')} icon={iconMessages} active={pathname?.startsWith("/messages")} />
         <NavItem href="/profile" label={t('sidebar.profile')} icon={iconProfile} active={pathname?.startsWith("/profile")} />
         
-        {/* BOUTON MODÉRATION */}
-        <NavItem href="/moderation" label={t('sidebar.moderation')} icon={iconModeration} active={pathname?.startsWith("/moderation")} />
+        {/* BOUTON MODÉRATION — modérateurs / admins uniquement */}
+        {isStaff && (
+          <NavItem href="/moderation" label={t('sidebar.moderation')} icon={iconModeration} active={pathname?.startsWith("/moderation")} />
+        )}
         
         <NavItem href="/settings" label={t('sidebar.settings')} icon={iconSettings} active={pathname?.startsWith("/settings")} />
       </nav>

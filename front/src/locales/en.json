@@ -61,7 +61,7 @@
     "emailPlaceholder": "email address:",
     "passwordPlaceholder": "password:",
     "errorMessage": "Incorrect credentials. Please try again.",
-    "submitButton": "Log In",
+    "submitButton": "Log in",
     "registerButton": "Sign Up",
     "noAccount": "Don't have an account yet?"
   },
@@ -70,7 +70,7 @@
     "displayNamePlaceholder": "display name:",
     "usernamePlaceholder": "Username (@):",
     "errorMessage": "Error during registration. Please check your information.",
-    "submitButton": "Sign Up",
+    "submitButton": "Sign up",
     "loginButton": "Login",
     "alreadyHaveAccount": "Already have an account?"
   },
