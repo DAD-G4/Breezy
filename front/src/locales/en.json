@@ -14,7 +14,8 @@
     "createPost": "Post",
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "moderation": "Moderation"
   },
   "header": {
     "createPostAria": "Create a post",
@@ -148,5 +149,20 @@
       "title": "Location Service",
       "desc": "Allow adding a location to your publications."
     }
+  },
+  "moderation": {
+    "title": "Moderation Center",
+    "subtitle": "Manage Breezy security, reports, and users.",
+    "tabReports": "Reports",
+    "tabUsers": "Users",
+    "noReports": "No pending reports. Good job!",
+    "ignore": "Ignore",
+    "deletePost": "Delete post",
+    "statusActive": "Active",
+    "statusSuspended": "Suspended",
+    "statusBanned": "Banned",
+    "actionActive": "Activate account",
+    "actionSuspend": "Suspend account",
+    "actionBan": "Ban permanently"
   }
 }

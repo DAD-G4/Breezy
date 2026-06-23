@@ -14,7 +14,8 @@
     "createPost": "Créer un post",
     "lightMode": "Mode clair",
     "darkMode": "Mode sombre",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "moderation": "Modération"
   },
   "header": {
     "createPostAria": "Créer un post",
@@ -148,5 +149,20 @@
       "title": "Service de localisation",
       "desc": "Permettre d'ajouter un lieu à vos publications."
     }
+  },
+  "moderation": {
+    "title": "Espace Modération",
+    "subtitle": "Gestion de la sécurité de Breezy, des signalements et des utilisateurs.",
+    "tabReports": "Signalements",
+    "tabUsers": "Utilisateurs",
+    "noReports": "Aucun signalement en attente. Bon travail !",
+    "ignore": "Ignorer",
+    "deletePost": "Supprimer le post",
+    "statusActive": "Actif",
+    "statusSuspended": "Suspendu",
+    "statusBanned": "Banni",
+    "actionActive": "Activer le compte",
+    "actionSuspend": "Suspendre le compte",
+    "actionBan": "Bannir définitivement"
   }
 }
