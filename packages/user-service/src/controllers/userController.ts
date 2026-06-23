@@ -96,6 +96,58 @@ export async function updateProfile(req: AuthRequest, res: Response): Promise<vo
 }
 
 /**
+ * POST /api/users/batch
+ * Returns profiles for multiple users in one request. Accepts { ids: number[] } body.
+ * Max 100 IDs per request. Uses WHERE IN query for efficiency.
+ */
+export async function getBatchProfiles(req: AuthRequest, res: Response): Promise<void> {
+  const { ids } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    error(res, 'ids array is required', 400);
+    return;
+  }
+
+  if (ids.length > 100) {
+    error(res, 'Too many IDs (max 100)', 400);
+    return;
+  }
+
+  const users = await UserModel.findAll({
+    where: { id: ids },
+    include: [{ model: ProfileModel, as: 'profile' }],
+    attributes: { exclude: ['password_hash'] },
+  });
+
+  const usersWithCounts = await Promise.all(
+    users.map(async (user) => {
+      const profile = user.get('profile') as { display_name?: string; bio?: string; avatar_url?: string } | null;
+      const userId = user.get('id') as number;
+
+      const [followerCount, followingCount, postCount] = await Promise.all([
+        Follower.count({ where: { following_id: userId } }),
+        Follower.count({ where: { follower_id: userId } }),
+        PostModel.countDocuments({ user_id: userId }),
+      ]);
+
+      return {
+        id: userId,
+        username: user.get('username'),
+        email: user.get('email'),
+        display_name: profile?.display_name || user.get('username'),
+        bio: profile?.bio || '',
+        avatar_url: profile?.avatar_url || '',
+        follower_count: followerCount,
+        following_count: followingCount,
+        post_count: postCount,
+      };
+    })
+  );
+
+  success(res, { users: usersWithCounts });
+}
+
+/**
  * PUT /api/users/settings/:id
  * Updates language_preference and theme_preference, 403 if not owner.
  * Ownership is checked: req.user.id must match route param :id.

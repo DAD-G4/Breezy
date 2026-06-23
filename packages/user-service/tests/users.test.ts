@@ -4,6 +4,7 @@ import request from 'supertest';
 const mockUserModel = {
   findByPk: jest.fn(),
   findOne: jest.fn(),
+  findAll: jest.fn(),
 };
 
 const mockProfileModel = {
@@ -365,6 +366,101 @@ describe('User Routes', () => {
       expect(res.body.data.followers_count).toBe(42);
       expect(res.body.data.following_count).toBe(17);
       expect(res.body.data.post_count).toBe(88);
+    });
+  });
+
+  describe('POST /api/users/batch', () => {
+    it('should return profiles for valid IDs', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const mockUsers = [
+        {
+          get(field: string) { return field === 'id' ? 1 : field === 'username' ? 'alice' : field === 'email' ? 'alice@test.com' : undefined; },
+          profile: { display_name: 'Alice', bio: 'Hello', avatar_url: 'https://example.com/alice.jpg' },
+        },
+        {
+          get(field: string) { return field === 'id' ? 2 : field === 'username' ? 'bob' : field === 'email' ? 'bob@test.com' : undefined; },
+          profile: { display_name: 'Bob', bio: 'World', avatar_url: 'https://example.com/bob.jpg' },
+        },
+      ];
+
+      mockUserModel.findAll.mockResolvedValue(mockUsers);
+      mockFollowerModel.count.mockResolvedValue(5);
+      mockPostModel.countDocuments.mockResolvedValue(3);
+
+      const res = await request(app)
+        .post('/api/users/batch')
+        .send({ ids: [1, 2] });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.users).toHaveLength(2);
+      expect(res.body.data.users[0].id).toBe(1);
+      expect(res.body.data.users[0].username).toBe('alice');
+      expect(res.body.data.users[1].id).toBe(2);
+      expect(res.body.data.users[1].username).toBe('bob');
+      expect(mockUserModel.findAll).toHaveBeenCalledWith({
+        where: { id: [1, 2] },
+        include: [{ model: expect.anything(), as: 'profile' }],
+        attributes: { exclude: ['password_hash'] },
+      });
+    });
+
+    it('should return empty array when no users match', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      mockUserModel.findAll.mockResolvedValue([]);
+
+      const res = await request(app)
+        .post('/api/users/batch')
+        .send({ ids: [999, 1000] });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.users).toEqual([]);
+    });
+
+    it('should return 400 when ids is missing', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const res = await request(app)
+        .post('/api/users/batch')
+        .send({});
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('ids array is required');
+    });
+
+    it('should return 400 when ids is empty', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const res = await request(app)
+        .post('/api/users/batch')
+        .send({ ids: [] });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('ids array is required');
+    });
+
+    it('should return 400 when ids exceeds 100', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+
+      const tooManyIds = Array.from({ length: 101 }, (_, i) => i + 1);
+
+      const res = await request(app)
+        .post('/api/users/batch')
+        .send({ ids: tooManyIds });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Too many IDs (max 100)');
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      mockAuthenticatedUser = null;
+
+      const res = await request(app)
+        .post('/api/users/batch')
+        .send({ ids: [1, 2] });
+
+      expect(res.status).toBe(401);
     });
   });
 });
