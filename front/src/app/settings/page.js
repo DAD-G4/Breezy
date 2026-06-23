@@ -2,11 +2,18 @@
 
 import { useState, useEffect } from "react";
 import AppShell from "@/components/layout/AppShell";
-import { useRequireAuth } from "@/context/AuthContext";
+import { updateSettings } from "@/services/users";
+import { useAuth, useRequireAuth } from "@/context/AuthContext";
 
 export default function SettingsPage() {
   useRequireAuth();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Persiste un réglage côté backend (best-effort, si connecté).
+  const persist = (fields) => {
+    if (user?.id) updateSettings(user.id, fields).catch(() => {});
+  };
 
 // État pour savoir quel menu déroulant est ouvert (null si aucun)
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -42,6 +49,8 @@ export default function SettingsPage() {
           document.documentElement.classList.remove("dark");
           localStorage.setItem("theme", "light");
         }
+        // Fx23 — persistance du thème côté backend.
+        persist({ theme_preference: newValue ? "dark" : "light" });
       }
       return {
         ...prev,
@@ -52,6 +61,8 @@ export default function SettingsPage() {
 
   const handleSelectOption = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+    // Fx22 — persistance de la langue côté backend.
+    if (key === "language") persist({ language_preference: value });
   }
 
   // LISTE DES PARAMÈTRES MOCK DATA
