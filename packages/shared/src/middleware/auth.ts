@@ -1,5 +1,6 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { ModelStatic } from 'sequelize';
 import { AuthRequest, UserRole } from '../types';
 
 /**
@@ -113,7 +114,7 @@ export function checkBan(banChecker: BanChecker) {
  * Role-based access control middleware.
  * MUST be used AFTER authenticateToken.
  */
-const ROLE_HIERARCHY: Record<string, number> = {
+export const ROLE_HIERARCHY: Record<string, number> = {
   [UserRole.USER]: 0,
   [UserRole.MODERATOR]: 1,
   [UserRole.ADMIN]: 2,
@@ -138,7 +139,7 @@ export function requireRole(minimumRole: UserRole) {
   };
 }
 
-export function createBanChecker(BanModel: any) {
+export function createBanChecker(BanModel: ModelStatic<any>) {
   return async (userId: number) => {
     const ban = await BanModel.findOne({ where: { user_id: userId } });
     if (!ban) return null;

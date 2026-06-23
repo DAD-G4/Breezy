@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { ReportModel as Report, AuthRequest, Ban, UserModel, UserRole, success, error } from '@breezy/shared';
+import { ReportModel as Report, AuthRequest, Ban, UserModel, UserRole, ROLE_HIERARCHY, success, error } from '@breezy/shared';
 
 export async function createReport(
   req: AuthRequest,
@@ -64,17 +64,6 @@ export async function resolveReport(
 
   success(res, report, 'Report resolved successfully.');
 }
-
-/**
- * Role hierarchy: user < moderator < admin.
- * A moderator can only ban users, not other moderators or admins.
- * An admin can ban anyone.
- */
-const ROLE_HIERARCHY: Record<string, number> = {
-  [UserRole.USER]: 0,
-  [UserRole.MODERATOR]: 1,
-  [UserRole.ADMIN]: 2,
-};
 
 export async function createBan(
   req: AuthRequest,
