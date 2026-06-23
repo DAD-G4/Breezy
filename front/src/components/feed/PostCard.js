@@ -2,11 +2,25 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toggleLike } from "../../services/posts";
+import { report } from "../../services/moderation";
 
 export default function PostCard({ post, disableProfileLink = false }) {
   // Etats pour gérer le like (initialisés depuis les données du post)
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
+  const [reported, setReported] = useState(false);
+
+  // Fx20 — Signaler : POST /api/moderation/report { target_type, target_id, reason }
+  const handleReport = async () => {
+    setIsMenuOpen(false);
+    if (reported) return;
+    try {
+      await report({ targetType: "post", targetId: post.id, reason: "Contenu inapproprié" });
+      setReported(true);
+    } catch {
+      // silencieux : on n'interrompt pas l'utilisateur
+    }
+  };
 
   // Fx6 — Liker : POST /api/posts/:id/like (toggle côté backend).
   // UI optimiste : on bascule tout de suite, puis on recale avec la réponse
@@ -89,18 +103,15 @@ export default function PostCard({ post, disableProfileLink = false }) {
               {/* boîte */}
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-xl shadow-lg dark:shadow-[0_5px_20px_rgba(0,0,0,0.5)] z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
                 
-                {/* Signaler */}
-                <button 
-                  onClick={() => {
-                    alert(`Le post de ${post.username} a été signalé.`);
-                    setIsMenuOpen(false);
-                  }}
+                {/* Signaler (Fx20) */}
+                <button
+                  onClick={handleReport}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-papaya-whip hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                 >
                   <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                   </svg>
-                  Signaler le post
+                  {reported ? "Post signalé ✓" : "Signaler le post"}
                 </button>
 
                 {/* Séparateur */}
