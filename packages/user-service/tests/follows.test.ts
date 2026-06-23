@@ -64,7 +64,6 @@ describe('Follow Routes', () => {
     it('should follow a user successfully', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      mockFollowerModel.findOne.mockResolvedValue(null);
       mockFollowerModel.create.mockResolvedValue({
         id: 1,
         follower_id: 1,
@@ -79,9 +78,6 @@ describe('Follow Routes', () => {
       expect(res.body.message).toBe('Successfully followed user');
       expect(res.body.data.follower_id).toBe(1);
       expect(res.body.data.following_id).toBe(2);
-      expect(mockFollowerModel.findOne).toHaveBeenCalledWith({
-        where: { follower_id: 1, following_id: 2 },
-      });
       expect(mockFollowerModel.create).toHaveBeenCalledWith({
         follower_id: 1,
         following_id: 2,
@@ -109,18 +105,18 @@ describe('Follow Routes', () => {
     it('should return 409 when already following', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      mockFollowerModel.findOne.mockResolvedValue({
-        id: 1,
-        follower_id: 1,
-        following_id: 2,
-        created_at: new Date(),
-      });
+      const uniqueError = new Error('Unique constraint violation');
+      uniqueError.name = 'SequelizeUniqueConstraintError';
+      mockFollowerModel.create.mockRejectedValue(uniqueError);
 
       const res = await request(app).post('/api/users/follow/2');
 
       expect(res.status).toBe(409);
       expect(res.body.error).toBe('Already following');
-      expect(mockFollowerModel.create).not.toHaveBeenCalled();
+      expect(mockFollowerModel.create).toHaveBeenCalledWith({
+        follower_id: 1,
+        following_id: 2,
+      });
     });
 
     it('should return 401 if no token provided', async () => {
@@ -134,7 +130,6 @@ describe('Follow Routes', () => {
     it('should return 409 on UniqueConstraintError (race condition)', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      mockFollowerModel.findOne.mockResolvedValue(null);
       const uniqueError = new Error('Unique constraint violation');
       uniqueError.name = 'SequelizeUniqueConstraintError';
       mockFollowerModel.create.mockRejectedValue(uniqueError);
@@ -142,13 +137,13 @@ describe('Follow Routes', () => {
       const res = await request(app).post('/api/users/follow/2');
 
       expect(res.status).toBe(409);
-      expect(res.body.error).toBe('Resource already exists');
+      expect(res.body.error).toBe('Already following');
     });
 
     it('should return 500 on unexpected database error', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 
-      mockFollowerModel.findOne.mockRejectedValue(new Error('DB connection failed'));
+      mockFollowerModel.create.mockRejectedValue(new Error('DB connection failed'));
 
       const res = await request(app).post('/api/users/follow/2');
 

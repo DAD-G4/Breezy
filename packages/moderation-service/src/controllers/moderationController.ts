@@ -42,7 +42,7 @@ export async function listReports(
       page,
       limit,
       total,
-      pages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / limit),
     },
   });
 }
@@ -156,7 +156,7 @@ export async function listBans(
       page,
       limit,
       total,
-      pages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / limit),
     },
   });
 }
