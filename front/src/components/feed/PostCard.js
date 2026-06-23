@@ -1,8 +1,11 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function PostCard({ post, disableProfileLink = false }) {
+  const { t } = useLanguage();
+
   // Etats pour gérer le like
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
@@ -17,7 +20,7 @@ export default function PostCard({ post, disableProfileLink = false }) {
     }
   };
 
-  //Etat pour gérer le menu déroulant 3 points
+  // Etat pour gérer le menu déroulant 3 points
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // on stock l'avatar nom dans une variable
@@ -36,7 +39,6 @@ export default function PostCard({ post, disableProfileLink = false }) {
       </div>
     </>
   );
-
 
   return (
     <article className="p-4 border-b border-gray-200 dark:border-steel-blue/40 bg-transparent transition-colors duration-200">      
@@ -68,7 +70,7 @@ export default function PostCard({ post, disableProfileLink = false }) {
           {/* Si menu est ouvert, on affiche */}
           {isMenuOpen && (
             <>
-              {/* Overlay invisible, clique ailleurs pour fermer*/}
+              {/* Overlay invisible */}
               <div 
                 className="fixed inset-0 z-10" 
                 onClick={() => setIsMenuOpen(false)}
@@ -80,7 +82,7 @@ export default function PostCard({ post, disableProfileLink = false }) {
                 {/* Signaler */}
                 <button 
                   onClick={() => {
-                    alert(`Le post de ${post.username} a été signalé.`);
+                    alert(t('postCard.reportAlert').replace('{{username}}', post.username));
                     setIsMenuOpen(false);
                   }}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-papaya-whip hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
@@ -88,16 +90,16 @@ export default function PostCard({ post, disableProfileLink = false }) {
                   <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                   </svg>
-                  Signaler le post
+                  {t('postCard.report')}
                 </button>
 
                 {/* Séparateur */}
                 <hr className="border-gray-100 dark:border-white/10" />
 
-                {/* Bloquer*/}
+                {/* Bloquer */}
                 <button 
                   onClick={() => {
-                    alert(`Vous avez bloqué ${post.username}.`);
+                    alert(t('postCard.blockAlert').replace('{{username}}', post.username));
                     setIsMenuOpen(false);
                   }}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brick-red hover:bg-brick-red/10 dark:hover:bg-brick-red/40 transition-colors"
@@ -105,7 +107,7 @@ export default function PostCard({ post, disableProfileLink = false }) {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                   </svg>
-                  Bloquer {post.username}
+                  {t('postCard.block').replace('{{username}}', post.username)}
                 </button>
 
               </div>
@@ -122,10 +124,10 @@ export default function PostCard({ post, disableProfileLink = false }) {
         <div className="mb-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
           <img
             src={post.imageUrl}
-            alt="Contenu du post"
+            alt={t('postCard.imageAlt')}
             className="w-full h-auto object-cover"
             onError={(e) => {
-              // Repli local si l'image externe ne charge pas (ex. hors-ligne)
+              // Repli local
               if (e.currentTarget.src.indexOf("/sample-post.jpg") === -1) {
                 e.currentTarget.src = "/sample-post.jpg";
               }

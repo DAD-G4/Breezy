@@ -2,19 +2,20 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 // COMPOSANT INDIVIDUEL
 function CommentItem({ comment, isReply = false }) {
+  const { t } = useLanguage();
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState("");
 
-  // Soumission d'une réponse
   const handleSubmitReply = (e) => {
     e.preventDefault();
     if (!replyText.trim()) return;
     
-    // A REMPLACER PAR L'APPEL BACKEND (POST /api/comments)
-    alert(`Votre réponse : "${replyText}" a été envoyée !`);
+    // A REMPLACER PAR L'APPEL BACKEND
+    alert(`${t('commentSection.replySent')} "${replyText}"`);
     
     setIsReplying(false);
     setReplyText("");
@@ -29,7 +30,7 @@ function CommentItem({ comment, isReply = false }) {
           {comment.avatar}
         </Link>
 
-        {/* commentaire */}
+        {/* Commentaire */}
         <div className="flex flex-col flex-1 min-w-0">
           
           <div className="flex items-baseline gap-2">
@@ -56,11 +57,10 @@ function CommentItem({ comment, isReply = false }) {
               onClick={() => setIsReplying(!isReplying)}
               className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-steel-blue transition-colors"
             >
-              {/* Icône flèche de réponse */}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
               </svg>
-              Répondre
+              {t('commentSection.reply')}
             </button>
           </div>
 
@@ -70,7 +70,7 @@ function CommentItem({ comment, isReply = false }) {
               <input
                 type="text"
                 autoFocus
-                placeholder={`Répondre à ${comment.user}...`}
+                placeholder={t('commentSection.replyTo').replace('{{user}}', comment.user)}
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 className="flex-1 px-4 py-2 text-sm rounded-full border border-gray-200 dark:border-steel-blue/40 bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue transition-all"
@@ -100,9 +100,11 @@ function CommentItem({ comment, isReply = false }) {
   );
 }
 
-// 2. LE COMPOSANT PRINCIPAL (La section entière à importer dans ta page Post)
+// COMPOSANT PRINCIPAL
 export default function CommentSection() {
-  // MOCK DATA (Simule la réponse d'une API avec des commentaires imbriqués)
+  const { t } = useLanguage();
+
+  // MOCK DATA 
   const mockComments = [
     {
       id: 1,
@@ -151,7 +153,7 @@ export default function CommentSection() {
   return (
     <section className="mt-4 pt-4 border-t border-gray-200 dark:border-steel-blue/30">
       <h3 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip mb-2">
-        Commentaires ({mockComments.length})
+        {t('commentSection.comments')} ({mockComments.length})
       </h3>
       
       <div className="flex flex-col">

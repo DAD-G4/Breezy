@@ -2,10 +2,13 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import AppShell from "../../components/layout/AppShell";
+import AppShell from "@/components/layout/AppShell";
+import { useLanguage } from "@/context/LanguageContext";
+
 
 export default function CreatePostPage() {
   const router = useRouter();
+  const { t } = useLanguage(); 
   
   // etats du formulaire
   const [content, setContent] = useState("");
@@ -51,18 +54,19 @@ export default function CreatePostPage() {
           <button
             onClick={() => router.back()}
             className="p-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors"
-            aria-label="Retour"
+            aria-label={t('common.back')} 
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
           </button>
           <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">
-            Nouvelle publication
+            {/* 4. TITRE */}
+            {t('createPost.title')}
           </h1>
         </div>
 
-        {/* Carte de création */}
+        {/* Carte création */}
         <form 
           onSubmit={handleSubmit} 
           className="p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm dark:shadow-[0_0_15px_rgba(102,155,188,0.15)] flex flex-col gap-4 transition-all"
@@ -74,7 +78,8 @@ export default function CreatePostPage() {
               M
             </div>
             <span className="font-bold text-deep-space-blue dark:text-papaya-whip text-sm">
-              Moi
+              {/* 5. NOM UTILISATEUR */}
+              {t('common.me')}
             </span>
           </div>
 
@@ -82,7 +87,8 @@ export default function CreatePostPage() {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Quoi de neuf sur Breezy ?"
+            // 6. PLACEHOLDER
+            placeholder={t('createPost.placeholder')}
             className="w-full bg-transparent resize-none outline-none text-deep-space-blue dark:text-papaya-whip placeholder:text-gray-400 min-h-[120px] text-lg"
             required={!imagePreview} // uniquement s'il y a pas d'image
           />
@@ -90,13 +96,19 @@ export default function CreatePostPage() {
           {/* Aperçu de l'image */}
           {imagePreview && (
             <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 mt-2">
-              <img src={imagePreview} alt="Aperçu" className="w-full h-auto object-cover" />
+              <img 
+                src={imagePreview} 
+                // 7. ALT IMAGE
+                alt={t('createPost.imagePreviewAlt')} 
+                className="w-full h-auto object-cover" 
+              />
               {/* retirer l'image */}
               <button
                 type="button"
                 onClick={() => setImagePreview(null)}
                 className="absolute top-2 right-2 bg-black/70 text-white p-2 rounded-full hover:bg-brick-red transition-colors"
-                aria-label="Supprimer l'image"
+                // 8. ARIA-LABEL SUPPRESSION
+                aria-label={t('common.removeImage')}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -116,7 +128,8 @@ export default function CreatePostPage() {
                 type="button" 
                 onClick={() => fileInputRef.current?.click()}
                 className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors group"
-                title="Ajouter une image"
+                // 9. TITLE OUTIL
+                title={t('createPost.tools.addImage')}
               >
                 <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -139,7 +152,8 @@ export default function CreatePostPage() {
               disabled={isLoading || (!content.trim() && !imagePreview)}
               className="px-6 py-2.5 bg-steel-blue hover:bg-deep-space-blue dark:bg-papaya-whip dark:text-deep-space-blue dark:hover:bg-white text-white font-bold rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >
-              {isLoading ? "Publication..." : "Publier"}
+              {/* 10. TEXTE BOUTON DYNAMIQUE */}
+              {isLoading ? t('createPost.submit.loading') : t('createPost.submit.default')}
             </button>
 
           </div>
@@ -147,4 +161,4 @@ export default function CreatePostPage() {
       </div>
     </AppShell>
   );
-} 
+}

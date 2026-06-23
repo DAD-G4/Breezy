@@ -2,17 +2,19 @@
 
 import { useState, use } from "react";
 import { useRouter } from "next/navigation";
-import AppShell from "../../../components/layout/AppShell";
-import PostCard from "../../../components/feed/PostCard";
+import AppShell from "@/components/layout/AppShell";
+import PostCard from "@/components/feed/PostCard";
 import CommentSection from "@/components/feed/CommentSection";  
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function PostDetailsPage({ params }) {
   const router = useRouter();
+  const { t } = useLanguage();
   
   const resolvedParams = use(params);
   const postId = resolvedParams.id;
 
-  // Mock datas A REMPLACER PAR UN APPEL API VERS LE BACK-END
+  // MOCK DATA
   const mainPost = {
     id: postId,
     username: "Jane Doe",
@@ -24,13 +26,12 @@ export default function PostDetailsPage({ params }) {
 
   const [newComment, setNewComment] = useState("");
 
-  // AJOUTER UN COMMENTAIRE 
   const handleAddComment = (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
-    // A relier au backend plus tard avec POST /api/posts/id/comments)
-    alert(`Nouveau commentaire posté : "${newComment}"`);
+    // ALERT
+    alert(`${t('postDetails.commentPosted')} "${newComment}"`);
     setNewComment(""); 
   };
 
@@ -38,29 +39,29 @@ export default function PostDetailsPage({ params }) {
     <AppShell>
       <div className="flex flex-col p-4 gap-4">
 
-        {/* Bouton Retour */}
+        {/* RETOUR */}
         <button
           onClick={() => router.back()} 
           className="p-2 -ml-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all w-fit"
-          aria-label="Retour"
+          aria-label={t('common.back')}
         >
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
         </button>
 
-        {/* Le Post Principal */}
+        {/* POST */}
         <PostCard post={mainPost} />
 
         <div className="h-px bg-gray-200 dark:bg-steel-blue/30 my-2"></div>
 
-        {/* Commentaire Principal */}
+        {/* FORMULAIRE COMMENTAIRE */}
         <form onSubmit={handleAddComment} className="flex gap-2">
           <input 
             type="text" 
             value={newComment} 
             onChange={(e) => setNewComment(e.target.value)} 
-            placeholder="Ajouter un commentaire..." 
+            placeholder={t('postDetails.addCommentPlaceholder')} 
             className="flex-1 px-4 py-2 rounded-full border border-gray-300 dark:border-steel-blue/40 bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue transition-colors" 
           />
           <button 

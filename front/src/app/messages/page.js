@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import AppShell from "../../components/layout/AppShell";
+import AppShell from "@/components/layout/AppShell";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function MessagesInboxPage() {
+  const { t } = useLanguage();
+
   // MOCK DATA 
   const initialConversations = [
     { id: 1, username: "User1", time: "5min", lastMessage: "Lorem ipsum dolor sit amet consectetur.", unread: true },
@@ -33,7 +36,8 @@ export default function MessagesInboxPage() {
           </div>
           <input 
             type="text" 
-            placeholder="Rechercher un message..." 
+            /* PLACEHOLDER RECHERCHE */
+            placeholder={t('messagesInbox.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue dark:focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all shadow-sm"

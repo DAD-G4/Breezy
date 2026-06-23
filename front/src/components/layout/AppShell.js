@@ -1,9 +1,9 @@
 "use client";
 
-import Header from "./Header";
-import BottomNav from "./BottomNav";
-import LeftSidebar from "./LeftSidebar";
-import RightSidebar from "./RightSidebar";
+import Header from "@/components/layout/Header";
+import BottomNav from "@/components/layout/BottomNav";
+import LeftSidebar from "@/components/layout/LeftSidebar";
+import RightSidebar from "@/components/layout/RightSidebar";
 
 // Coquille responsive commune aux pages "app" (feed, profil, post, création).
 // - Mobile (<md)  : Header en haut + BottomNav en bas, colonne unique.

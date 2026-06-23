@@ -3,17 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import BreezyBadge from "../ui/BreezyBadge";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Header() {
-
+  const { t } = useLanguage();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
   // MOCK DATA  NOTIFICATIONS
   const notifications = [
-    { id: 1, type: "like", postId: "123", user: "Alice", avatar: "A", action: "a aimé votre publication.", time: "Il y a 5 min", unread: true },
-    { id: 2, type: "follow", user: "Bob", avatar: "B", action: "a commencé à vous suivre.", time: "1h", unread: true },
-    { id: 3, type: "mention", postId: "124", user: "Charlie", avatar: "C", action: "vous a mentionné dans un commentaire.", time: "Hier", unread: false },
-    { id: 4, type: "comment", postId: "123", user: "User67", avatar: "U", action: "a commenté : \"Superbe photo !\"", time: "Il y a 2 jours", unread: false },
+    { id: 1, type: "like", postId: "123", user: "Alice", avatar: "A", action: t('header.notif.liked'), time: t('header.notif.time5m'), unread: true },
+    { id: 2, type: "follow", user: "Bob", avatar: "B", action: t('header.notif.followed'), time: t('header.notif.time1h'), unread: true },
+    { id: 3, type: "mention", postId: "124", user: "Charlie", avatar: "C", action: t('header.notif.mentioned'), time: t('header.notif.timeYesterday'), unread: false },
+    { id: 4, type: "comment", postId: "123", user: "User67", avatar: "U", action: t('header.notif.commented'), time: t('header.notif.time2d'), unread: false },
   ];
 
   // nombre de notifications non lues
@@ -32,11 +33,11 @@ export default function Header() {
     <header className="md:hidden sticky top-0 z-50 bg-white dark:bg-deep-space-blue text-deep-space-blue dark:text-papaya-whip border-b border-gray-200 dark:border-steel-blue/40 shadow-sm transition-colors duration-300">
       <div className="flex justify-between items-center px-4 h-16 relative">
         
-        {/* BOUTON "CRÉER UN POST" */}
+        {/* BOUTON CREER POST */}
         <Link 
           href="/create" 
           className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors"
-          aria-label="Créer un post"
+          aria-label={t('header.createPostAria')}
         >
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
@@ -51,15 +52,15 @@ export default function Header() {
           <span className="text-xl font-bold tracking-wide hidden sm:block">Breezy</span>
         </Link>
 
-        {/* ICÔNES DE DROITE */}
+        {/* ICONES DROITE */}
         <div className="flex items-center gap-1 sm:gap-2">
           
-          {/* MENU DES NOTIFICATIONS */}
+          {/* MENU NOTIFICATIONS */}
           <div className="relative">
             <button 
               onClick={() => setIsNotifOpen(!isNotifOpen)}
               className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors relative"
-              aria-label="Notifications"
+              aria-label={t('header.notificationsAria')}
             >
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -76,26 +77,26 @@ export default function Header() {
                 <div className="absolute right-0 mt-2 w-80 max-h-[80vh] overflow-y-auto bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-2xl shadow-xl z-50 animate-in fade-in zoom-in-95 duration-200 flex flex-col">
                   
                   <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/10 sticky top-0 bg-white/90 dark:bg-deep-space-blue/90 backdrop-blur-md z-10">
-                    <h3 className="font-bold text-lg">Notifications</h3>
-                    <button className="text-sm font-medium text-steel-blue hover:underline">Tout marquer comme lu</button>
+                    <h3 className="font-bold text-lg">{t('header.notificationsTitle')}</h3>
+                    <button className="text-sm font-medium text-steel-blue hover:underline">{t('header.markAllRead')}</button>
                   </div>
 
                   <div className="flex flex-col">
                     {notifications.map((notif) => (
                       <Link 
-                        href={getNotifLink(notif)} // <-- UTILISATION DE LA FONCTION ICI
+                        href={getNotifLink(notif)}
                         key={notif.id} 
                         className={`flex items-start gap-3 p-4 border-b border-gray-50 dark:border-white/5 transition-colors hover:bg-slate-50 dark:hover:bg-white/5 ${
                           notif.unread ? "bg-blue-50/50 dark:bg-steel-blue/10" : ""
                         }`}
                         onClick={() => setIsNotifOpen(false)}
                       >
-                        {/* Avatar */}
+                        {/* AVATAR */}
                         <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold shrink-0">
                           {notif.avatar}
                         </div>
                         
-                        {/* Contenu */}
+                        {/* CONTENU */}
                         <div className="flex flex-col flex-1 min-w-0">
                           <p className="text-sm text-deep-space-blue dark:text-papaya-whip leading-snug">
                             <span className="font-bold mr-1">{notif.user}</span>
@@ -122,7 +123,7 @@ export default function Header() {
           <Link 
             href="/profile" 
             className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors"
-            aria-label="Mon profil"
+            aria-label={t('header.profileAria')}
           >
             <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

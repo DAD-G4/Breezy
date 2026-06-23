@@ -1,10 +1,11 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTheme } from "../../context/ThemeContext";
-import BreezyBadge from "../ui/BreezyBadge";
+import { useTheme } from "@/context/ThemeContext";
+import BreezyBadge from "@/components/ui/BreezyBadge";
 
 // Item de navigation
 function NavItem({ href, label, icon, active, onClick, hasNotif }) {
@@ -42,15 +43,16 @@ function NavItem({ href, label, icon, active, onClick, hasNotif }) {
 export default function LeftSidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useLanguage();
 
   // ÉTATS ET DONNÉES DES NOTIFICATIONS 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   
   // (A REMPLACER dans un Hook "useNotifications" pour partager la donnée entre le Header
   const notifications = [
-    { id: 1, type: "like", postId: "123", user: "Alice", avatar: "A", action: "a aimé votre publication.", time: "Il y a 5 min", unread: true },
-    { id: 2, type: "follow", user: "Bob", avatar: "B", action: "a commencé à vous suivre.", time: "1h", unread: true },
-    { id: 3, type: "mention", postId: "124", user: "Charlie", avatar: "C", action: "vous a mentionné dans un commentaire.", time: "Hier", unread: false },
+    { id: 1, type: "like", postId: "123", user: "Alice", avatar: "A", action: t('header.notif.liked'), time: t('header.notif.time5m'), unread: true },
+    { id: 2, type: "follow", user: "Bob", avatar: "B", action: t('header.notif.followed'), time: t('header.notif.time1h'), unread: true },
+    { id: 3, type: "mention", postId: "124", user: "Charlie", avatar: "C", action: t('header.notif.mentioned'), time: t('header.notif.timeYesterday'), unread: false },
   ];
   const unreadCount = notifications.filter(n => n.unread).length;
 
@@ -79,13 +81,13 @@ export default function LeftSidebar() {
 
       {/* Navigation */}
       <nav className="flex flex-col gap-1 mt-2">
-        <NavItem href="/" label="Accueil" icon={iconHome} active={pathname === "/"} />
-        <NavItem href="/search" label="Recherche" icon={iconSearch} active={pathname === "/search"} />
+        <NavItem href="/" label={t('sidebar.home')} icon={iconHome} active={pathname === "/"} />
+        <NavItem href="/search" label={t('sidebar.search')} icon={iconSearch} active={pathname === "/search"} />
         
         {/* BOUTON NOTIFS*/}
         <div className="relative flex">
           <NavItem 
-            label="Notifications" 
+            label={t('sidebar.notifications')} 
             icon={iconNotif} 
             active={isNotifOpen} 
             hasNotif={unreadCount > 0}
@@ -100,7 +102,8 @@ export default function LeftSidebar() {
               {/* menu déroulant */}
               <div className="absolute left-full top-0 ml-4 w-80 max-h-[80vh] overflow-y-auto bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-2xl shadow-xl z-50 animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col">
                 <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/10 sticky top-0 bg-white/90 dark:bg-deep-space-blue/90 backdrop-blur-md z-10">
-                  <h3 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip">Notifications</h3>
+                  <h3 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip">{t('header.notificationsTitle')}</h3>
+                  <button className="text-sm font-medium text-steel-blue hover:underline">{t('header.markAllRead')}</button>
                 </div>
                 <div className="flex flex-col">
                   {notifications.map((notif) => (
@@ -129,25 +132,25 @@ export default function LeftSidebar() {
           )}
         </div>
 
-        <NavItem href="/messages" label="Messages" icon={iconMessages} active={pathname?.startsWith("/messages")} />
-        <NavItem href="/profile" label="Profil" icon={iconProfile} active={pathname?.startsWith("/profile")} />
-        <NavItem href="/settings" label="Paramètres" icon={iconSettings} active={pathname?.startsWith("/settings")} />
+        <NavItem href="/messages" label={t('sidebar.messages')} icon={iconMessages} active={pathname?.startsWith("/messages")} />
+        <NavItem href="/profile" label={t('sidebar.profile')} icon={iconProfile} active={pathname?.startsWith("/profile")} />
+        <NavItem href="/settings" label={t('sidebar.settings')} icon={iconSettings} active={pathname?.startsWith("/settings")} />
       </nav>
 
       {/* Créer un post*/}
       <Link href="/create" className="mt-3 flex items-center justify-center gap-2 bg-steel-blue hover:bg-deep-space-blue dark:bg-papaya-whip dark:text-deep-space-blue dark:hover:bg-white text-white font-bold rounded-full p-3 lg:px-4 transition-colors shadow-md">
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-        <span className="hidden lg:inline">Créer un post</span>
+        <span className="hidden lg:inline">{t('sidebar.createPost')}</span>
       </Link>
 
       {/* Bascule de thème */}
-      <button onClick={toggleTheme} className="mt-auto flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start" aria-label="Changer de thème">
+      <button onClick={toggleTheme} className="mt-auto flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start" aria-label={theme === "dark" ? t('sidebar.lightMode') : t('sidebar.darkMode')}>
         {theme === "dark" ? (
           <svg className="w-7 h-7 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
         ) : (
           <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
         )}
-        <span className="hidden lg:inline font-medium">{theme === "dark" ? "Mode clair" : "Mode sombre"}</span>
+        <span className="hidden lg:inline font-medium">{theme === "dark" ? t('sidebar.lightMode') : t('sidebar.darkMode')}</span>
       </button>
     </aside>
   );

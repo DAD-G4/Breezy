@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import AppShell from "@/components/layout/AppShell";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function SettingsPage() {
+  const { t, language, changeLanguage } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
 
-// État pour savoir quel menu déroulant est ouvert (null si aucun)
+  // État pour savoir quel menu déroulant est ouvert (null si aucun)
   const [openDropdown, setOpenDropdown] = useState(null);
 
   // ÉTATS DES PARAMÈTRES
@@ -15,16 +17,16 @@ export default function SettingsPage() {
     darkMode: true,
     notifications: true,
     privateProfile: false,
-    language: "fr",
+    language: language || "fr", 
     dataSaver: false,
     location: true,
   });
 
-  // INITIALISATION MODE SOMBRE 
+  // INITIALISATION MODE SOMBRE ET SYNCHRONISATION LANGUE
   useEffect(() => {
     const isDark = document.documentElement.classList.contains('dark') || localStorage.getItem('theme') === 'dark';
-    setSettings(prev => ({ ...prev, darkMode: isDark }));
-  }, []);
+    setSettings(prev => ({ ...prev, darkMode: isDark, language: language }));
+  }, [language]);
 
   // FONCTION POUR BASCULER UN PARAMÈTRE 
   const toggleSetting = (key) => {
@@ -50,39 +52,44 @@ export default function SettingsPage() {
 
   const handleSelectOption = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+    
+    // CHANGEMENT EFFECTIF DE LA LANGUE DANS TOUTE L'APP
+    if (key === "language") {
+      changeLanguage(value);
+    }
   }
 
   // LISTE DES PARAMÈTRES MOCK DATA
   const settingsList = [
     {
       id: "darkMode",
-      title: "Mode Sombre",
-      description: "Activer le thème sombre de l'application.",
+      title: t('settingsPage.darkMode.title'),
+      description: t('settingsPage.darkMode.desc'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
       )
     },
     {
       id: "notifications",
-      title: "Notifications Push",
-      description: "Recevoir des alertes pour les nouveaux messages et likes.",
+      title: t('settingsPage.notifications.title'),
+      description: t('settingsPage.notifications.desc'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
       )
     },
     {
       id: "privateProfile",
-      title: "Profil Privé",
-      description: "Seuls vos abonnés peuvent voir vos publications.",
+      title: t('settingsPage.privateProfile.title'),
+      description: t('settingsPage.privateProfile.desc'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
       )
     },
     {
       id: "language",
-      type: "dropdown", //déroule un menu 
-      title: "Langue",
-      description: "Choisir la langue de l'application.",
+      type: "dropdown", 
+      title: t('settingsPage.language.title'),
+      description: t('settingsPage.language.desc'),
       options: [
         { value: "fr", label: "Français" },
         { value: "en", label: "English" },
@@ -92,16 +99,16 @@ export default function SettingsPage() {
     },
     {
       id: "dataSaver",
-      title: "Économiseur de données",
-      description: "Réduire la qualité des images pour économiser de la data.",
+      title: t('settingsPage.dataSaver.title'),
+      description: t('settingsPage.dataSaver.desc'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
       )
     },
     {
       id: "location",
-      title: "Service de localisation",
-      description: "Permettre d'ajouter un lieu à vos publications.",
+      title: t('settingsPage.location.title'),
+      description: t('settingsPage.location.desc'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
       )
@@ -127,7 +134,7 @@ export default function SettingsPage() {
           </div>
           <input 
             type="text" 
-            placeholder="Rechercher un paramètre..." 
+            placeholder={t('settingsPage.searchPlaceholder')} 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all shadow-sm"
@@ -214,7 +221,7 @@ export default function SettingsPage() {
             })
           ) : (
             <div className="text-center py-10 text-gray-500 dark:text-gray-400">
-              Aucun paramètre trouvé pour "{searchTerm}"
+              {t('settingsPage.noResults')} "{searchTerm}"
             </div>
           )}
         </div>

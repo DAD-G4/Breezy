@@ -1,10 +1,13 @@
 "use client";
 
-import PostCard from "../components/feed/PostCard";
-import AppShell from "../components/layout/AppShell";
+import PostCard from "@/components/feed/PostCard";
+import AppShell from "@/components/layout/AppShell";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function FeedPage() {
-  // TODO: remplacer par les données réelles du back-end
+  const { t } = useLanguage();
+
+  // A remplacer par les données réelles du back-end
   const mockPosts = [
     {
       id: 1,
@@ -38,7 +41,9 @@ export default function FeedPage() {
     <AppShell>
       {/* En-tête de section, collant en haut du feed sur desktop */}
       <div className="sticky top-0 z-30 bg-slate-50/80 dark:bg-deep-space-blue/80 backdrop-blur border-b border-gray-200 dark:border-white/10 px-4 py-3 hidden md:block">
-        <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">Accueil</h1>
+        <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">
+          {t('feed.title')}
+        </h1>
       </div>
 
       <div className="flex flex-col p-4 gap-4">
