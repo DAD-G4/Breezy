@@ -4,26 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import BreezyBadge from "../ui/BreezyBadge";
 import { useLanguage } from "@/context/LanguageContext";
+import { useNotifications } from "@/hooks/useNotifications";
 
 export default function Header() {
   const { t } = useLanguage();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
-  // MOCK DATA  NOTIFICATIONS
-  const notifications = [
-    { id: 1, type: "like", postId: "123", user: "Alice", avatar: "A", action: t('header.notif.liked'), time: t('header.notif.time5m'), unread: true },
-    { id: 2, type: "follow", user: "Bob", avatar: "B", action: t('header.notif.followed'), time: t('header.notif.time1h'), unread: true },
-    { id: 3, type: "mention", postId: "124", user: "Charlie", avatar: "C", action: t('header.notif.mentioned'), time: t('header.notif.timeYesterday'), unread: false },
-    { id: 4, type: "comment", postId: "123", user: "User67", avatar: "U", action: t('header.notif.commented'), time: t('header.notif.time2d'), unread: false },
-  ];
+  // Fx14-16 — notifications réelles (GET /api/notifications)
+  const { notifications, unreadCount, markAllRead } = useNotifications(t);
 
-  // nombre de notifications non lues
-  const unreadCount = notifications.filter(n => n.unread).length;
-
-  // LOGIQUE DE REDIRECTION POUR LES NOTIFS 
+  // LOGIQUE DE REDIRECTION POUR LES NOTIFS
   const getNotifLink = (notif) => {
     if (notif.type === "follow") {
-      return `/profile/${notif.user.toLowerCase()}`;
+      return `/profile/${notif.username}`;
     }
     // Pour les likes, commentaires et mentions, on redirige vers le post
     return `/post/${notif.postId}`;
@@ -78,7 +71,7 @@ export default function Header() {
                   
                   <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/10 sticky top-0 bg-white/90 dark:bg-deep-space-blue/90 backdrop-blur-md z-10">
                     <h3 className="font-bold text-lg">{t('header.notificationsTitle')}</h3>
-                    <button className="text-sm font-medium text-steel-blue hover:underline">{t('header.markAllRead')}</button>
+                    <button onClick={markAllRead} className="text-sm font-medium text-steel-blue hover:underline">{t('header.markAllRead')}</button>
                   </div>
 
                   <div className="flex flex-col">

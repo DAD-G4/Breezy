@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "@/context/ThemeContext";
 import BreezyBadge from "@/components/ui/BreezyBadge";
+import { useNotifications } from "@/hooks/useNotifications";
 
 
 function NavItem({ href, label, icon, active, onClick, hasNotif }) {
@@ -44,16 +45,12 @@ export default function LeftSidebar() {
   const { t } = useLanguage();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  
-  const notifications = [
-    { id: 1, type: "like", postId: "123", user: "Alice", avatar: "A", action: t('header.notif.liked'), time: t('header.notif.time5m'), unread: true },
-    { id: 2, type: "follow", user: "Bob", avatar: "B", action: t('header.notif.followed'), time: t('header.notif.time1h'), unread: true },
-    { id: 3, type: "mention", postId: "124", user: "Charlie", avatar: "C", action: t('header.notif.mentioned'), time: t('header.notif.timeYesterday'), unread: false },
-  ];
-  const unreadCount = notifications.filter(n => n.unread).length;
+
+  // Fx14-16 — notifications réelles (GET /api/notifications)
+  const { notifications, unreadCount, markAllRead } = useNotifications(t);
 
   const getNotifLink = (notif) => {
-    if (notif.type === "follow") return `/profile/${notif.user.toLowerCase()}`;
+    if (notif.type === "follow") return `/profile/${notif.username}`;
     return `/post/${notif.postId}`;
   };
 
@@ -93,7 +90,7 @@ export default function LeftSidebar() {
               <div className="absolute left-full top-0 ml-4 w-80 max-h-[80vh] overflow-y-auto bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-2xl shadow-xl z-50 animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col">
                 <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/10 sticky top-0 bg-white/90 dark:bg-deep-space-blue/90 backdrop-blur-md z-10">
                   <h3 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip">{t('header.notificationsTitle')}</h3>
-                  <button className="text-sm font-medium text-steel-blue hover:underline">{t('header.markAllRead')}</button>
+                  <button onClick={markAllRead} className="text-sm font-medium text-steel-blue hover:underline">{t('header.markAllRead')}</button>
                 </div>
                 <div className="flex flex-col">
                   {notifications.map((notif) => (

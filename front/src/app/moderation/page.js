@@ -1,47 +1,108 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppShell from "@/components/layout/AppShell";
 import { useLanguage } from "@/context/LanguageContext";
+import { getApiErrorMessage } from "@/lib/api";
+import { listReports, resolveReport, banUser, unbanUser, listBans } from "@/services/moderation";
+import { getPost } from "@/services/posts";
+import { resolveUser } from "@/services/users";
+import { useRequireAuth } from "@/context/AuthContext";
 
 export default function ModerationPage() {
+  useRequireAuth();
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("reports"); // "reports" | "users"
-  
-  // NOUVEAU : État pour le filtre des utilisateurs
-  const [userFilter, setUserFilter] = useState("all"); // "all" | "active" | "suspended" | "banned"
+  const [userFilter, setUserFilter] = useState("all");
+  const [reports, setReports] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [error, setError] = useState("");
 
-  // MOCK DATA - Signalements (Fx20)
-  const [reports, setReports] = useState([
-    { id: 1, postAuthor: "User67", reporter: "Alice", reason: "Spam", content: "Achetez des cryptos maintenant !!!", status: "pending" },
-    { id: 2, postAuthor: "Troll99", reporter: "Bob", reason: "Harcèlement", content: "T'es vraiment nul en dev...", status: "pending" }
-  ]);
+  // Signalements réels (GET /api/moderation/reports) — réservé modérateur/admin.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const { reports: raw } = await listReports();
+        const mapped = await Promise.all(
+          (raw || []).map(async (r) => {
+            const reporter = await resolveUser(r.reported_by);
+            let postAuthor = "—";
+            let content = "";
+            if (r.target_type === "post") {
+              try {
+                const post = await getPost(r.target_id);
+                content = post.content;
+                postAuthor = (await resolveUser(post.user_id)).username;
+              } catch {
+                content = t("moderation.deletedContent") || "(contenu indisponible)";
+              }
+            } else if (r.target_type === "user") {
+              postAuthor = (await resolveUser(r.target_id)).username;
+            }
+            return { id: r._id, reason: r.reason, reporter: reporter.username, postAuthor, content, status: r.status };
+          })
+        );
+        if (active) setReports(mapped);
+      } catch (err) {
+        if (active) setError(getApiErrorMessage(err, "Accès réservé à la modération."));
+      }
+    })();
+    return () => { active = false; };
+  }, []);
 
-  // MOCK DATA - Utilisateurs (Fx21)
-  const [users, setUsers] = useState([
-    { id: 1, username: "User67", status: "active", reportsCount: 3 },
-    { id: 2, username: "Troll99", status: "suspended", reportsCount: 12 },
-    { id: 3, username: "SpammerO1", status: "banned", reportsCount: 50 }
-  ]);
+  // Utilisateurs bannis (GET /api/moderation/bans).
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const { bans } = await listBans();
+        const mapped = await Promise.all(
+          (bans || []).map(async (b) => ({
+            id: b.user_id,
+            username: (await resolveUser(b.user_id)).username,
+            status: "banned",
+            reportsCount: 0,
+          }))
+        );
+        if (active) setUsers(mapped);
+      } catch {
+        /* géré par le chargement des signalements */
+      }
+    })();
+    return () => { active = false; };
+  }, []);
 
-  // Actions de modération simulées
-  const handleDeletePost = (id) => {
-    alert(`Le post a été supprimé.`);
-    setReports(reports.filter(r => r.id !== id));
+  // Résolution d'un signalement (Ignorer / Traiter → PUT /reports/:id/resolve).
+  const handleResolve = async (id) => {
+    setReports((rs) => rs.filter((r) => r.id !== id));
+    try { await resolveReport(id); } catch { /* silencieux */ }
+  };
+  const handleIgnoreReport = handleResolve;
+  const handleDeletePost = handleResolve;
+
+  // Ban / unban (POST /ban, DELETE /ban/:userId).
+  const handleUpdateUserStatus = async (id, newStatus) => {
+    if (newStatus === "active") {
+      setUsers((us) => us.filter((u) => u.id !== id));
+      try { await unbanUser(id); } catch { /* silencieux */ }
+    } else {
+      setUsers((us) => us.map((u) => (u.id === id ? { ...u, status: "banned" } : u)));
+      try { await banUser(id, "Décision de modération"); } catch { /* silencieux */ }
+    }
   };
 
-  const handleIgnoreReport = (id) => {
-    setReports(reports.filter(r => r.id !== id));
-  };
+  const filteredUsers = userFilter === "all"
+    ? users
+    : users.filter((user) => user.status === userFilter);
 
-  const handleUpdateUserStatus = (id, newStatus) => {
-    setUsers(users.map(u => u.id === id ? { ...u, status: newStatus } : u));
-  };
-
-  // NOUVEAU : Logique de filtrage des utilisateurs
-  const filteredUsers = userFilter === "all" 
-    ? users 
-    : users.filter(user => user.status === userFilter);
+  if (error) {
+    return (
+      <AppShell>
+        <div className="p-8 text-center text-brick-red font-semibold">{error}</div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
