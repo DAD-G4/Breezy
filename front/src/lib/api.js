@@ -7,10 +7,13 @@ import axios from "axios";
 // Défaut = nginx local (docker-compose), port 80.
 const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost/api";
 
+// Pas de Content-Type par défaut : axios pose automatiquement
+// « application/json » pour les corps objets ET « multipart/form-data;
+// boundary=… » pour les FormData (uploads). Forcer un défaut casserait
+// l'encodage multipart des uploads (boundary manquant).
 const api = axios.create({
   baseURL,
   withCredentials: true,
-  headers: { "Content-Type": "application/json" },
 });
 
 // Réponse : si le backend renvoie 401 (token absent/expiré), on purge la session
