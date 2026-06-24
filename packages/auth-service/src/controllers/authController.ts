@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { UserModel, ProfileModel, success, error, getJwtSecret, validateRegisterInput, UserRole } from '@breezy/shared';
+import { UserModel, ProfileModel, Ban, success, error, getJwtSecret, validateRegisterInput, UserRole } from '@breezy/shared';
 
 const JWT_SECRET = getJwtSecret();
 const SALT_ROUNDS = 10;
@@ -107,11 +107,12 @@ export async function register(req: Request, res: Response): Promise<void> {
 
 /**
  * POST /api/auth/admin/register
- * Admin-only: create a new user account with optional role assignment.
- * Does NOT auto-login — admin stays on their own session.
+ * Admin-only: create a new STANDARD user account (rôle toujours "user" —
+ * un admin ne peut pas créer de modérateur ni d'admin).
+ * Does NOT auto-login — l'admin garde sa propre session.
  */
 export async function adminRegister(req: Request, res: Response): Promise<void> {
-  const { email, username: rawUsername, password, role } = req.body;
+  const { email, username: rawUsername, password } = req.body;
   const username = rawUsername?.toLowerCase?.() ?? rawUsername;
 
   const validationErrors = validateRegisterInput({ email, username, password });
@@ -132,16 +133,14 @@ export async function adminRegister(req: Request, res: Response): Promise<void> 
     return;
   }
 
-  const allowedRoles = [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN];
-  const assignedRole = allowedRoles.includes(role) ? role : UserRole.USER;
-
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
+  // Rôle figé : un admin ne crée que des utilisateurs standards.
   const user = await UserModel.create({
     email,
     username,
     password_hash: passwordHash,
-    role: assignedRole,
+    role: UserRole.USER,
   });
 
   await ProfileModel.create({
@@ -174,6 +173,13 @@ export async function login(req: Request, res: Response): Promise<void> {
   const isPasswordValid = await bcrypt.compare(password, user.password_hash);
   if (!isPasswordValid) {
     error(res, 'Invalid credentials', 401);
+    return;
+  }
+
+  // Refuse l'authentification si le compte est banni (ban permanent ou non expiré).
+  const ban = await Ban.findOne({ where: { user_id: user.id } });
+  if (ban && (!ban.expires_at || new Date(ban.expires_at) > new Date())) {
+    error(res, 'Votre compte a été suspendu. Vous ne pouvez pas vous connecter.', 403);
     return;
   }
 
