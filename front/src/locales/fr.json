@@ -94,7 +94,8 @@
     "trendingPosts": "Posts tendance"
   },
   "conversation": {
-    "placeholder": "Votre message..."
+    "placeholder": "Votre message...",
+    "blocked": "Vous ne pouvez pas envoyer de message à cet utilisateur."
   },
   "messagesInbox": {
     "searchPlaceholder": "Rechercher un message..."
@@ -162,7 +163,8 @@
     "reportConfirmTitle": "Signaler ce profil ?",
     "reportConfirmMessage": "Vous allez signaler {{name}} à la modération.",
     "blockConfirmTitle": "Bloquer cet utilisateur ?",
-    "blockConfirmMessage": "{{name}} ne pourra plus voir votre profil ni interagir avec vous."
+    "blockConfirmMessage": "{{name}} ne pourra plus voir votre profil ni interagir avec vous.",
+    "blockedNoPosts": "Vous ne pouvez pas voir les publications de cet utilisateur."
   },
   "postCard": {
     "report": "Signaler le post",

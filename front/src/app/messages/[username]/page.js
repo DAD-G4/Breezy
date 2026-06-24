@@ -57,7 +57,7 @@ export default function ConversationPage({ params }) {
           read: !!m.is_read,
         }));
         if (active) {
-          setOtherUser({ id: u.id, displayName, lastActive: u.profile?.last_active || null });
+          setOtherUser({ id: u.id, displayName, lastActive: u.profile?.last_active || null, isBlocked: !!u.is_blocked });
           setMessages(mapped);
         }
         // Marque la conversation comme lue (best-effort).
@@ -211,35 +211,44 @@ export default function ConversationPage({ params }) {
         </div>
       </div>
 
-      <form
-        onSubmit={handleSend}
-        className="fixed bottom-[65px] left-0 right-0 md:sticky md:bottom-0 md:left-auto md:right-auto px-4 py-3 bg-gray-100/90 dark:bg-night/95 backdrop-blur-lg border-t border-gray-200/60 dark:border-steel-blue/20 z-30"
-      >
-        <div className="flex items-end gap-2">
-          <input
-            type="text"
-            placeholder={t('conversation.placeholder')}
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            className="flex-1 px-4 py-2.5 rounded-2xl border border-gray-200 dark:border-steel-blue/30 bg-white dark:bg-gray-800 text-deep-space-blue dark:text-white text-sm outline-none focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 shadow-sm"
-          />
-          <button
-            type="submit"
-            disabled={!newMessage.trim() || sending}
-            className={`
-              flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-all shadow-sm
-              ${newMessage.trim()
-                ? "bg-steel-blue text-white hover:bg-steel-blue/80 active:scale-95"
-                : "bg-gray-200 dark:bg-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed"
-              }
-            `}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-            </svg>
-          </button>
+      {otherUser?.isBlocked ? (
+        <div className="fixed bottom-[65px] left-0 right-0 md:sticky md:bottom-0 md:left-auto md:right-auto px-4 py-4 bg-gray-100/90 dark:bg-night/95 backdrop-blur-lg border-t border-gray-200/60 dark:border-steel-blue/20 z-30 flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400">
+          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+          </svg>
+          <span className="text-sm font-medium">{t('conversation.blocked')}</span>
         </div>
-      </form>
+      ) : (
+        <form
+          onSubmit={handleSend}
+          className="fixed bottom-[65px] left-0 right-0 md:sticky md:bottom-0 md:left-auto md:right-auto px-4 py-3 bg-gray-100/90 dark:bg-night/95 backdrop-blur-lg border-t border-gray-200/60 dark:border-steel-blue/20 z-30"
+        >
+          <div className="flex items-end gap-2">
+            <input
+              type="text"
+              placeholder={t('conversation.placeholder')}
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              className="flex-1 px-4 py-2.5 rounded-2xl border border-gray-200 dark:border-steel-blue/30 bg-white dark:bg-gray-800 text-deep-space-blue dark:text-white text-sm outline-none focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 shadow-sm"
+            />
+            <button
+              type="submit"
+              disabled={!newMessage.trim() || sending}
+              className={`
+                flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-all shadow-sm
+                ${newMessage.trim()
+                  ? "bg-steel-blue text-white hover:bg-steel-blue/80 active:scale-95"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed"
+                }
+              `}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+              </svg>
+            </button>
+          </div>
+        </form>
+      )}
     </AppShell>
   );
 }

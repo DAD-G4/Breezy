@@ -94,7 +94,8 @@
     "trendingPosts": "Publicaciones populares"
   },
   "conversation": {
-    "placeholder": "Tu mensaje..."
+    "placeholder": "Tu mensaje...",
+    "blocked": "No puedes enviar mensajes a este usuario."
   },
   "messagesInbox": {
     "searchPlaceholder": "Buscar un mensaje..."
@@ -162,7 +163,8 @@
     "reportConfirmTitle": "¿Reportar este perfil?",
     "reportConfirmMessage": "Vas a reportar a {{name}} a moderación.",
     "blockConfirmTitle": "¿Bloquear a este usuario?",
-    "blockConfirmMessage": "{{name}} no podrá ver tu perfil ni interactuar contigo."
+    "blockConfirmMessage": "{{name}} no podrá ver tu perfil ni interactuar contigo.",
+    "blockedNoPosts": "No puedes ver las publicaciones de este usuario."
   },
   "postCard": {
     "report": "Denunciar publicación",

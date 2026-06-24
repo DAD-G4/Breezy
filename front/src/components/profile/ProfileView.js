@@ -40,24 +40,14 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
   const [isFollowing, setIsFollowing] = useState(initialUser.isFollowing || false); // Est-ce que l'utilisateur actuel folow ce profil ?
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [reported, setReported] = useState(false);
-  const [isBlocked, setIsBlocked] = useState(false);
+  // Blocage déterminé par le serveur (dans un sens ou l'autre).
+  const [isBlocked, setIsBlocked] = useState(initialUser.isBlocked || false);
   const [showToast, setShowToast] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmBlockOpen, setConfirmBlockOpen] = useState(false);
   const [confirmReportOpen, setConfirmReportOpen] = useState(false);
 
   const fileInputRef = useRef(null);
-
-  // Check if the viewed user is blocked by the current user
-  useEffect(() => {
-    if (isOwnProfile || !user?.id) return;
-    getBlockedUsers()
-      .then((blocked) => {
-        const blockedIds = (blocked || []).map((u) => u.id);
-        setIsBlocked(blockedIds.includes(initialUser.id));
-      })
-      .catch(() => {});
-  }, [isOwnProfile, user?.id, initialUser.id]);
 
   // Fx10 — Photo de profil : upload média puis sauvegarde de l'avatar_url.
   const handleAvatarChange = async (e) => {
@@ -179,6 +169,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
     try {
       await blockUser(initialUser.id);
       setIsBlocked(true);
+      setProfilePosts([]); // on ne voit plus ses posts après blocage
       // Le blocage retire l'abonnement existant : on ne décrémente QUE si on
       // suivait réellement, et jamais en dessous de 0.
       if (isFollowing) setFollowers((prev) => Math.max(0, prev - 1));
@@ -403,18 +394,24 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
         <h2 className="font-bold text-lg text-deep-space-blue dark:text-white px-2">
           {isOwnProfile ? t('profileView.yourPosts') : t('profileView.userPosts').replace('{{name}}', name)}
         </h2>
-        {profilePosts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={post}
-            disableProfileLink={true}
-            currentUserId={user?.id}
-            onDelete={(postId) => setProfilePosts((prev) => prev.filter((p) => p.id !== postId))}
-            onUpdate={(postId, content) =>
-              setProfilePosts((prev) => prev.map((p) => (p.id === postId ? { ...p, content } : p)))
-            }
-          />
-        ))}
+        {isBlocked && !isOwnProfile ? (
+          <p className="text-center text-gray-500 dark:text-gray-400 py-10 text-sm">
+            {t('profileView.blockedNoPosts')}
+          </p>
+        ) : (
+          profilePosts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              disableProfileLink={true}
+              currentUserId={user?.id}
+              onDelete={(postId) => setProfilePosts((prev) => prev.filter((p) => p.id !== postId))}
+              onUpdate={(postId, content) =>
+                setProfilePosts((prev) => prev.map((p) => (p.id === postId ? { ...p, content } : p)))
+              }
+            />
+          ))
+        )}
       </section>
 
       {showToast && (

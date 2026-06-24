@@ -9,7 +9,7 @@ import ImageModal from "../ui/ImageModal";
 import Toast from "../ui/Toast";
 import ConfirmDialog from "../ui/ConfirmDialog";
 
-export default function PostCard({ post, disableProfileLink = false, currentUserId, onDelete, onUpdate }) {
+export default function PostCard({ post, disableProfileLink = false, currentUserId, onDelete, onUpdate, onBlock }) {
   const { t } = useLanguage();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
@@ -83,6 +83,7 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
     try {
       await blockUser(post.userId);
       setBlockedToast(true);
+      onBlock?.(post.userId); // retire les posts de cet utilisateur du feed
     } catch (err) {
       console.error('[PostCard] Failed to block user:', err);
     }

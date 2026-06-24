@@ -94,7 +94,8 @@
     "trendingPosts": "Trending posts"
   },
   "conversation": {
-    "placeholder": "Your message..."
+    "placeholder": "Your message...",
+    "blocked": "You can't message this user."
   },
   "messagesInbox": {
     "searchPlaceholder": "Search for a message..."
@@ -162,7 +163,8 @@
     "reportConfirmTitle": "Report this profile?",
     "reportConfirmMessage": "You're about to report {{name}} to moderation.",
     "blockConfirmTitle": "Block this user?",
-    "blockConfirmMessage": "{{name}} won't be able to see your profile or interact with you."
+    "blockConfirmMessage": "{{name}} won't be able to see your profile or interact with you.",
+    "blockedNoPosts": "You can't see this user's posts."
   },
   "postCard": {
     "report": "Report post",

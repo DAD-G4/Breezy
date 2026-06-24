@@ -51,6 +51,7 @@ export default function PublicProfilePage({ params }) {
             followers: u.followers_count ?? 0,
             following: u.following_count ?? 0,
             isFollowing: !!u.is_following,
+            isBlocked: !!u.is_blocked,
             posts,
           });
         }

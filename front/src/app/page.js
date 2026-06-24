@@ -84,6 +84,7 @@ export default function FeedPage() {
             onUpdate={(postId, content) =>
               setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, content } : p)))
             }
+            onBlock={(uid) => setPosts((prev) => prev.filter((p) => p.userId !== uid))}
           />
         ))}
       </div>
