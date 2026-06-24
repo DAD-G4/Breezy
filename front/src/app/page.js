@@ -76,7 +76,15 @@ export default function FeedPage() {
         )}
 
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
+          <PostCard
+            key={post.id}
+            post={post}
+            currentUserId={user?.id}
+            onDelete={(postId) => setPosts((prev) => prev.filter((p) => p.id !== postId))}
+            onUpdate={(postId, content) =>
+              setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, content } : p)))
+            }
+          />
         ))}
       </div>
     </AppShell>

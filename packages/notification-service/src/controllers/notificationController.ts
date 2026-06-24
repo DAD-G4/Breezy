@@ -63,3 +63,50 @@ export async function markAsRead(req: AuthRequest, res: Response): Promise<void>
 
   success(res, notification, 'Notification marked as read');
 }
+
+/**
+ * DELETE /api/notifications/:id
+ * Delete a single notification. Only the recipient can delete their own notifications.
+ */
+export async function deleteNotification(req: AuthRequest, res: Response): Promise<void> {
+  if (!req.user) {
+    error(res, 'Authentication required', 401);
+    return;
+  }
+
+  const { id } = req.params;
+
+  const notification = await Notification.findById(id);
+
+  if (!notification) {
+    error(res, 'Notification not found', 404);
+    return;
+  }
+
+  if (notification.recipient_id !== req.user.id) {
+    error(res, 'Forbidden: you can only delete your own notifications', 403);
+    return;
+  }
+
+  await Notification.findByIdAndDelete(id);
+
+  success(res, { deleted: true }, 'Notification deleted');
+}
+
+/**
+ * DELETE /api/notifications
+ * Delete all read notifications for the current user.
+ */
+export async function deleteAllRead(req: AuthRequest, res: Response): Promise<void> {
+  if (!req.user) {
+    error(res, 'Authentication required', 401);
+    return;
+  }
+
+  const result = await Notification.deleteMany({
+    recipient_id: req.user.id,
+    is_read: true,
+  });
+
+  success(res, { deletedCount: result.deletedCount }, 'Read notifications deleted');
+}

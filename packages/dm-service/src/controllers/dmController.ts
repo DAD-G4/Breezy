@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { DirectMessageModel as DirectMessage, success, error, AuthRequest } from '@breezy/shared';
+import { DirectMessageModel as DirectMessage, NotificationModel, success, error, AuthRequest } from '@breezy/shared';
 import type { PipelineStage } from 'mongoose';
 
 /** Deterministic ID: ensures (A,B) and (B,A) map to the same conversation. */
@@ -24,6 +24,14 @@ export async function sendMessage(req: AuthRequest, res: Response): Promise<void
     sender_id: senderId,
     recipient_id,
     message_text,
+  });
+
+  await NotificationModel.create({
+    recipient_id,
+    sender_id: senderId,
+    type: 'dm',
+    post_id: null,
+    is_read: false,
   });
 
   success(res, dm, 'Message sent successfully', 201);
