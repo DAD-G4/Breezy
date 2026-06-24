@@ -7,6 +7,7 @@ import { blockUser } from "../../services/users";
 import { useLanguage } from "../../context/LanguageContext";
 import ImageModal from "../ui/ImageModal";
 import Toast from "../ui/Toast";
+import ConfirmDialog from "../ui/ConfirmDialog";
 
 export default function PostCard({ post, disableProfileLink = false, currentUserId, onDelete, onUpdate }) {
   const { t } = useLanguage();
@@ -21,6 +22,9 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
   const [editSaving, setEditSaving] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [confirmBlockOpen, setConfirmBlockOpen] = useState(false);
+  const [blockedToast, setBlockedToast] = useState(false);
 
   const isOwner = currentUserId != null && post.userId === currentUserId;
 
@@ -54,14 +58,33 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     setIsMenuOpen(false);
-    if (!window.confirm(t('postCard.delete'))) return;
+    setConfirmDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    setConfirmDeleteOpen(false);
     try {
       await deletePost(post.id);
       onDelete?.(post.id);
     } catch (err) {
       console.error('[PostCard] Failed to delete:', err);
+    }
+  };
+
+  const handleBlock = () => {
+    setIsMenuOpen(false);
+    setConfirmBlockOpen(true);
+  };
+
+  const confirmBlock = async () => {
+    setConfirmBlockOpen(false);
+    try {
+      await blockUser(post.userId);
+      setBlockedToast(true);
+    } catch (err) {
+      console.error('[PostCard] Failed to block user:', err);
     }
   };
 
@@ -194,39 +217,35 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
                       </svg>
                       {t('postCard.delete')}
                     </button>
-
-                    <hr className="border-gray-100 dark:border-white/10" />
                   </>
                 )}
 
-                <button
-                  onClick={handleReport}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-papaya-whip hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
-                >
-                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                  </svg>
-                  {reported ? t('postCard.reported') : t('postCard.report')}
-                </button>
+                {/* Signaler / Bloquer : uniquement sur les posts des AUTRES. */}
+                {!isOwner && (
+                  <>
+                    <button
+                      onClick={handleReport}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-papaya-whip hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                    >
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                      </svg>
+                      {reported ? t('postCard.reported') : t('postCard.report')}
+                    </button>
 
-                <hr className="border-gray-100 dark:border-white/10" />
+                    <hr className="border-gray-100 dark:border-white/10" />
 
-                <button 
-                  onClick={async () => {
-                    try {
-                      await blockUser(post.userId);
-                    } catch (err) {
-                      console.error('[PostCard] Failed to block user:', err);
-                    }
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brick-red hover:bg-brick-red/10 dark:hover:bg-brick-red/40 transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                  </svg>
-                  {t('postCard.block').replace('{{username}}', post.username)}
-                </button>
+                    <button
+                      onClick={handleBlock}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brick-red hover:bg-brick-red/10 dark:hover:bg-brick-red/40 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      </svg>
+                      {t('postCard.block').replace('{{username}}', post.username)}
+                    </button>
+                  </>
+                )}
 
               </div>
             </>
@@ -321,6 +340,33 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
       {showToast && (
         <Toast message={t('toast.postReported')} />
       )}
+      {blockedToast && (
+        <Toast message={t('postCard.block').replace('{{username}}', post.username)} />
+      )}
+
+      {/* Confirmations animées (remplacent window.confirm) */}
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        variant="danger"
+        icon="warning"
+        title={t('postCard.deleteConfirmTitle')}
+        message={t('postCard.deleteConfirmMessage')}
+        confirmLabel={t('postCard.delete')}
+        cancelLabel={t('postCard.cancel')}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmDeleteOpen(false)}
+      />
+      <ConfirmDialog
+        open={confirmBlockOpen}
+        variant="danger"
+        icon="block"
+        title={t('postCard.blockConfirmTitle')}
+        message={t('postCard.block').replace('{{username}}', post.username)}
+        confirmLabel={t('postCard.blockConfirm')}
+        cancelLabel={t('postCard.cancel')}
+        onConfirm={confirmBlock}
+        onCancel={() => setConfirmBlockOpen(false)}
+      />
     </article>
   );
 }

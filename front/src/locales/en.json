@@ -151,7 +151,12 @@
     "reported": "User reported ✓",
     "blocked": "User blocked",
     "blockUser": "Block this user",
-    "unblock": "Unblock"
+    "unblock": "Unblock",
+    "moreActions": "More actions",
+    "reportConfirmTitle": "Report this profile?",
+    "reportConfirmMessage": "You're about to report {{name}} to moderation.",
+    "blockConfirmTitle": "Block this user?",
+    "blockConfirmMessage": "{{name}} won't be able to see your profile or interact with you."
   },
   "postCard": {
     "report": "Report post",
@@ -164,7 +169,11 @@
     "delete": "Delete post",
     "editing": "Editing...",
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "deleteConfirmTitle": "Delete post?",
+    "deleteConfirmMessage": "This action is permanent. The post will be removed for everyone.",
+    "blockConfirmTitle": "Block this user?",
+    "blockConfirm": "Block"
   },
   "commentSection": {
     "reply": "Reply",
@@ -172,7 +181,9 @@
     "replyTo": "Reply to {{user}}...",
     "comments": "Comments",
     "delete": "Delete",
-    "deleted": "Comment deleted"
+    "deleted": "Comment deleted",
+    "comment": "Comment",
+    "empty": "No comments yet."
   },
   "settingsPage": {
     "searchPlaceholder": "Search for a setting...",

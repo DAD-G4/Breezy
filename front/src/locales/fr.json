@@ -151,7 +151,12 @@
     "reported": "Utilisateur signalé ✓",
     "blocked": "Utilisateur bloqué",
     "blockUser": "Bloquer cet utilisateur",
-    "unblock": "Débloquer"
+    "unblock": "Débloquer",
+    "moreActions": "Plus d'actions",
+    "reportConfirmTitle": "Signaler ce profil ?",
+    "reportConfirmMessage": "Vous allez signaler {{name}} à la modération.",
+    "blockConfirmTitle": "Bloquer cet utilisateur ?",
+    "blockConfirmMessage": "{{name}} ne pourra plus voir votre profil ni interagir avec vous."
   },
   "postCard": {
     "report": "Signaler le post",
@@ -164,7 +169,11 @@
     "delete": "Supprimer le post",
     "editing": "Modification...",
     "cancel": "Annuler",
-    "save": "Enregistrer"
+    "save": "Enregistrer",
+    "deleteConfirmTitle": "Supprimer le post ?",
+    "deleteConfirmMessage": "Cette action est définitive. Le post sera supprimé pour tout le monde.",
+    "blockConfirmTitle": "Bloquer cet utilisateur ?",
+    "blockConfirm": "Bloquer"
   },
   "commentSection": {
     "reply": "Répondre",
@@ -172,7 +181,9 @@
     "replyTo": "Répondre à {{user}}...",
     "comments": "Commentaires",
     "delete": "Supprimer",
-    "deleted": "Commentaire supprimé"
+    "deleted": "Commentaire supprimé",
+    "comment": "Commenter",
+    "empty": "Aucun commentaire pour le moment."
   },
   "settingsPage": {
     "searchPlaceholder": "Rechercher un paramètre...",

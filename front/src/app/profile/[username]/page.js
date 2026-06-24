@@ -86,7 +86,7 @@ export default function PublicProfilePage({ params }) {
           <p className="text-center text-brick-red font-semibold py-8">{error}</p>
         )}
         {!loading && !error && profile && (
-          <ProfileView initialUser={profile} isOwnProfile={false} />
+          <ProfileView initialUser={profile} isOwnProfile={user?.id === profile.id} />
         )}
       </div>
     </AppShell>
