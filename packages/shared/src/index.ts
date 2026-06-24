@@ -1,6 +1,6 @@
 export * from './types';
 
-export { authenticateToken, checkBan, requireRole, getJwtSecret, createBanChecker, ROLE_HIERARCHY } from './middleware/auth';
+export { authenticateToken, optionalAuth, checkBan, requireRole, getJwtSecret, createBanChecker, ROLE_HIERARCHY } from './middleware/auth';
 export type { BanChecker, BanRecord } from './middleware/auth';
 export { errorHandler, AppError } from './middleware/errorHandler';
 export type { ErrorResponse as ErrorHandlerErrorResponse } from './middleware/errorHandler';

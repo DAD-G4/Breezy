@@ -27,14 +27,24 @@ export async function getProfile(req: AuthRequest, res: Response): Promise<void>
     PostModel.countDocuments({ user_id: userId }),
   ]);
 
-  success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount });
+  const isFollowing = await viewerFollows(req.user?.id, userId);
+
+  success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount, is_following: isFollowing });
+}
+
+/** True si le viewer (connecté) suit l'utilisateur cible. */
+async function viewerFollows(viewerId: number | undefined, targetId: number): Promise<boolean> {
+  if (!viewerId || viewerId === targetId) return false;
+  const count = await Follower.count({ where: { follower_id: viewerId, following_id: targetId } });
+  return count > 0;
 }
 
 /**
  * GET /api/users/username/:username
- * Returns user + profile by username, 404 if not found. Public route — no auth required.
+ * Returns user + profile by username, 404 if not found. Public route
+ * (optionalAuth) — renvoie is_following si le viewer est connecté.
  */
-export async function getProfileByUsername(req: Request, res: Response): Promise<void> {
+export async function getProfileByUsername(req: AuthRequest, res: Response): Promise<void> {
   const { username } = req.params;
 
   const user = await UserModel.findOne({
@@ -56,7 +66,9 @@ export async function getProfileByUsername(req: Request, res: Response): Promise
     PostModel.countDocuments({ user_id: userId }),
   ]);
 
-  success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount });
+  const isFollowing = await viewerFollows(req.user?.id, userId);
+
+  success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount, is_following: isFollowing });
 }
 
 /**

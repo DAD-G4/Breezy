@@ -67,6 +67,40 @@ export function authenticateToken(
 }
 
 /**
+ * Optional authentication.
+ * Sets req.user if a valid token (cookie or header) is present, but NEVER
+ * rejects: used on public routes that still want to know the viewer (e.g. to
+ * compute "is_following"). Visitors simply have req.user undefined.
+ */
+export function optionalAuth(
+  req: AuthRequest,
+  _res: Response,
+  next: NextFunction
+): void {
+  const authHeader = req.headers.authorization;
+  const tokenFromHeader = authHeader && authHeader.startsWith('Bearer ')
+    ? authHeader.slice(7)
+    : null;
+  const tokenFromCookie = (req as any).cookies?.accessToken;
+  const token = tokenFromHeader || tokenFromCookie;
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, getJwtSecretLazy(), { algorithms: ['HS256'] }) as JwtPayload;
+      req.user = {
+        id: decoded.id,
+        username: decoded.username,
+        email: decoded.email,
+        role: decoded.role,
+      };
+    } catch {
+      /* token invalide/expiré → on reste en visiteur */
+    }
+  }
+  next();
+}
+
+/**
  * Ban-check middleware.
  * MUST be used AFTER authenticateToken.
  * - Queries the Ban model to check if the user is currently banned
