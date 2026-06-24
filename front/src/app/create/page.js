@@ -116,11 +116,12 @@ export default function CreatePostPage() {
             </span>
           </div>
 
-          {/* Zone de texte */}
+          {/* Zone de texte — limite 280 caractères (Fx3) */}
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t('createPost.placeholder')}
+            maxLength={280}
             className="w-full bg-transparent resize-none outline-none text-deep-space-blue dark:text-white placeholder:text-gray-400 min-h-[120px] text-lg"
             required={!imagePreview} // uniquement s'il y a pas d'image
           />
@@ -180,14 +181,28 @@ export default function CreatePostPage() {
               />
             </div>
 
-            {/* Bouton Soumission */}
-            <button 
-              type="submit" 
-              disabled={isLoading || (!content.trim() && !imagePreview)}
-              className="px-6 py-2.5 bg-steel-blue hover:bg-deep-space-blue dark:bg-white dark:text-deep-space-blue dark:hover:bg-white text-white font-bold rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-            >
-              {isLoading ? t('createPost.submit.loading') : t('createPost.submit.default')}
-            </button>
+            {/* Compteur de caractères (Fx3) + Soumission */}
+            <div className="flex items-center gap-3">
+              <span
+                className={`text-sm font-medium tabular-nums ${
+                  content.length >= 280
+                    ? "text-brick-red"
+                    : content.length > 260
+                    ? "text-amber-500"
+                    : "text-gray-400 dark:text-gray-500"
+                }`}
+                aria-live="polite"
+              >
+                {content.length}/280
+              </span>
+              <button
+                type="submit"
+                disabled={isLoading || (!content.trim() && !imagePreview)}
+                className="px-6 py-2.5 bg-steel-blue hover:bg-deep-space-blue dark:bg-white dark:text-deep-space-blue dark:hover:bg-white text-white font-bold rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+              >
+                {isLoading ? t('createPost.submit.loading') : t('createPost.submit.default')}
+              </button>
+            </div>
 
           </div>
         </form>
