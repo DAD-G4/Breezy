@@ -1,6 +1,6 @@
 import { Response, Request } from 'express';
 import { Op } from 'sequelize';
-import { UserModel, ProfileModel, Follower, PostModel, success, error, AuthRequest } from '@breezy/shared';
+import { UserModel, ProfileModel, Follower, BlockedUser, PostModel, success, error, AuthRequest } from '@breezy/shared';
 
 /**
  * GET /api/users/profile/:id
@@ -115,6 +115,50 @@ export async function searchUsers(req: AuthRequest, res: Response): Promise<void
       display_name: profile?.display_name || u.get('username'),
       avatar_url: profile?.avatar_url || null,
       bio: profile?.bio || '',
+    };
+  });
+
+  success(res, { users: results });
+}
+
+/**
+ * GET /api/users/suggestions
+ * Returns up to 5 users the current user can follow:
+ * excludes self, already-followed users and blocked users.
+ */
+export async function getSuggestions(req: AuthRequest, res: Response): Promise<void> {
+  if (!req.user) {
+    error(res, 'Authentication required', 401);
+    return;
+  }
+  const me = req.user.id;
+
+  const [following, blocked] = await Promise.all([
+    Follower.findAll({ where: { follower_id: me }, attributes: ['following_id'] }),
+    BlockedUser.findAll({ where: { blocker_id: me }, attributes: ['blocked_id'] }),
+  ]);
+
+  const excludeIds = [
+    me,
+    ...following.map((f: any) => f.get('following_id')),
+    ...blocked.map((b: any) => b.get('blocked_id')),
+  ];
+
+  const users = await UserModel.findAll({
+    where: { id: { [Op.notIn]: excludeIds } },
+    include: [{ model: ProfileModel, as: 'profile' }],
+    attributes: { exclude: ['password_hash'] },
+    order: [['created_at', 'DESC']],
+    limit: 5,
+  });
+
+  const results = users.map((u: any) => {
+    const profile = u.get('profile');
+    return {
+      id: u.get('id'),
+      username: u.get('username'),
+      display_name: profile?.display_name || u.get('username'),
+      avatar_url: profile?.avatar_url || null,
     };
   });
 
