@@ -157,8 +157,8 @@ export default function ConversationPage({ params }) {
     : false;
 
   return (
-    <AppShell>
-      <div className="flex flex-col h-full">
+    <AppShell chat>
+      <div className="flex flex-col h-full min-h-0">
 
         <header className="sticky top-0 z-10 bg-gray-100/80 dark:bg-night/85 backdrop-blur-lg border-b border-gray-200/60 dark:border-steel-blue/20">
           <div className="flex items-center gap-3 px-4 py-3">
@@ -194,7 +194,7 @@ export default function ConversationPage({ params }) {
           </div>
         </header>
 
-        <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3">
           {loading && (
             <div className="flex justify-center py-12">
               <div className="flex gap-1.5">
@@ -263,19 +263,18 @@ export default function ConversationPage({ params }) {
             </div>
           ))}
         </div>
-      </div>
 
-      {otherUser?.isBlocked ? (
-        <div className="fixed bottom-[65px] left-0 right-0 md:sticky md:bottom-0 md:left-auto md:right-auto px-4 py-4 bg-gray-100/90 dark:bg-night/95 backdrop-blur-lg border-t border-gray-200/60 dark:border-steel-blue/20 z-30 flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400">
+        {otherUser?.isBlocked ? (
+        <div className="shrink-0 px-4 py-4 bg-gray-100/90 dark:bg-night/95 border-t border-gray-200/60 dark:border-steel-blue/20 flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400">
           <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
           </svg>
           <span className="text-sm font-medium">{t('conversation.blocked')}</span>
         </div>
-      ) : (
+        ) : (
         <form
           onSubmit={handleSend}
-          className="fixed bottom-[65px] left-0 right-0 md:sticky md:bottom-0 md:left-auto md:right-auto px-4 py-3 bg-gray-100/90 dark:bg-night/95 backdrop-blur-lg border-t border-gray-200/60 dark:border-steel-blue/20 z-30"
+          className="shrink-0 px-4 py-3 bg-gray-100/90 dark:bg-night/95 border-t border-gray-200/60 dark:border-steel-blue/20"
         >
           <div className="flex items-end gap-2">
             <input
@@ -302,7 +301,8 @@ export default function ConversationPage({ params }) {
             </button>
           </div>
         </form>
-      )}
+        )}
+      </div>
     </AppShell>
   );
 }

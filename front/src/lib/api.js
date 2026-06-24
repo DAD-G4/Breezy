@@ -22,6 +22,13 @@ const api = axios.create({
 // pas de refresh (pour éviter les boucles).
 const AUTH_ROUTE = /\/auth\/(login|refresh|me|logout|register)/;
 
+// Single-flight : un seul /auth/refresh partagé par TOUS les 401 concurrents.
+// Le polling (notifs, messages, présence…) déclenche beaucoup d'appels en
+// parallèle ; sans ça, chaque 401 lançait son propre refresh → rafale qui
+// pouvait dépasser la limite de débit nginx sur /api/auth (5 r/s) et faire
+// échouer le renouvellement → déconnexion intempestive.
+let refreshPromise = null;
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -32,7 +39,12 @@ api.interceptors.response.use(
     if (status === 401 && !AUTH_ROUTE.test(url) && !original._retry) {
       original._retry = true;
       try {
-        await api.post("/auth/refresh");
+        if (!refreshPromise) {
+          refreshPromise = api.post("/auth/refresh").finally(() => {
+            refreshPromise = null;
+          });
+        }
+        await refreshPromise; // attend le refresh en cours (partagé)
         return api(original); // rejoue la requête avec le nouveau cookie
       } catch {
         if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {

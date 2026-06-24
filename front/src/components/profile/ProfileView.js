@@ -196,14 +196,14 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
         <div className="flex justify-between items-center w-full">
           
           {/* Avatar et Nom */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <div
-              className={`relative group ${isOwnProfile && isEditing ? "cursor-pointer" : ""}`}
+              className={`relative group shrink-0 ${isOwnProfile && isEditing ? "cursor-pointer" : ""}`}
               onClick={() => isOwnProfile && isEditing && fileInputRef.current?.click()}
             >
-              <div className="w-20 h-20 rounded-full bg-steel-blue flex items-center justify-center text-white text-2xl font-bold border-2 border-white dark:border-night overflow-hidden">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-steel-blue flex items-center justify-center text-white text-2xl font-bold border-2 border-white dark:border-night overflow-hidden">
                 {avatarPreview ? (
-                  <img src={avatarPreview} alt="Avatar" className="w-full h-20 object-cover" />
+                  <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   name.charAt(0).toUpperCase()
                 )}
@@ -219,17 +219,17 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
             </div>
 
             {/* Nom */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               {isEditing && isOwnProfile ? (
-                <input 
-                  type="text" 
-                  value={name} 
+                <input
+                  type="text"
+                  value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-3 py-1 text-lg font-bold rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-white outline-none border border-steel-blue"
                   autoFocus
                 />
               ) : (
-                <h1 className="text-2xl font-bold text-deep-space-blue dark:text-white">{name}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-deep-space-blue dark:text-white truncate">{name}</h1>
               )}
             </div>
           </div>
@@ -237,9 +237,9 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
           {/* Bouton Edit Profile / S'abonner */}
           {isOwnProfile ? (
             !isEditing && (
-              <button 
+              <button
                 onClick={() => setIsEditing(true)}
-                className="ml-3 px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
+                className="ml-2 px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
               >
                 {t('profileView.editProfile')}
               </button>
@@ -251,7 +251,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                   <button
                     onClick={handleFollowToggle}
                     disabled={isFollowLoading}
-                    className={`ml-3 px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 ${
+                    className={`ml-2 px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 ${
                       isFollowing
                         ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-white border border-gray-200 dark:border-white/20"
                         : "bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
@@ -302,13 +302,13 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                   </div>
                 </>
               ) : (
-                <div className="flex items-center gap-3 ml-3">
-                  <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                <div className="flex items-center gap-2 ml-2 shrink-0">
+                  <span className="hidden sm:inline text-sm font-semibold text-gray-500 dark:text-gray-400">
                     {t('profileView.blocked')}
                   </span>
                   <button
                     onClick={handleUnblock}
-                    className="px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
+                    className="px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
                   >
                     {t('profileView.unblock')}
                   </button>

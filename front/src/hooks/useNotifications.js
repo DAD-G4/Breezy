@@ -115,9 +115,21 @@ export function useNotifications(t, locale) {
     fetchNotifications();
     // Rafraîchissement live : refetch périodique (likes, commentaires, follows…).
     const interval = setInterval(fetchNotifications, 15000);
+    // Sur mobile, les navigateurs gèlent setInterval quand l'onglet passe en
+    // arrière-plan. On refetch IMMÉDIATEMENT au retour de focus (sinon l'UI
+    // reste figée jusqu'au prochain tick et l'utilisateur recharge à la main).
+    const onVisible = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        fetchNotifications();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
     return () => {
       active = false;
       clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
