@@ -17,6 +17,7 @@ export default function ModerationPage() {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("reports");
   const [userFilter, setUserFilter] = useState("all");
+  const [userSearch, setUserSearch] = useState("");
   const [reports, setReports] = useState([]);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
@@ -171,9 +172,23 @@ export default function ModerationPage() {
     }
   };
 
-  const filteredUsers = userFilter === "all"
-    ? users
-    : users.filter((user) => user.status === userFilter);
+  // Ensemble des utilisateurs signalés, dérivé des signalements chargés :
+  // par id (signalements de type "user") et par username (auteur d'un post signalé).
+  const reportedIds = new Set();
+  const reportedNames = new Set();
+  for (const r of reports) {
+    if (r.targetType === "user") reportedIds.add(String(r.targetId));
+    else if (r.postAuthor && r.postAuthor !== "—") reportedNames.add(r.postAuthor);
+  }
+
+  const searchTerm = userSearch.trim().toLowerCase();
+  const filteredUsers = users
+    .filter((u) => {
+      if (userFilter === "active" || userFilter === "banned") return u.status === userFilter;
+      if (userFilter === "reported") return reportedIds.has(String(u.id)) || reportedNames.has(u.username);
+      return true; // all
+    })
+    .filter((u) => !searchTerm || u.username.toLowerCase().includes(searchTerm));
 
   if (error) {
     return (
@@ -268,20 +283,35 @@ export default function ModerationPage() {
         {activeTab === "users" && (
           <div className="flex flex-col gap-4">
             
-            {/* NOUVEAU : UI DU FILTRE UTILISATEURS */}
-            <div className="flex items-center justify-between bg-gray-50 dark:bg-black/20 p-3 rounded-xl border border-gray-100 dark:border-white/10">
-              <span className="text-sm font-bold text-deep-space-blue dark:text-white">
-                {t('moderation.filterStatus')}
-              </span>
-              <select 
-                value={userFilter}
-                onChange={(e) => setUserFilter(e.target.value)}
-                className="text-sm bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/40 rounded-lg px-3 py-1.5 outline-none text-deep-space-blue dark:text-white cursor-pointer shadow-sm"
-              >
-                <option value="all">{t('moderation.filterAll')}</option>
-                <option value="active">{t('moderation.statusActive')}</option>
-                <option value="banned">{t('moderation.statusBanned')}</option>
-              </select>
+            {/* FILTRE + RECHERCHE UTILISATEURS */}
+            <div className="flex flex-col gap-3 bg-gray-50 dark:bg-black/20 p-3 rounded-xl border border-gray-100 dark:border-white/10">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </span>
+                <input
+                  type="text"
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  placeholder={t('moderation.searchUsers')}
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/40 outline-none text-deep-space-blue dark:text-white focus:border-steel-blue"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-deep-space-blue dark:text-white">
+                  {t('moderation.filterStatus')}
+                </span>
+                <select
+                  value={userFilter}
+                  onChange={(e) => setUserFilter(e.target.value)}
+                  className="text-sm bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/40 rounded-lg px-3 py-1.5 outline-none text-deep-space-blue dark:text-white cursor-pointer shadow-sm"
+                >
+                  <option value="all">{t('moderation.filterAll')}</option>
+                  <option value="reported">{t('moderation.filterReported')}</option>
+                  <option value="active">{t('moderation.statusActive')}</option>
+                  <option value="banned">{t('moderation.statusBanned')}</option>
+                </select>
+              </div>
             </div>
 
             {/* LISTE FILTRÉE */}

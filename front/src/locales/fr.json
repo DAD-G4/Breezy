@@ -258,7 +258,9 @@
     "role": "Rôle",
     "roleUser": "Utilisateur",
     "roleModerator": "Modérateur",
-    "roleAdmin": "Administrateur"
+    "roleAdmin": "Administrateur",
+    "searchUsers": "Rechercher un utilisateur…",
+    "filterReported": "Signalés"
   },
   "toast": {
     "postReported": "Post signalé avec succès",
