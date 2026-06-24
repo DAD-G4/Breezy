@@ -28,8 +28,9 @@ export async function getProfile(req: AuthRequest, res: Response): Promise<void>
   ]);
 
   const isFollowing = await viewerFollows(req.user?.id, userId);
+  const isBlocked = await blockedBetween(req.user?.id, userId);
 
-  success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount, is_following: isFollowing });
+  success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount, is_following: isFollowing, is_blocked: isBlocked });
 }
 
 /**
@@ -49,6 +50,20 @@ export async function ping(req: AuthRequest, res: Response): Promise<void> {
 async function viewerFollows(viewerId: number | undefined, targetId: number): Promise<boolean> {
   if (!viewerId || viewerId === targetId) return false;
   const count = await Follower.count({ where: { follower_id: viewerId, following_id: targetId } });
+  return count > 0;
+}
+
+/** True si un blocage existe entre le viewer et la cible (dans un sens ou l'autre). */
+async function blockedBetween(viewerId: number | undefined, targetId: number): Promise<boolean> {
+  if (!viewerId || viewerId === targetId) return false;
+  const count = await BlockedUser.count({
+    where: {
+      [Op.or]: [
+        { blocker_id: viewerId, blocked_id: targetId },
+        { blocker_id: targetId, blocked_id: viewerId },
+      ],
+    },
+  });
   return count > 0;
 }
 
@@ -80,8 +95,9 @@ export async function getProfileByUsername(req: AuthRequest, res: Response): Pro
   ]);
 
   const isFollowing = await viewerFollows(req.user?.id, userId);
+  const isBlocked = await blockedBetween(req.user?.id, userId);
 
-  success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount, is_following: isFollowing });
+  success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount, is_following: isFollowing, is_blocked: isBlocked });
 }
 
 /**
