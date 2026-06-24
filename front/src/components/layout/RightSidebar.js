@@ -16,7 +16,7 @@ export default function RightSidebar() {
   useEffect(() => {
     let cancelled = false;
     getTrending()
-      .then((data) => { if (!cancelled) setTrends(data); })
+      .then((data) => { if (!cancelled) setTrends((data || []).slice(0, 5)); })
       .catch(() => {})
       .finally(() => { if (!cancelled) setTrendsLoading(false); });
     return () => { cancelled = true; };
