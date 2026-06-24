@@ -141,6 +141,15 @@ export async function updateProfile(req: AuthRequest, res: Response): Promise<vo
 
   const { display_name, bio, avatar_url } = req.body;
 
+  if (bio !== undefined && bio !== null && bio.length > 160) {
+    error(res, 'Bio must be 160 characters or less', 400);
+    return;
+  }
+  if (display_name !== undefined && display_name !== null && display_name.length > 50) {
+    error(res, 'Display name must be 50 characters or less', 400);
+    return;
+  }
+
   const profile = await ProfileModel.findOne({ where: { user_id: id } });
 
   if (!profile) {
