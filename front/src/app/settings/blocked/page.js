@@ -49,7 +49,7 @@ export default function BlockedUsersPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
           </button>
-          <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">
+          <h1 className="font-bold text-xl text-deep-space-blue dark:text-white">
             {t("settingsPage.blockedUsers.title")}
           </h1>
         </div>
@@ -86,7 +86,7 @@ export default function BlockedUsersPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip truncate group-hover:underline">
+                  <p className="font-bold text-sm text-deep-space-blue dark:text-white truncate group-hover:underline">
                     {u.display_name}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{u.username}</p>

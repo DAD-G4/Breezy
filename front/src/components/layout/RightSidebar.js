@@ -62,13 +62,13 @@ export default function RightSidebar() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('rightSidebar.searchPlaceholder')}
-            className="w-full pl-11 pr-4 py-2.5 rounded-full bg-gray-100 dark:bg-black/30 text-deep-space-blue dark:text-papaya-whip placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-steel-blue transition-all"
+            className="w-full pl-11 pr-4 py-2.5 rounded-full bg-gray-100 dark:bg-black/30 text-deep-space-blue dark:text-white placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-steel-blue transition-all"
           />
         </form>
 
         {/* TENDANCES */}
         <section className="bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/30 rounded-2xl overflow-hidden">
-          <h2 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip px-4 pt-4 pb-2">
+          <h2 className="font-bold text-lg text-deep-space-blue dark:text-white px-4 pt-4 pb-2">
             {t('rightSidebar.trendsTitle')}
           </h2>
           <ul>
@@ -85,7 +85,7 @@ export default function RightSidebar() {
                       href={`/search?q=${encodeURIComponent(tItem.tag)}`}
                       className="block px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                     >
-                      <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip">
+                      <p className="font-bold text-sm text-deep-space-blue dark:text-white">
                         #{tItem.tag}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -101,7 +101,7 @@ export default function RightSidebar() {
         {/* SUGGESTIONS */}
         {suggestions.length > 0 && (
           <section className="bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/30 rounded-2xl overflow-hidden">
-            <h2 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip px-4 pt-4 pb-2">
+            <h2 className="font-bold text-lg text-deep-space-blue dark:text-white px-4 pt-4 pb-2">
               {t('rightSidebar.suggestionsTitle')}
             </h2>
             <ul>
@@ -119,7 +119,7 @@ export default function RightSidebar() {
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip truncate group-hover:text-steel-blue transition-colors">{s.display_name || s.username}</p>
+                        <p className="font-bold text-sm text-deep-space-blue dark:text-white truncate group-hover:text-steel-blue transition-colors">{s.display_name || s.username}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{s.username}</p>
                       </div>
                     </Link>
@@ -129,7 +129,7 @@ export default function RightSidebar() {
                       disabled={isFollowed}
                       className={`ml-2 px-4 py-1.5 text-sm font-bold rounded-full transition-colors shrink-0 ${
                         isFollowed
-                          ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-papaya-whip border border-gray-200 dark:border-white/20"
+                          ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-white border border-gray-200 dark:border-white/20"
                           : "bg-steel-blue text-white hover:bg-deep-space-blue"
                       }`}
                     >

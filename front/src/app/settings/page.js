@@ -66,7 +66,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex flex-col flex-1">
-            <span className="font-bold text-deep-space-blue dark:text-papaya-whip text-base">
+            <span className="font-bold text-deep-space-blue dark:text-white text-base">
               {t('settingsPage.darkMode.title')}
             </span>
             <span className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
@@ -98,7 +98,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="flex flex-col flex-1">
-              <span className="font-bold text-deep-space-blue dark:text-papaya-whip text-base">
+              <span className="font-bold text-deep-space-blue dark:text-white text-base">
                 {t('settingsPage.language.title')}
               </span>
               <span className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
@@ -106,7 +106,7 @@ export default function SettingsPage() {
               </span>
             </div>
 
-            <div className="flex-shrink-0 ml-2 flex items-center gap-2 text-steel-blue dark:text-papaya-whip font-medium">
+            <div className="flex-shrink-0 ml-2 flex items-center gap-2 text-steel-blue dark:text-white font-medium">
               <span className="text-sm">{selectedLabel}</span>
               <svg
                 className={`w-5 h-5 transition-transform duration-300 ${openDropdown ? 'rotate-180' : ''}`}
@@ -128,7 +128,7 @@ export default function SettingsPage() {
                   className={`text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                     selectedLanguage === option.value
                       ? 'bg-steel-blue text-white'
-                      : 'text-deep-space-blue dark:text-papaya-whip hover:bg-slate-50 dark:hover:bg-white/10'
+                      : 'text-deep-space-blue dark:text-white hover:bg-slate-50 dark:hover:bg-white/10'
                   }`}
                 >
                   {option.label}
@@ -150,7 +150,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex flex-col flex-1">
-            <span className="font-bold text-deep-space-blue dark:text-papaya-whip text-base">
+            <span className="font-bold text-deep-space-blue dark:text-white text-base">
               {t('settingsPage.logout.title')}
             </span>
             <span className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
@@ -170,7 +170,7 @@ export default function SettingsPage() {
             </svg>
           </div>
           <div className="flex flex-col flex-1">
-            <span className="font-bold text-deep-space-blue dark:text-papaya-whip text-base">
+            <span className="font-bold text-deep-space-blue dark:text-white text-base">
               {t('settingsPage.blockedUsers.title')}
             </span>
             <span className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">

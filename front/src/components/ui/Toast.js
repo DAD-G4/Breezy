@@ -37,7 +37,7 @@ export default function Toast({ message, onUndo, duration = 5000 }) {
             onUndo();
             dismiss();
           }}
-          className="ml-2 px-3 py-1 text-xs font-bold rounded-full bg-steel-blue/20 dark:bg-surface/40 text-steel-blue dark:text-papaya-whip hover:bg-steel-blue/30 dark:hover:bg-deep-space-blue/30 transition-colors"
+          className="ml-2 px-3 py-1 text-xs font-bold rounded-full bg-steel-blue/20 dark:bg-surface/40 text-steel-blue dark:text-white hover:bg-steel-blue/30 dark:hover:bg-deep-space-blue/30 transition-colors"
         >
           Undo
         </button>

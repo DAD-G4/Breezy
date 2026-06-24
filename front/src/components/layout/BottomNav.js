@@ -20,7 +20,7 @@ export default function BottomNav() {
       {/* Bouton Accueil*/}
       <Link 
         href="/" 
-        className={`p-2 rounded-xl transition-colors ${isActive("/") ? "text-steel-blue dark:text-papaya-whip font-bold" : "text-gray-400 hover:text-steel-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5"}`}
+        className={`p-2 rounded-xl transition-colors ${isActive("/") ? "text-steel-blue dark:text-white font-bold" : "text-gray-400 hover:text-steel-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5"}`}
         aria-label={t('sidebar.home')}
       >
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,7 +31,7 @@ export default function BottomNav() {
       {/* bouton Recherche */}
       <Link 
         href="/search"
-        className={`p-2 rounded-xl transition-colors ${isActive("/search") ? "text-steel-blue dark:text-papaya-whip font-bold" : "text-gray-400 hover:text-steel-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5"}`}
+        className={`p-2 rounded-xl transition-colors ${isActive("/search") ? "text-steel-blue dark:text-white font-bold" : "text-gray-400 hover:text-steel-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5"}`}
         aria-label={t('sidebar.search')}>
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -41,7 +41,7 @@ export default function BottomNav() {
       {/* bouton Messages */}
       <Link 
         href="/messages"
-        className={`p-2 rounded-xl transition-colors ${isActive("/messages") ? "text-steel-blue dark:text-papaya-whip font-bold" : "text-gray-400 hover:text-steel-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5"}`}
+        className={`p-2 rounded-xl transition-colors ${isActive("/messages") ? "text-steel-blue dark:text-white font-bold" : "text-gray-400 hover:text-steel-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5"}`}
         aria-label={t('sidebar.messages')}>
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -51,7 +51,7 @@ export default function BottomNav() {
       {/* bouton Paramètres */}
       <Link 
         href="/settings"
-        className={`p-2 rounded-xl transition-colors ${isActive("/settings") ? "text-steel-blue dark:text-papaya-whip font-bold" : "text-gray-400 hover:text-steel-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5"}`}
+        className={`p-2 rounded-xl transition-colors ${isActive("/settings") ? "text-steel-blue dark:text-white font-bold" : "text-gray-400 hover:text-steel-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5"}`}
         aria-label={t('sidebar.settings')}
       >
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">

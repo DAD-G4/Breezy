@@ -10,7 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 
 
 function NavItem({ href, label, icon, active, onClick, hasNotif }) {
-  const base = "flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start relative";
+  const base = "flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-white hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start relative";
   const state = active ? "font-bold bg-black/5 dark:bg-white/5" : "font-medium";
   
   const content = (
@@ -88,7 +88,7 @@ export default function LeftSidebar() {
         <span className="hidden lg:inline">{t('sidebar.createPost')}</span>
       </Link>
 
-      <button onClick={toggleTheme} className="mt-auto flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start" aria-label={theme === "dark" ? t('sidebar.lightMode') : t('sidebar.darkMode')}>
+      <button onClick={toggleTheme} className="mt-auto flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-white hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start" aria-label={theme === "dark" ? t('sidebar.lightMode') : t('sidebar.darkMode')}>
         {theme === "dark" ? (
           <svg className="w-7 h-7 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
         ) : (
@@ -97,7 +97,7 @@ export default function LeftSidebar() {
         <span className="hidden lg:inline font-medium">{theme === "dark" ? t('sidebar.lightMode') : t('sidebar.darkMode')}</span>
       </button>
 
-      <button onClick={logout} className="flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start" aria-label={t('sidebar.logout')}>
+      <button onClick={logout} className="flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-white hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start" aria-label={t('sidebar.logout')}>
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
         </svg>

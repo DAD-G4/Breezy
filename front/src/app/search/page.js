@@ -158,7 +158,7 @@ function SearchContent() {
             placeholder={t("search.placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-12 pr-11 py-3 rounded-full border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue dark:focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all shadow-sm"
+            className="w-full pl-12 pr-11 py-3 rounded-full border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-black/20 text-deep-space-blue dark:text-white outline-none focus:border-steel-blue dark:focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all shadow-sm"
           />
           {query && (
             <button
@@ -283,7 +283,7 @@ function SearchContent() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip truncate">
+                <p className="font-bold text-sm text-deep-space-blue dark:text-white truncate">
                   {u.display_name}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{u.username}</p>

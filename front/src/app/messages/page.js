@@ -80,7 +80,7 @@ export default function MessagesInboxPage() {
     <AppShell>
       <div className="flex flex-col p-4 gap-6">
         <div className="flex items-center justify-between px-1">
-          <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">{t('sidebar.messages')}</h1>
+          <h1 className="font-bold text-xl text-deep-space-blue dark:text-white">{t('sidebar.messages')}</h1>
           <button
             onClick={() => setComposeOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-steel-blue hover:bg-deep-space-blue dark:bg-papaya-whip dark:text-deep-space-blue dark:hover:bg-white text-white text-sm font-bold rounded-full transition-colors shadow-sm"
@@ -116,14 +116,14 @@ export default function MessagesInboxPage() {
 
               <div className="flex flex-col flex-1 min-w-0">
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className={`text-base truncate ${conv.unread ? 'font-bold text-deep-space-blue dark:text-white' : 'font-semibold text-deep-space-blue/90 dark:text-papaya-whip/90'}`}>
+                  <span className={`text-base truncate ${conv.unread ? 'font-bold text-deep-space-blue dark:text-white' : 'font-semibold text-deep-space-blue/90 dark:text-white/90'}`}>
                     {conv.displayName}
                   </span>
                   <span className={`text-xs flex-shrink-0 ml-2 ${conv.unread ? 'font-bold text-steel-blue dark:text-steel-blue' : 'text-gray-500 dark:text-gray-400'}`}>
                     {conv.time}
                   </span>
                 </div>
-                <p className={`text-sm truncate ${conv.unread ? 'font-semibold text-deep-space-blue/80 dark:text-papaya-whip' : 'text-gray-500 dark:text-gray-400'}`}>
+                <p className={`text-sm truncate ${conv.unread ? 'font-semibold text-deep-space-blue/80 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
                   {conv.lastMessage}
                 </p>
               </div>
@@ -151,7 +151,7 @@ export default function MessagesInboxPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/10">
-              <h2 className="font-bold text-deep-space-blue dark:text-papaya-whip">
+              <h2 className="font-bold text-deep-space-blue dark:text-white">
                 {t('messages.new') || 'Nouveau message'}
               </h2>
               <button
@@ -176,7 +176,7 @@ export default function MessagesInboxPage() {
                   value={composeQuery}
                   onChange={(e) => setComposeQuery(e.target.value)}
                   placeholder={t('messages.searchUser') || 'Rechercher un utilisateur…'}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-full bg-gray-100 dark:bg-black/30 text-deep-space-blue dark:text-papaya-whip placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-steel-blue transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-full bg-gray-100 dark:bg-black/30 text-deep-space-blue dark:text-white placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-steel-blue transition-all"
                 />
               </div>
             </div>
@@ -204,7 +204,7 @@ export default function MessagesInboxPage() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip truncate">{u.display_name || u.username}</p>
+                    <p className="font-bold text-sm text-deep-space-blue dark:text-white truncate">{u.display_name || u.username}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{u.username}</p>
                   </div>
                 </button>

@@ -232,11 +232,11 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                   type="text" 
                   value={name} 
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-1 text-lg font-bold rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none border border-steel-blue"
+                  className="w-full px-3 py-1 text-lg font-bold rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-white outline-none border border-steel-blue"
                   autoFocus
                 />
               ) : (
-                <h1 className="text-2xl font-bold text-deep-space-blue dark:text-papaya-whip">{name}</h1>
+                <h1 className="text-2xl font-bold text-deep-space-blue dark:text-white">{name}</h1>
               )}
             </div>
           </div>
@@ -260,7 +260,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                     disabled={isFollowLoading}
                     className={`ml-3 px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 ${
                       isFollowing
-                        ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-papaya-whip border border-gray-200 dark:border-white/20"
+                        ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-white border border-gray-200 dark:border-white/20"
                         : "bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
                     } ${isFollowLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
@@ -286,7 +286,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                           <button
                             onClick={() => { setMenuOpen(false); setConfirmReportOpen(true); }}
                             disabled={reported}
-                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-papaya-whip hover:bg-slate-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
                           >
                             <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
@@ -333,7 +333,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
             href={`/profile/${initialUser.username}/followers`}
             className="flex items-baseline gap-1.5 hover:opacity-70 transition-opacity"
           >
-            <span className="font-bold text-base text-deep-space-blue dark:text-papaya-whip">{followers}</span>
+            <span className="font-bold text-base text-deep-space-blue dark:text-white">{followers}</span>
             <span className="text-gray-500 dark:text-gray-400">{t('profileView.followersLabel')}</span>
           </Link>
           
@@ -341,7 +341,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
             href={`/profile/${initialUser.username}/following`}
             className="flex items-baseline gap-1.5 hover:opacity-70 transition-opacity"
           >
-            <span className="font-bold text-base text-deep-space-blue dark:text-papaya-whip">{following}</span>
+            <span className="font-bold text-base text-deep-space-blue dark:text-white">{following}</span>
             <span className="text-gray-500 dark:text-gray-400">{t('profileView.followingLabel')}</span>
           </Link>
 
@@ -364,13 +364,13 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                 }}
                 maxLength={160}
                 rows={5}
-                className="w-full p-3 text-sm rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none border border-steel-blue resize-none min-h-[80px]"
+                className="w-full p-3 text-sm rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-white outline-none border border-steel-blue resize-none min-h-[80px]"
                 autoFocus
               />
               <p className="text-xs text-gray-400 dark:text-gray-500 text-right mt-1">{bio?.length || 0}/160 · {bio?.split("\n").length || 1}/{MAX_BIO_LINES} {t('profile.lines') || 'lignes'}</p>
             </div>
           ) : (
-            <p className="text-sm text-deep-space-blue/80 dark:text-papaya-whip/80 leading-relaxed whitespace-pre-wrap break-words overflow-hidden">
+            <p className="text-sm text-deep-space-blue/80 dark:text-white/80 leading-relaxed whitespace-pre-wrap break-words overflow-hidden">
               {bio}
             </p>
           )}
@@ -381,7 +381,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
           <div className="flex gap-3 justify-end">
             <button 
               onClick={handleCancel}
-              className="px-4 py-2 text-sm rounded-lg font-bold transition-all duration-300 bg-gray-200 dark:bg-white/10 text-deep-space-blue dark:text-papaya-whip hover:bg-gray-300 dark:hover:bg-white/20"
+              className="px-4 py-2 text-sm rounded-lg font-bold transition-all duration-300 bg-gray-200 dark:bg-white/10 text-deep-space-blue dark:text-white hover:bg-gray-300 dark:hover:bg-white/20"
             >
               {t('profileView.cancelButton')}
             </button>
@@ -398,7 +398,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
 
       {/* Historique des posts */}
       <section className="flex flex-col gap-4">
-        <h2 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip px-2">
+        <h2 className="font-bold text-lg text-deep-space-blue dark:text-white px-2">
           {isOwnProfile ? t('profileView.yourPosts') : t('profileView.userPosts').replace('{{name}}', name)}
         </h2>
         {profilePosts.map((post) => (

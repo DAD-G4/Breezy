@@ -37,7 +37,7 @@ export default function NotificationsPage() {
     <AppShell>
       <div className="flex flex-col p-4 gap-6">
         <div className="flex items-center justify-between px-1">
-          <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">
+          <h1 className="font-bold text-xl text-deep-space-blue dark:text-white">
             {t("sidebar.notifications")}
           </h1>
           <div className="flex items-center gap-3">
@@ -80,7 +80,7 @@ export default function NotificationsPage() {
               </div>
 
               <div className="flex flex-col flex-1 min-w-0">
-                <p className="text-sm text-deep-space-blue dark:text-papaya-whip leading-snug">
+                <p className="text-sm text-deep-space-blue dark:text-white leading-snug">
                   <span className="font-bold mr-1">{notif.user}</span>
                   <span className="opacity-90">{notif.action}</span>
                 </p>

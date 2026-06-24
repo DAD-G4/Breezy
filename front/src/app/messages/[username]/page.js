@@ -121,7 +121,7 @@ export default function ConversationPage({ params }) {
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-white dark:border-night rounded-full" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip truncate leading-tight">
+                <h1 className="text-sm font-bold text-deep-space-blue dark:text-white truncate leading-tight">
                   {title}
                 </h1>
                 <p className="text-xs text-gray-400 dark:text-gray-500 leading-tight">
@@ -176,7 +176,7 @@ export default function ConversationPage({ params }) {
                   max-w-[78%] px-4 py-2.5 text-sm leading-relaxed shadow-sm
                   ${msg.mine
                     ? "bg-steel-blue text-white rounded-2xl rounded-br-md"
-                    : "bg-gray-200 dark:bg-gray-700/60 text-deep-space-blue dark:text-papaya-whip rounded-2xl rounded-bl-md"
+                    : "bg-gray-200 dark:bg-gray-700/60 text-deep-space-blue dark:text-white rounded-2xl rounded-bl-md"
                   }
                 `}
               >
@@ -200,7 +200,7 @@ export default function ConversationPage({ params }) {
             placeholder={t('conversation.placeholder')}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="flex-1 px-4 py-2.5 rounded-2xl border border-gray-200 dark:border-steel-blue/30 bg-white dark:bg-gray-800 text-deep-space-blue dark:text-papaya-whip text-sm outline-none focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 shadow-sm"
+            className="flex-1 px-4 py-2.5 rounded-2xl border border-gray-200 dark:border-steel-blue/30 bg-white dark:bg-gray-800 text-deep-space-blue dark:text-white text-sm outline-none focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 shadow-sm"
           />
           <button
             type="submit"

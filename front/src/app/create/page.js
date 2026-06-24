@@ -83,7 +83,7 @@ export default function CreatePostPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
           </button>
-          <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">
+          <h1 className="font-bold text-xl text-deep-space-blue dark:text-white">
             {t('createPost.title')}
           </h1>
         </div>
@@ -99,7 +99,7 @@ export default function CreatePostPage() {
             <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold dark:shadow-[0_0_10px_rgba(102,155,188,0.5)]">
               M
             </div>
-              <span className="font-bold text-deep-space-blue dark:text-papaya-whip text-sm">
+              <span className="font-bold text-deep-space-blue dark:text-white text-sm">
                 {t('common.me')}
             </span>
           </div>
@@ -109,7 +109,7 @@ export default function CreatePostPage() {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t('createPost.placeholder')}
-            className="w-full bg-transparent resize-none outline-none text-deep-space-blue dark:text-papaya-whip placeholder:text-gray-400 min-h-[120px] text-lg"
+            className="w-full bg-transparent resize-none outline-none text-deep-space-blue dark:text-white placeholder:text-gray-400 min-h-[120px] text-lg"
             required={!imagePreview} // uniquement s'il y a pas d'image
           />
 

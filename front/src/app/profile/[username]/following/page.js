@@ -44,7 +44,7 @@ function UserCard({ u, currentUserId, onFollowChange, t }) {
 
       <div className="flex-1 min-w-0">
         <Link href={`/profile/${u.username}`} className="block">
-          <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip truncate hover:underline">
+          <p className="font-bold text-sm text-deep-space-blue dark:text-white truncate hover:underline">
             {u.display_name}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{u.username}</p>
@@ -57,7 +57,7 @@ function UserCard({ u, currentUserId, onFollowChange, t }) {
           disabled={loading}
           className={`px-4 py-1.5 text-xs rounded-full font-bold transition-all duration-300 flex-shrink-0 ${
             isFollowing
-              ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-papaya-whip border border-gray-200 dark:border-white/20"
+              ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-white border border-gray-200 dark:border-white/20"
               : "bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
           }`}
         >
@@ -112,7 +112,7 @@ export default function FollowingPage({ params }) {
           </svg>
         </button>
 
-        <h1 className="text-xl font-bold text-deep-space-blue dark:text-papaya-whip">
+        <h1 className="text-xl font-bold text-deep-space-blue dark:text-white">
           {t("profileView.followingLabel")}
         </h1>
 

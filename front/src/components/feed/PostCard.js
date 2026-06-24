@@ -152,7 +152,7 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
         )}
       </div>
       <div className="flex flex-col">
-        <span className={`font-bold text-deep-space-blue dark:text-papaya-whip text-sm ${disableProfileLink ? '' : 'group-hover/author:underline'}`}>
+        <span className={`font-bold text-deep-space-blue dark:text-white text-sm ${disableProfileLink ? '' : 'group-hover/author:underline'}`}>
           {post.username}
         </span>
         <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -200,7 +200,7 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
                   <>
                     <button
                       onClick={handleEditStart}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-papaya-whip hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                     >
                       <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -225,7 +225,7 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
                   <>
                     <button
                       onClick={handleReport}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-papaya-whip hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                     >
                       <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
@@ -260,7 +260,7 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
             onChange={(e) => setEditContent(e.target.value)}
             autoFocus
             maxLength={280}
-            className="w-full p-3 text-sm rounded-xl bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none border border-steel-blue resize-none min-h-[80px] transition-colors"
+            className="w-full p-3 text-sm rounded-xl bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-white outline-none border border-steel-blue resize-none min-h-[80px] transition-colors"
           />
           <div className="flex items-center gap-2 mt-2">
             <button
@@ -280,7 +280,7 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
           </div>
         </div>
       ) : (
-        <p className="text-sm text-deep-space-blue dark:text-papaya-whip/90 mb-3 leading-relaxed">
+        <p className="text-sm text-deep-space-blue dark:text-white/90 mb-3 leading-relaxed">
           {renderContentWithHashtags(post.content)}
         </p>
       )}

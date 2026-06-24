@@ -57,7 +57,7 @@ export default function FeedPage() {
     <AppShell>
       {/* En-tête de section, collant en haut du feed sur desktop */}
       <div className="sticky top-0 z-30 bg-slate-50/80 dark:bg-night/85 backdrop-blur border-b border-gray-200 dark:border-white/10 px-4 py-3 hidden md:block">
-        <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">{t('sidebar.home')}</h1>
+        <h1 className="font-bold text-xl text-deep-space-blue dark:text-white">{t('sidebar.home')}</h1>
       </div>
 
       <div className="flex flex-col p-4 gap-4">

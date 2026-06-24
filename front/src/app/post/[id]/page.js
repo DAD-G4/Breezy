@@ -193,7 +193,7 @@ export default function PostDetailsPage({ params }) {
               onChange={(e) => setNewComment(e.target.value)}
               placeholder={t('postDetails.addCommentPlaceholder')}
               rows={2}
-              className="w-full px-4 py-2.5 text-[15px] rounded-2xl border border-gray-200 dark:border-steel-blue/40 bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue resize-none transition-colors"
+              className="w-full px-4 py-2.5 text-[15px] rounded-2xl border border-gray-200 dark:border-steel-blue/40 bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-white outline-none focus:border-steel-blue resize-none transition-colors"
             />
             <div className="flex justify-end">
               <button type="submit" disabled={!newComment.trim() || submitting} className="px-5 py-2 bg-steel-blue hover:bg-deep-space-blue text-white rounded-full font-bold text-sm transition-colors disabled:opacity-50">
@@ -210,7 +210,7 @@ export default function PostDetailsPage({ params }) {
 
         {/* Liste des commentaires (fil Twitter/X) */}
         <div className="flex flex-col mt-2">
-          <h3 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip mb-1 px-1">
+          <h3 className="font-bold text-lg text-deep-space-blue dark:text-white mb-1 px-1">
             {t('commentSection.comments')} · {comments.length}
           </h3>
 
@@ -238,9 +238,9 @@ export default function PostDetailsPage({ params }) {
                   {/* En-tête : nom · @handle · temps */}
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {comment.authorHandle ? (
-                      <Link href={`/profile/${comment.authorHandle}`} className="font-bold text-[15px] text-deep-space-blue dark:text-papaya-whip hover:underline">{comment.username}</Link>
+                      <Link href={`/profile/${comment.authorHandle}`} className="font-bold text-[15px] text-deep-space-blue dark:text-white hover:underline">{comment.username}</Link>
                     ) : (
-                      <span className="font-bold text-[15px] text-deep-space-blue dark:text-papaya-whip">{comment.username}</span>
+                      <span className="font-bold text-[15px] text-deep-space-blue dark:text-white">{comment.username}</span>
                     )}
                     {comment.authorHandle && (
                       <span className="text-sm text-gray-500 dark:text-gray-400">@{comment.authorHandle}</span>
@@ -250,7 +250,7 @@ export default function PostDetailsPage({ params }) {
                   </div>
 
                   {/* Contenu */}
-                  <p className="text-[15px] text-deep-space-blue dark:text-papaya-whip/90 mt-0.5 leading-relaxed whitespace-pre-wrap break-words">{comment.content}</p>
+                  <p className="text-[15px] text-deep-space-blue dark:text-white/90 mt-0.5 leading-relaxed whitespace-pre-wrap break-words">{comment.content}</p>
 
                   {/* Actions */}
                   <div className="flex items-center gap-5 mt-2 text-gray-500 dark:text-gray-400">
@@ -284,7 +284,7 @@ export default function PostDetailsPage({ params }) {
                         onChange={(e) => setReplyText(e.target.value)}
                         placeholder={t('conversation.placeholder')}
                         autoFocus
-                        className="flex-1 px-4 py-2 text-sm rounded-full border border-gray-300 dark:border-steel-blue/40 bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue transition-colors"
+                        className="flex-1 px-4 py-2 text-sm rounded-full border border-gray-300 dark:border-steel-blue/40 bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-white outline-none focus:border-steel-blue transition-colors"
                       />
                       <button type="submit" disabled={!replyText.trim()} className="px-4 py-2 text-sm bg-steel-blue hover:bg-deep-space-blue text-white rounded-full font-semibold transition-colors disabled:opacity-50">
                         {t('post.send')}
@@ -309,9 +309,9 @@ export default function PostDetailsPage({ params }) {
                           <div className="flex flex-col min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               {reply.authorHandle ? (
-                                <Link href={`/profile/${reply.authorHandle}`} className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip hover:underline">{reply.username}</Link>
+                                <Link href={`/profile/${reply.authorHandle}`} className="font-bold text-sm text-deep-space-blue dark:text-white hover:underline">{reply.username}</Link>
                               ) : (
-                                <span className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip">{reply.username}</span>
+                                <span className="font-bold text-sm text-deep-space-blue dark:text-white">{reply.username}</span>
                               )}
                               {reply.authorHandle && (
                                 <span className="text-xs text-gray-500 dark:text-gray-400">@{reply.authorHandle}</span>
@@ -319,7 +319,7 @@ export default function PostDetailsPage({ params }) {
                               <span className="text-gray-400 dark:text-gray-500">·</span>
                               <span className="text-xs text-gray-500 dark:text-gray-400">{reply.time}</span>
                             </div>
-                            <p className="text-sm text-deep-space-blue dark:text-papaya-whip/90 leading-relaxed whitespace-pre-wrap break-words">{reply.content}</p>
+                            <p className="text-sm text-deep-space-blue dark:text-white/90 leading-relaxed whitespace-pre-wrap break-words">{reply.content}</p>
                           </div>
                         </div>
                       ))}

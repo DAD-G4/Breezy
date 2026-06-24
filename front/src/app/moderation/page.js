@@ -195,7 +195,7 @@ export default function ModerationPage() {
             </svg>
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-deep-space-blue dark:text-papaya-whip">
+            <h1 className="text-2xl font-bold text-deep-space-blue dark:text-white">
               {t('moderation.title')}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -245,7 +245,7 @@ export default function ModerationPage() {
                     </span>
                     <span className="text-xs text-gray-500">{t('moderation.reportedBy')} @{report.reporter}</span>
                   </div>
-                  <p className="text-sm font-medium text-deep-space-blue dark:text-papaya-whip mt-2 mb-1">{t('moderation.author')} @{report.postAuthor}</p>
+                  <p className="text-sm font-medium text-deep-space-blue dark:text-white mt-2 mb-1">{t('moderation.author')} @{report.postAuthor}</p>
                   <div className="p-3 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-white/10 text-sm text-gray-600 dark:text-gray-300 italic mb-4">
                     "{report.content}"
                   </div>
@@ -270,13 +270,13 @@ export default function ModerationPage() {
             
             {/* NOUVEAU : UI DU FILTRE UTILISATEURS */}
             <div className="flex items-center justify-between bg-gray-50 dark:bg-black/20 p-3 rounded-xl border border-gray-100 dark:border-white/10">
-              <span className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip">
+              <span className="text-sm font-bold text-deep-space-blue dark:text-white">
                 {t('moderation.filterStatus')}
               </span>
               <select 
                 value={userFilter}
                 onChange={(e) => setUserFilter(e.target.value)}
-                className="text-sm bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/40 rounded-lg px-3 py-1.5 outline-none text-deep-space-blue dark:text-papaya-whip cursor-pointer shadow-sm"
+                className="text-sm bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/40 rounded-lg px-3 py-1.5 outline-none text-deep-space-blue dark:text-white cursor-pointer shadow-sm"
               >
                 <option value="all">{t('moderation.filterAll')}</option>
                 <option value="active">{t('moderation.statusActive')}</option>
@@ -293,7 +293,7 @@ export default function ModerationPage() {
                   <div key={user.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-surface shadow-sm">
                     
                     <div className="flex flex-col">
-                      <span className="font-bold text-deep-space-blue dark:text-papaya-whip">@{user.username}</span>
+                      <span className="font-bold text-deep-space-blue dark:text-white">@{user.username}</span>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                           user.role === "admin" ? "bg-purple-100 text-purple-700" :
@@ -316,7 +316,7 @@ export default function ModerationPage() {
                       <select 
                         value={user.status}
                         onChange={(e) => handleUpdateUserStatus(user.id, e.target.value)}
-                        className="text-sm bg-gray-100 dark:bg-black/30 border border-gray-200 dark:border-steel-blue/40 rounded-lg px-2 py-1.5 outline-none text-deep-space-blue dark:text-papaya-whip cursor-pointer"
+                        className="text-sm bg-gray-100 dark:bg-black/30 border border-gray-200 dark:border-steel-blue/40 rounded-lg px-2 py-1.5 outline-none text-deep-space-blue dark:text-white cursor-pointer"
                       >
                         <option value="active">{t('moderation.actionActive')}</option>
                         <option value="banned">{t('moderation.actionBan')}</option>
@@ -334,41 +334,41 @@ export default function ModerationPage() {
           <div className="flex flex-col gap-4">
             <form onSubmit={handleCreateAccount} className="flex flex-col gap-4 p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-surface shadow-sm">
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip">{t('moderation.username')}</label>
+                <label className="text-sm font-bold text-deep-space-blue dark:text-white">{t('moderation.username')}</label>
                 <input
                   type="text"
                   value={accountForm.username}
                   onChange={(e) => setAccountForm({ ...accountForm, username: e.target.value })}
                   required
-                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip text-sm outline-none focus:border-steel-blue"
+                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-white text-sm outline-none focus:border-steel-blue"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip">{t('moderation.email')}</label>
+                <label className="text-sm font-bold text-deep-space-blue dark:text-white">{t('moderation.email')}</label>
                 <input
                   type="email"
                   value={accountForm.email}
                   onChange={(e) => setAccountForm({ ...accountForm, email: e.target.value })}
                   required
-                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip text-sm outline-none focus:border-steel-blue"
+                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-white text-sm outline-none focus:border-steel-blue"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip">{t('moderation.password')}</label>
+                <label className="text-sm font-bold text-deep-space-blue dark:text-white">{t('moderation.password')}</label>
                 <input
                   type="password"
                   value={accountForm.password}
                   onChange={(e) => setAccountForm({ ...accountForm, password: e.target.value })}
                   required
-                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip text-sm outline-none focus:border-steel-blue"
+                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-white text-sm outline-none focus:border-steel-blue"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip">{t('moderation.role')}</label>
+                <label className="text-sm font-bold text-deep-space-blue dark:text-white">{t('moderation.role')}</label>
                 <select
                   value={accountForm.role}
                   onChange={(e) => setAccountForm({ ...accountForm, role: e.target.value })}
-                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip text-sm outline-none focus:border-steel-blue cursor-pointer"
+                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-white text-sm outline-none focus:border-steel-blue cursor-pointer"
                 >
                   <option value="user">{t('moderation.roleUser')}</option>
                   <option value="moderator">{t('moderation.roleModerator')}</option>

@@ -10,7 +10,7 @@ export default function Header() {
   const { unreadCount } = useNotificationsContext();
 
   return (
-    <header className="md:hidden sticky top-0 z-50 bg-white dark:bg-surface text-deep-space-blue dark:text-papaya-whip border-b border-gray-200 dark:border-steel-blue/40 shadow-sm transition-colors duration-300">
+    <header className="md:hidden sticky top-0 z-50 bg-white dark:bg-surface text-deep-space-blue dark:text-white border-b border-gray-200 dark:border-steel-blue/40 shadow-sm transition-colors duration-300">
       <div className="flex justify-between items-center px-4 h-16 relative">
         
         {/* BOUTON CREER POST */}

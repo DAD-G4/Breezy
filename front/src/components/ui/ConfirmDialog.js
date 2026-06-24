@@ -75,16 +75,16 @@ export default function ConfirmDialog({
             </div>
           )}
           {title && (
-            <h2 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip">{title}</h2>
+            <h2 className="font-bold text-lg text-deep-space-blue dark:text-white">{title}</h2>
           )}
           {message && (
-            <p className="text-sm text-gray-600 dark:text-papaya-whip/70 leading-relaxed">{message}</p>
+            <p className="text-sm text-gray-600 dark:text-white/70 leading-relaxed">{message}</p>
           )}
         </div>
         <div className="flex gap-2 p-4 pt-0">
           <button
             onClick={onCancel}
-            className="flex-1 px-4 py-2.5 text-sm font-semibold rounded-full text-deep-space-blue dark:text-papaya-whip bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+            className="flex-1 px-4 py-2.5 text-sm font-semibold rounded-full text-deep-space-blue dark:text-white bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
           >
             {cancelLabel}
           </button>
