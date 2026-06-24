@@ -291,7 +291,7 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
             className="mb-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 cursor-zoom-in"
             onClick={() => setLightboxOpen(true)}
           >
-            <img src={post.imageUrl} alt={t('postCard.imageAlt')} className="w-full h-auto object-cover" />
+            <img src={post.imageUrl} alt={t('postCard.imageAlt')} className="w-full max-h-[510px] object-cover" />
           </div>
           {lightboxOpen && (
             <ImageModal
