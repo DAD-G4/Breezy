@@ -1,10 +1,24 @@
 import { Response } from 'express';
-import { DirectMessageModel as DirectMessage, NotificationModel, success, error, AuthRequest } from '@breezy/shared';
+import { Op } from 'sequelize';
+import { DirectMessageModel as DirectMessage, NotificationModel, BlockedUser, success, error, AuthRequest } from '@breezy/shared';
 import type { PipelineStage } from 'mongoose';
 
 /** Deterministic ID: ensures (A,B) and (B,A) map to the same conversation. */
 function generateConversationId(userId1: number, userId2: number): string {
   return `${Math.min(userId1, userId2)}-${Math.max(userId1, userId2)}`;
+}
+
+/** True si l'un des deux utilisateurs a bloqué l'autre (dans un sens ou l'autre). */
+async function isBlockedBetween(a: number, b: number): Promise<boolean> {
+  const row = await BlockedUser.findOne({
+    where: {
+      [Op.or]: [
+        { blocker_id: a, blocked_id: b },
+        { blocker_id: b, blocked_id: a },
+      ],
+    },
+  });
+  return !!row;
 }
 
 /** POST /api/dms/send */
@@ -17,6 +31,13 @@ export async function sendMessage(req: AuthRequest, res: Response): Promise<void
   const { recipient_id, message_text } = req.body;
 
   const senderId = req.user.id;
+
+  // Blocage : impossible d'envoyer un message si l'un a bloqué l'autre.
+  if (await isBlockedBetween(senderId, recipient_id)) {
+    error(res, 'You cannot message this user', 403);
+    return;
+  }
+
   const conversationId = generateConversationId(senderId, recipient_id);
 
   const dm = await DirectMessage.create({

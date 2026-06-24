@@ -1,5 +1,20 @@
 import { Response } from 'express';
-import { PostModel, UserModel, NotificationModel as Notification, success, error, AuthRequest } from '@breezy/shared';
+import { Op } from 'sequelize';
+import { PostModel, UserModel, BlockedUser, NotificationModel as Notification, success, error, AuthRequest } from '@breezy/shared';
+
+/** True si l'un des deux utilisateurs a bloqué l'autre (dans un sens ou l'autre). */
+async function isBlockedBetween(a: number, b: number): Promise<boolean> {
+  if (!a || !b || a === b) return false;
+  const row = await BlockedUser.findOne({
+    where: {
+      [Op.or]: [
+        { blocker_id: a, blocked_id: b },
+        { blocker_id: b, blocked_id: a },
+      ],
+    },
+  });
+  return !!row;
+}
 
 const extractTags = (content: string): string[] => {
   const matches = content.match(/#(\w+)/g);
@@ -59,6 +74,13 @@ export async function getUserPosts(req: AuthRequest, res: Response): Promise<voi
 
   const { id } = req.params;
   const userId = parseInt(id, 10);
+
+  // Blocage : on ne voit pas les posts d'un utilisateur bloqué (ou qui nous bloque).
+  if (await isBlockedBetween(req.user.id, userId)) {
+    success(res, { posts: [], pagination: { page: 1, limit: 0, total: 0, totalPages: 0 } });
+    return;
+  }
+
   const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
   const skip = (page - 1) * limit;
@@ -88,6 +110,12 @@ export async function getPostById(req: AuthRequest, res: Response): Promise<void
   const post = await PostModel.findById(id);
 
   if (!post) {
+    error(res, 'Post not found', 404);
+    return;
+  }
+
+  // Blocage : un viewer connecté ne peut pas voir le post d'un utilisateur bloqué.
+  if (req.user?.id && (await isBlockedBetween(req.user.id, post.user_id))) {
     error(res, 'Post not found', 404);
     return;
   }

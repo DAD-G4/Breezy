@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { Op } from 'sequelize';
 import { BlockedUser, Follower, UserModel, ProfileModel, success, error, AuthRequest } from '@breezy/shared';
 
 export async function blockUser(req: AuthRequest, res: Response): Promise<void> {
@@ -21,11 +22,13 @@ export async function blockUser(req: AuthRequest, res: Response): Promise<void> 
       blocked_id: blockedId,
     });
 
-    // Auto-unfollow when blocking
+    // Blocage = désabonnement MUTUEL : on retire les deux sens d'abonnement.
     await Follower.destroy({
       where: {
-        follower_id: req.user.id,
-        following_id: blockedId,
+        [Op.or]: [
+          { follower_id: req.user.id, following_id: blockedId },
+          { follower_id: blockedId, following_id: req.user.id },
+        ],
       },
     });
 
