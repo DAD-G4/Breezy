@@ -19,7 +19,7 @@ export default function Toast({ message, onUndo, duration = 5000 }) {
 
   return (
     <div
-      className={`fixed bottom-6 left-1/2 z-[100] flex items-center gap-3 px-5 py-3 rounded-2xl border border-steel-blue/20 bg-deep-space-blue text-papaya-whip dark:bg-steel-blue dark:text-deep-space-blue shadow-[0_8px_30px_rgba(0,48,73,0.35)] dark:shadow-[0_8px_30px_rgba(102,155,188,0.35)] transition-all duration-300 -translate-x-1/2 ${
+      className={`fixed bottom-6 left-1/2 z-[100] flex items-center gap-3 px-5 py-3 rounded-2xl border border-steel-blue/20 bg-deep-space-blue text-white dark:bg-steel-blue dark:text-deep-space-blue shadow-[0_8px_30px_rgba(0,48,73,0.35)] dark:shadow-[0_8px_30px_rgba(102,155,188,0.35)] transition-all duration-300 -translate-x-1/2 ${
         exiting
           ? "opacity-0 translate-y-2 scale-95"
           : "opacity-100 translate-y-0 scale-100"
@@ -45,7 +45,7 @@ export default function Toast({ message, onUndo, duration = 5000 }) {
 
       <button
         onClick={dismiss}
-        className="ml-1 p-1 rounded-full text-papaya-whip/50 dark:text-deep-space-blue/50 hover:text-papaya-whip dark:hover:text-deep-space-blue transition-colors"
+        className="ml-1 p-1 rounded-full text-white/50 dark:text-deep-space-blue/50 hover:text-white dark:hover:text-deep-space-blue transition-colors"
         aria-label="Close"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

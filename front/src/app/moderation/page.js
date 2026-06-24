@@ -208,14 +208,14 @@ export default function ModerationPage() {
         <div className="flex gap-4 border-b border-gray-200 dark:border-steel-blue/40">
           <button 
             onClick={() => setActiveTab("reports")}
-            className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === "reports" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-papaya-whip"}`}
+            className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === "reports" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-white"}`}
           >
             {t('moderation.tabReports')} ({reports.length})
             {activeTab === "reports" && <span className="absolute bottom-0 left-0 w-full h-1 bg-steel-blue rounded-t-full"></span>}
           </button>
           <button 
             onClick={() => setActiveTab("users")}
-            className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === "users" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-papaya-whip"}`}
+            className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === "users" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-white"}`}
           >
             {t('moderation.tabUsers')}
             {activeTab === "users" && <span className="absolute bottom-0 left-0 w-full h-1 bg-steel-blue rounded-t-full"></span>}
@@ -223,7 +223,7 @@ export default function ModerationPage() {
           {isAdmin && (
             <button 
               onClick={() => setActiveTab("accounts")}
-              className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === "accounts" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-papaya-whip"}`}
+              className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === "accounts" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-white"}`}
             >
               {t('moderation.createAccount')}
               {activeTab === "accounts" && <span className="absolute bottom-0 left-0 w-full h-1 bg-steel-blue rounded-t-full"></span>}

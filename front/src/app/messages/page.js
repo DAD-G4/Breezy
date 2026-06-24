@@ -83,7 +83,7 @@ export default function MessagesInboxPage() {
           <h1 className="font-bold text-xl text-deep-space-blue dark:text-white">{t('sidebar.messages')}</h1>
           <button
             onClick={() => setComposeOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-steel-blue hover:bg-deep-space-blue dark:bg-papaya-whip dark:text-deep-space-blue dark:hover:bg-white text-white text-sm font-bold rounded-full transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-steel-blue hover:bg-deep-space-blue dark:bg-white dark:text-deep-space-blue dark:hover:bg-white text-white text-sm font-bold rounded-full transition-colors shadow-sm"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />

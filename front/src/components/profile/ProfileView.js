@@ -272,7 +272,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                     <button
                       onClick={() => setMenuOpen((o) => !o)}
                       aria-label={t('profileView.moreActions') || 'Plus'}
-                      className="p-2 rounded-full text-gray-500 hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                      className="p-2 rounded-full text-gray-500 hover:text-deep-space-blue dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />

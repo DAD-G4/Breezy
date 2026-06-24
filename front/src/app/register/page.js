@@ -51,8 +51,8 @@ export default function RegisterPage() {
           <BreezyBadge className="w-24 h-24 drop-shadow-lg" />
         </div>
 
-        <div className="w-full max-w-sm border-2 border-deep-space-blue dark:border-papaya-whip rounded-lg p-6 bg-white dark:bg-surface shadow-xl transition-colors duration-300">
-          <h1 className="text-2xl font-bold text-center mb-6 pb-4 border-b-2 border-deep-space-blue/20 dark:border-papaya-whip/20">
+        <div className="w-full max-w-sm border-2 border-deep-space-blue dark:border-white rounded-lg p-6 bg-white dark:bg-surface shadow-xl transition-colors duration-300">
+          <h1 className="text-2xl font-bold text-center mb-6 pb-4 border-b-2 border-deep-space-blue/20 dark:border-white/20">
             Register
           </h1>
 
@@ -110,7 +110,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 mt-4 rounded-full border-2 border-deep-space-blue dark:border-papaya-whip font-bold text-lg hover:bg-deep-space-blue hover:text-papaya-whip dark:hover:bg-papaya-whip dark:hover:text-deep-space-blue transition-all disabled:opacity-50"
+              className="w-full py-3 mt-4 rounded-full border-2 border-deep-space-blue dark:border-white font-bold text-lg hover:bg-deep-space-blue hover:text-white dark:hover:bg-white dark:hover:text-deep-space-blue transition-all disabled:opacity-50"
             >
               {loading ? t('common.loading') : t('register.submitButton')}
             </button>
@@ -119,7 +119,7 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => router.push("/login")}
-                className="px-6 py-2 rounded-full border-2 border-deep-space-blue dark:border-papaya-whip hover:bg-steel-blue hover:text-white hover:border-steel-blue transition-colors mb-2 mt-4"
+                className="px-6 py-2 rounded-full border-2 border-deep-space-blue dark:border-white hover:bg-steel-blue hover:text-white hover:border-steel-blue transition-colors mb-2 mt-4"
               >
                 Login
               </button>

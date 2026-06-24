@@ -104,7 +104,7 @@ export default function FollowersPage({ params }) {
       <div className="p-4 flex flex-col gap-4">
         <button
           onClick={() => router.back()}
-          className="p-2 -ml-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all w-fit"
+          className="p-2 -ml-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all w-fit"
           aria-label={t("common.back")}
         >
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">

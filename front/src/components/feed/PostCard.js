@@ -180,7 +180,7 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
         <div className="relative">
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-gray-500 hover:text-deep-space-blue dark:hover:text-papaya-whip transition-colors p-1 rounded-full hover:bg-slate-100 dark:hover:bg-white/10"
+            className="text-gray-500 hover:text-deep-space-blue dark:hover:text-white transition-colors p-1 rounded-full hover:bg-slate-100 dark:hover:bg-white/10"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />
@@ -273,7 +273,7 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
             <button
               onClick={handleEditCancel}
               disabled={editSaving}
-              className="px-4 py-1.5 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-deep-space-blue dark:hover:text-papaya-whip transition-colors"
+              className="px-4 py-1.5 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-deep-space-blue dark:hover:text-white transition-colors"
             >
               {t('postCard.cancel')}
             </button>

@@ -42,7 +42,7 @@ export default function BlockedUsersPage() {
         <div className="flex items-center gap-1">
           <button
             onClick={() => router.back()}
-            className="p-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors"
+            className="p-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors"
             aria-label={t("common.back") || "Retour"}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

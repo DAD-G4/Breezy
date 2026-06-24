@@ -165,7 +165,7 @@ function SearchContent() {
               type="button"
               onClick={handleClear}
               aria-label={t("search.clear") || "Effacer"}
-              className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-deep-space-blue dark:hover:text-papaya-whip transition-colors"
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-deep-space-blue dark:hover:text-white transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -181,7 +181,7 @@ function SearchContent() {
             className={`flex-1 pb-3 text-sm font-bold transition-colors relative ${
               activeTab === "posts"
                 ? "text-steel-blue"
-                : "text-gray-500 hover:text-deep-space-blue dark:hover:text-papaya-whip"
+                : "text-gray-500 hover:text-deep-space-blue dark:hover:text-white"
             }`}
           >
             {t("search.tabPosts")}
@@ -194,7 +194,7 @@ function SearchContent() {
             className={`flex-1 pb-3 text-sm font-bold transition-colors relative ${
               activeTab === "users"
                 ? "text-steel-blue"
-                : "text-gray-500 hover:text-deep-space-blue dark:hover:text-papaya-whip"
+                : "text-gray-500 hover:text-deep-space-blue dark:hover:text-white"
             }`}
           >
             {t("search.tabUsers")}
