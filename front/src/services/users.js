@@ -78,11 +78,13 @@ export async function resolveUser(userId) {
 
 const BATCH_SIZE = 100;
 
+// Tolère les deux formes de réponse : imbriquée (GET /profile → u.profile.*)
+// et à plat (POST /users/batch → u.display_name / u.avatar_url).
 function mapUser(u) {
   return {
     username: u.username,
-    displayName: u.profile?.display_name || u.username,
-    avatarUrl: u.profile?.avatar_url || null,
+    displayName: u.profile?.display_name || u.display_name || u.username,
+    avatarUrl: u.profile?.avatar_url || u.avatar_url || null,
   };
 }
 

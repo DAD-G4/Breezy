@@ -38,7 +38,7 @@ export default function FeedPage() {
         const userIds = raw.map((p) => p.user_id);
         const authors = await resolveUsers(userIds);
         const mapped = raw.map((p, i) =>
-          mapPost(p, { authorLabel: authors[i]?.displayName, currentUserId: user.id, locale: language })
+          mapPost(p, { authorLabel: authors[i]?.displayName, avatarUrl: authors[i]?.avatarUrl, currentUserId: user.id, locale: language })
         );
         if (active) setPosts(mapped);
       } catch (err) {

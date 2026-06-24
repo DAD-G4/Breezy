@@ -116,8 +116,17 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
 
   const userInfoContent = (
     <>
-      <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold dark:shadow-[0_0_10px_rgba(102,155,188,0.5)] overflow-hidden group-hover/author:opacity-80 transition-opacity">
-        {post.username.charAt(0).toUpperCase()}
+      <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold dark:shadow-[0_0_10px_rgba(102,155,188,0.5)] overflow-hidden group-hover/author:opacity-80 transition-opacity shrink-0">
+        {post.avatarUrl ? (
+          <img
+            src={post.avatarUrl}
+            alt={post.username}
+            className="w-full h-full object-cover"
+            onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.parentElement.textContent = post.username.charAt(0).toUpperCase(); }}
+          />
+        ) : (
+          post.username.charAt(0).toUpperCase()
+        )}
       </div>
       <div className="flex flex-col">
         <span className={`font-bold text-deep-space-blue dark:text-papaya-whip text-sm ${disableProfileLink ? '' : 'group-hover/author:underline'}`}>
