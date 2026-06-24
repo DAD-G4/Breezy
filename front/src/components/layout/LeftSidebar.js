@@ -1,7 +1,6 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "@/context/ThemeContext";
@@ -44,18 +43,11 @@ export default function LeftSidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   // Le lien Modération n'est visible que pour modérateurs / admins.
   const isStaff = user?.role === "moderator" || user?.role === "admin";
 
-  const [isNotifOpen, setIsNotifOpen] = useState(false);
-
-  const { notifications, unreadCount, markAllRead } = useNotificationsContext();
-
-  const getNotifLink = (notif) => {
-    if (notif.type === "follow") return `/profile/${notif.username}`;
-    return `/post/${notif.postId}`;
-  };
+  const { unreadCount } = useNotificationsContext();
 
   // ICÔNES 
   const iconHome = <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
@@ -78,49 +70,7 @@ export default function LeftSidebar() {
         <NavItem href="/" label={t('sidebar.home')} icon={iconHome} active={pathname === "/"} />
         <NavItem href="/search" label={t('sidebar.search')} icon={iconSearch} active={pathname === "/search"} />
         
-        <div className="relative flex">
-          <NavItem 
-            label={t('sidebar.notifications')} 
-            icon={iconNotif} 
-            active={isNotifOpen} 
-            hasNotif={unreadCount > 0}
-            onClick={() => setIsNotifOpen(!isNotifOpen)} 
-          />
-          
-          {isNotifOpen && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setIsNotifOpen(false)}></div>
-              <div className="absolute left-full top-0 ml-4 w-80 max-h-[80vh] overflow-y-auto bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-2xl shadow-xl z-50 animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col">
-                <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/10 sticky top-0 bg-white/90 dark:bg-deep-space-blue/90 backdrop-blur-md z-10">
-                  <h3 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip">{t('header.notificationsTitle')}</h3>
-                  <button onClick={markAllRead} className="text-sm font-medium text-steel-blue hover:underline">{t('header.markAllRead')}</button>
-                </div>
-                <div className="flex flex-col">
-                  {notifications.map((notif) => (
-                    <Link 
-                      href={getNotifLink(notif)}
-                      key={notif.id} 
-                      className={`flex items-start gap-3 p-4 border-b border-gray-50 dark:border-white/5 transition-colors hover:bg-slate-50 dark:hover:bg-white/5 ${notif.unread ? "bg-blue-50/50 dark:bg-steel-blue/10" : ""}`}
-                      onClick={() => setIsNotifOpen(false)}
-                    >
-                      <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold shrink-0">
-                        {notif.avatar}
-                      </div>
-                      <div className="flex flex-col flex-1 min-w-0">
-                        <p className="text-sm text-deep-space-blue dark:text-papaya-whip leading-snug">
-                          <span className="font-bold mr-1">{notif.user}</span>
-                          <span className="opacity-90">{notif.action}</span>
-                        </p>
-                        <span className={`text-xs mt-1 ${notif.unread ? "text-steel-blue font-semibold" : "text-gray-500 dark:text-gray-400"}`}>{notif.time}</span>
-                      </div>
-                      {notif.unread && <div className="w-2.5 h-2.5 rounded-full bg-steel-blue mt-2 shrink-0"></div>}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+        <NavItem href="/notifications" label={t('sidebar.notifications')} icon={iconNotif} active={pathname?.startsWith("/notifications")} hasNotif={unreadCount > 0} />
 
         <NavItem href="/messages" label={t('sidebar.messages')} icon={iconMessages} active={pathname?.startsWith("/messages")} />
         <NavItem href="/profile" label={t('sidebar.profile')} icon={iconProfile} active={pathname?.startsWith("/profile")} />
@@ -145,6 +95,13 @@ export default function LeftSidebar() {
           <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
         )}
         <span className="hidden lg:inline font-medium">{theme === "dark" ? t('sidebar.lightMode') : t('sidebar.darkMode')}</span>
+      </button>
+
+      <button onClick={logout} className="flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start" aria-label={t('sidebar.logout')}>
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        <span className="hidden lg:inline font-medium">{t('sidebar.logout')}</span>
       </button>
     </aside>
   );
