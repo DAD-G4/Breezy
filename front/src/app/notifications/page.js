@@ -11,7 +11,7 @@ export default function NotificationsPage() {
   useRequireAuth();
   const { t } = useLanguage();
   const router = useRouter();
-  const { notifications, unreadCount, markAllRead, deleteNotification, deleteAllRead } =
+  const { notifications, unreadCount, markRead, markAllRead, deleteAllRead } =
     useNotificationsContext();
 
   const getNotifLink = useCallback((notif) => {
@@ -22,10 +22,11 @@ export default function NotificationsPage() {
   const handleClick = useCallback(
     async (notif) => {
       const link = getNotifLink(notif);
-      await deleteNotification(notif.id);
+      // On marque comme lue (sans supprimer) puis on navigue.
+      if (notif.unread) markRead(notif.id);
       router.push(link);
     },
-    [getNotifLink, deleteNotification, router],
+    [getNotifLink, markRead, router],
   );
 
   const handleClearRead = useCallback(async () => {

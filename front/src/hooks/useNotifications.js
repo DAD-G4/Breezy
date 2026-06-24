@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   getNotifications,
+  markAsRead as svcMarkAsRead,
   markAllRead as svcMarkAllRead,
   deleteNotification as svcDeleteNotification,
   deleteAllRead as svcDeleteAllRead,
@@ -59,6 +60,12 @@ export function useNotifications(t, locale) {
     await svcMarkAllRead(ids);
   }, [notifications]);
 
+  // Marque UNE notification comme lue (sans la supprimer).
+  const markRead = useCallback(async (id) => {
+    setNotifications((ns) => ns.map((n) => (n.id === id ? { ...n, unread: false } : n)));
+    await svcMarkAsRead(id).catch(() => {});
+  }, []);
+
   const deleteNotification = useCallback(async (id) => {
     setNotifications((ns) => ns.filter((n) => n.id !== id));
     await svcDeleteNotification(id);
@@ -69,5 +76,5 @@ export function useNotifications(t, locale) {
     await svcDeleteAllRead();
   }, []);
 
-  return { notifications, unreadCount, markAllRead, deleteNotification, deleteAllRead: deleteAllReadNotifications };
+  return { notifications, unreadCount, markRead, markAllRead, deleteNotification, deleteAllRead: deleteAllReadNotifications };
 }
