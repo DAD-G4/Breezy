@@ -1,18 +1,26 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "../../components/layout/AppShell";
 import { getApiErrorMessage } from "../../lib/api";
 import { createPost } from "../../services/posts";
 import { upload } from "../../services/media";
-import { useRequireAuth } from "../../context/AuthContext";
+import { resolveUser } from "../../services/users";
+import { useAuth, useRequireAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
 export default function CreatePostPage() {
   useRequireAuth();
   const router = useRouter();
   const { t } = useLanguage();
+  const { user } = useAuth();
+
+  // Avatar du créateur (résolu depuis son profil).
+  const [me, setMe] = useState(null);
+  useEffect(() => {
+    if (user?.id) resolveUser(user.id).then(setMe).catch(() => {});
+  }, [user?.id]);
 
   // etats du formulaire
   const [content, setContent] = useState("");
@@ -94,13 +102,17 @@ export default function CreatePostPage() {
           className="p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-surface shadow-sm dark:shadow-[0_0_15px_rgba(102,155,188,0.15)] flex flex-col gap-4 transition-all"
         >
           
-          {/* Section Utilisateur A REDIRIGER VERS L'USER PROFILE */}
+          {/* Section Utilisateur */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold dark:shadow-[0_0_10px_rgba(102,155,188,0.5)]">
-              M
+            <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold overflow-hidden dark:shadow-[0_0_10px_rgba(102,155,188,0.5)]">
+              {me?.avatarUrl ? (
+                <img src={me.avatarUrl} alt={me.displayName || user?.username} className="w-full h-full object-cover" />
+              ) : (
+                (me?.displayName || user?.username || "?").charAt(0).toUpperCase()
+              )}
             </div>
               <span className="font-bold text-deep-space-blue dark:text-white text-sm">
-                {t('common.me')}
+                {me?.displayName || user?.username || t('common.me')}
             </span>
           </div>
 
@@ -119,7 +131,7 @@ export default function CreatePostPage() {
               {mediaType === "video" ? (
                 <video src={imagePreview} controls className="w-full h-auto max-h-[420px] bg-black" />
               ) : (
-                <img src={imagePreview} alt={t('createPost.imagePreviewAlt')} className="w-full h-auto object-cover" />
+                <img src={imagePreview} alt={t('createPost.imagePreviewAlt')} className="mx-auto max-h-[340px] w-auto max-w-full object-contain" />
               )}
               {/* retirer le média */}
               <button
