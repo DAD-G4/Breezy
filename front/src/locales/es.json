@@ -15,7 +15,8 @@
     "lightMode": "Modo claro",
     "darkMode": "Modo oscuro",
     "notifications": "Notificaciones",
-    "moderation": "Moderación"
+    "moderation": "Moderación",
+    "logout": "Cerrar sesión"
   },
   "header": {
     "createPostAria": "Crear una publicación",
@@ -63,28 +64,31 @@
   },
   "login": {
     "title": "Iniciar sesión",
-    "emailPlaceholder": "correo electrónico:",
-    "passwordPlaceholder": "contraseña:",
+    "emailPlaceholder": "correo electrónico",
+    "passwordPlaceholder": "contraseña",
     "errorMessage": "Credenciales incorrectas. Inténtalo de nuevo.",
-    "submitButton": "Iniciar sesión",
+    "submitButton": "Conexión",
     "registerButton": "Registrarse",
     "noAccount": "¿Aún no tienes una cuenta?"
   },
   "register": {
     "title": "Registrarse",
-    "displayNamePlaceholder": "nombre de pantalla:",
-    "usernamePlaceholder": "Usuario (@):",
-    "emailPlaceholder": "correo electrónico:",
-    "passwordPlaceholder": "contraseña:",
+    "displayNamePlaceholder": "nombre de pantalla",
+    "usernamePlaceholder": "Usuario (@)",
+    "emailPlaceholder": "correo electrónico",
+    "passwordPlaceholder": "contraseña",
     "errorMessage": "Error al registrarse. Por favor verifique su información.",
     "submitButton": "Registrarse",
     "loginButton": "Iniciar sesión",
     "alreadyHaveAccount": "¿Ya tienes una cuenta?"
   },
   "search": {
-    "placeholder": "Nombre de usuario...",
-    "noResults": "No se encontraron usuarios para",
-    "error": "Búsqueda fallida."
+    "placeholder": "Buscar...",
+    "noResults": "No se encontraron resultados para",
+    "error": "Búsqueda fallida.",
+    "tabPosts": "Publicaciones",
+    "tabUsers": "Usuarios",
+    "trending": "Tendencias"
   },
   "conversation": {
     "placeholder": "Tu mensaje..."
@@ -103,6 +107,7 @@
     "justNow": "Ahora mismo",
     "commentError": "No se pudo agregar el comentario.",
     "replyError": "No se pudo agregar la respuesta.",
+    "deleteCommentError": "No se pudo eliminar el comentario.",
     "send": "Enviar"
   },
   "profile": {
@@ -126,6 +131,7 @@
     "post2": "Primera publicación en Breezy."
   },
   "profileView": {
+    "editProfile": "Editar perfil",
     "editNameAria": "Editar nombre",
     "editBioAria": "Editar biografía",
     "following": "Siguiendo",
@@ -133,8 +139,12 @@
     "followersLabel": "Seguidores",
     "followingLabel": "Seguidos",
     "saveButton": "Guardar",
+    "cancelButton": "Cancelar",
     "yourPosts": "Tus publicaciones:",
-    "userPosts": "Publicaciones de {{name}}:"
+    "userPosts": "Publicaciones de {{name}}:",
+    "report": "Denunciar usuario",
+    "reportUser": "Denunciar a este usuario",
+    "reported": "Usuario denunciado ✓"
   },
   "postCard": {
     "report": "Denunciar publicación",
@@ -142,13 +152,20 @@
     "reportAlert": "La publicación de {{username}} ha sido denunciada.",
     "block": "Bloquear a {{username}}",
     "blockAlert": "Has bloqueado a {{username}}.",
-    "imageAlt": "Contenido de la publicación"
+    "imageAlt": "Contenido de la publicación",
+    "edit": "Editar publicación",
+    "delete": "Eliminar publicación",
+    "editing": "Editando...",
+    "cancel": "Cancelar",
+    "save": "Guardar"
   },
   "commentSection": {
     "reply": "Responder",
     "replySent": "¡Tu respuesta ha sido enviada!",
     "replyTo": "Responder a {{user}}...",
-    "comments": "Comentarios"
+    "comments": "Comentarios",
+    "delete": "Eliminar",
+    "deleted": "Comentario eliminado"
   },
   "settingsPage": {
     "searchPlaceholder": "Buscar un ajuste...",
@@ -176,6 +193,10 @@
     "location": {
       "title": "Servicio de Ubicación",
       "desc": "Permitir añadir una ubicación a tus publicaciones."
+    },
+    "logout": {
+      "title": "Cerrar Sesión",
+      "desc": "Cerrar sesión en tu cuenta de Breezy."
     }
   },
   "moderation": {
@@ -200,6 +221,29 @@
     "decision": "Decisión de moderación",
     "reportedBy": "Denunciado por",
     "author": "Autor:",
-    "reports": "denuncia(s)"
+    "reports": "denuncia(s)",
+    "createAccount": "Crear cuenta",
+    "accountCreated": "Cuenta creada con éxito",
+    "username": "Nombre de usuario",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "role": "Rol",
+    "roleUser": "Usuario",
+    "roleModerator": "Moderador",
+    "roleAdmin": "Administrador"
+  },
+  "toast": {
+    "postReported": "Publicación denunciada con éxito",
+    "userReported": "Usuario denunciado con éxito"
+  },
+  "notifications": {
+    "clearRead": "Borrar leídas",
+    "empty": "No hay notificaciones aún."
+  },
+  "followersPage": {
+    "empty": "Sin seguidores aún."
+  },
+  "followingPage": {
+    "empty": "No sigue a nadie aún."
   }
 }

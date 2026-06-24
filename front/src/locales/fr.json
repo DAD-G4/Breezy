@@ -15,7 +15,8 @@
     "lightMode": "Mode clair",
     "darkMode": "Mode sombre",
     "notifications": "Notifications",
-    "moderation": "Modération"
+    "moderation": "Modération",
+    "logout": "Se déconnecter"
   },
   "header": {
     "createPostAria": "Créer un post",
@@ -63,28 +64,31 @@
   },
   "login": {
     "title": "Connexion",
-    "emailPlaceholder": "adresse mail :",
-    "passwordPlaceholder": "mot de passe :",
+    "emailPlaceholder": "adresse mail",
+    "passwordPlaceholder": "mot de passe",
     "errorMessage": "Identifiants incorrects. Veuillez réessayer.",
-    "submitButton": "Se connecter",
+    "submitButton": "Connexion",
     "registerButton": "S'inscrire",
     "noAccount": "Pas encore de compte ?"
   },
   "register": {
     "title": "Inscription",
-    "displayNamePlaceholder": "nom d'affichage :",
-    "usernamePlaceholder": "Identifiant (@) :",
-    "emailPlaceholder": "adresse mail :",
-    "passwordPlaceholder": "mot de passe :",
+    "displayNamePlaceholder": "nom d'affichage",
+    "usernamePlaceholder": "Identifiant (@)",
+    "emailPlaceholder": "adresse mail",
+    "passwordPlaceholder": "mot de passe",
     "errorMessage": "Erreur lors de l'inscription. Veuillez vérifier vos informations.",
     "submitButton": "S'inscrire",
     "loginButton": "Connexion",
     "alreadyHaveAccount": "Vous avez déjà un compte ?"
   },
   "search": {
-    "placeholder": "Nom d'utilisateur...",
-    "noResults": "Aucun utilisateur trouvé pour",
-    "error": "Recherche impossible."
+    "placeholder": "Rechercher...",
+    "noResults": "Aucun résultat pour",
+    "error": "Recherche impossible.",
+    "tabPosts": "Posts",
+    "tabUsers": "Utilisateurs",
+    "trending": "Tendances"
   },
   "conversation": {
     "placeholder": "Votre message..."
@@ -103,6 +107,7 @@
     "justNow": "À l'instant",
     "commentError": "Impossible d'ajouter le commentaire.",
     "replyError": "Impossible d'ajouter la réponse.",
+    "deleteCommentError": "Impossible de supprimer le commentaire.",
     "send": "Envoyer"
   },
   "profile": {
@@ -126,6 +131,7 @@
     "post2": "Premier post sur Breezy."
   },
   "profileView": {
+    "editProfile": "Modifier le profil",
     "editNameAria": "Éditer le nom",
     "editBioAria": "Éditer la bio",
     "following": "Abonné",
@@ -133,8 +139,12 @@
     "followersLabel": "Abonnés",
     "followingLabel": "Abonnements",
     "saveButton": "Sauvegarder",
+    "cancelButton": "Annuler",
     "yourPosts": "Vos posts :",
-    "userPosts": "Posts de {{name}} :"
+    "userPosts": "Posts de {{name}} :",
+    "report": "Signaler l'utilisateur",
+    "reportUser": "Signaler cet utilisateur",
+    "reported": "Utilisateur signalé ✓"
   },
   "postCard": {
     "report": "Signaler le post",
@@ -142,13 +152,20 @@
     "reportAlert": "Le post de {{username}} a été signalé.",
     "block": "Bloquer {{username}}",
     "blockAlert": "Vous avez bloqué {{username}}.",
-    "imageAlt": "Contenu du post"
+    "imageAlt": "Contenu du post",
+    "edit": "Modifier le post",
+    "delete": "Supprimer le post",
+    "editing": "Modification...",
+    "cancel": "Annuler",
+    "save": "Enregistrer"
   },
   "commentSection": {
     "reply": "Répondre",
     "replySent": "Votre réponse a été envoyée !",
     "replyTo": "Répondre à {{user}}...",
-    "comments": "Commentaires"
+    "comments": "Commentaires",
+    "delete": "Supprimer",
+    "deleted": "Commentaire supprimé"
   },
   "settingsPage": {
     "searchPlaceholder": "Rechercher un paramètre...",
@@ -176,6 +193,10 @@
     "location": {
       "title": "Service de localisation",
       "desc": "Permettre d'ajouter un lieu à vos publications."
+    },
+    "logout": {
+      "title": "Se déconnecter",
+      "desc": "Se déconnecter de votre compte Breezy."
     }
   },
   "moderation": {
@@ -200,6 +221,29 @@
     "decision": "Décision de modération",
     "reportedBy": "Signalé par",
     "author": "Auteur :",
-    "reports": "signalement(s)"
+    "reports": "signalement(s)",
+    "createAccount": "Créer un compte",
+    "accountCreated": "Compte créé avec succès",
+    "username": "Nom d'utilisateur",
+    "email": "Adresse mail",
+    "password": "Mot de passe",
+    "role": "Rôle",
+    "roleUser": "Utilisateur",
+    "roleModerator": "Modérateur",
+    "roleAdmin": "Administrateur"
+  },
+  "toast": {
+    "postReported": "Post signalé avec succès",
+    "userReported": "Utilisateur signalé avec succès"
+  },
+  "notifications": {
+    "clearRead": "Effacer les lues",
+    "empty": "Aucune notification pour le moment."
+  },
+  "followersPage": {
+    "empty": "Aucun abonné pour le moment."
+  },
+  "followingPage": {
+    "empty": "Ne suit personne pour le moment."
   }
 }

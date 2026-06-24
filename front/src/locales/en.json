@@ -15,7 +15,8 @@
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
     "notifications": "Notifications",
-    "moderation": "Moderation"
+    "moderation": "Moderation",
+    "logout": "Log out"
   },
   "header": {
     "createPostAria": "Create a post",
@@ -63,28 +64,31 @@
   },
   "login": {
     "title": "Login",
-    "emailPlaceholder": "email address:",
-    "passwordPlaceholder": "password:",
+    "emailPlaceholder": "email address",
+    "passwordPlaceholder": "password",
     "errorMessage": "Incorrect credentials. Please try again.",
-    "submitButton": "Log in",
+    "submitButton": "Connection",
     "registerButton": "Sign Up",
     "noAccount": "Don't have an account yet?"
   },
   "register": {
     "title": "Register",
-    "displayNamePlaceholder": "display name:",
-    "usernamePlaceholder": "Username (@):",
-    "emailPlaceholder": "email address:",
-    "passwordPlaceholder": "password:",
+    "displayNamePlaceholder": "display name",
+    "usernamePlaceholder": "Username (@)",
+    "emailPlaceholder": "email address",
+    "passwordPlaceholder": "password",
     "errorMessage": "Error during registration. Please check your information.",
     "submitButton": "Sign up",
     "loginButton": "Login",
     "alreadyHaveAccount": "Already have an account?"
   },
   "search": {
-    "placeholder": "Username...",
-    "noResults": "No users found for",
-    "error": "Search failed."
+    "placeholder": "Search...",
+    "noResults": "No results found for",
+    "error": "Search failed.",
+    "tabPosts": "Posts",
+    "tabUsers": "Users",
+    "trending": "Trending"
   },
   "conversation": {
     "placeholder": "Your message..."
@@ -103,6 +107,7 @@
     "justNow": "Just now",
     "commentError": "Could not add the comment.",
     "replyError": "Could not add the reply.",
+    "deleteCommentError": "Could not delete the comment.",
     "send": "Send"
   },
   "profile": {
@@ -126,6 +131,7 @@
     "post2": "First post on Breezy."
   },
   "profileView": {
+    "editProfile": "Edit Profile",
     "editNameAria": "Edit name",
     "editBioAria": "Edit bio",
     "following": "Following",
@@ -133,8 +139,12 @@
     "followersLabel": "Followers",
     "followingLabel": "Following",
     "saveButton": "Save",
+    "cancelButton": "Cancel",
     "yourPosts": "Your posts:",
-    "userPosts": "{{name}}'s posts:"
+    "userPosts": "{{name}}'s posts:",
+    "report": "Report user",
+    "reportUser": "Report this user",
+    "reported": "User reported ✓"
   },
   "postCard": {
     "report": "Report post",
@@ -142,13 +152,20 @@
     "reportAlert": "{{username}}'s post has been reported.",
     "block": "Block {{username}}",
     "blockAlert": "You have blocked {{username}}.",
-    "imageAlt": "Post content"
+    "imageAlt": "Post content",
+    "edit": "Edit post",
+    "delete": "Delete post",
+    "editing": "Editing...",
+    "cancel": "Cancel",
+    "save": "Save"
   },
   "commentSection": {
     "reply": "Reply",
     "replySent": "Your reply has been sent!",
     "replyTo": "Reply to {{user}}...",
-    "comments": "Comments"
+    "comments": "Comments",
+    "delete": "Delete",
+    "deleted": "Comment deleted"
   },
   "settingsPage": {
     "searchPlaceholder": "Search for a setting...",
@@ -176,6 +193,10 @@
     "location": {
       "title": "Location Service",
       "desc": "Allow adding a location to your publications."
+    },
+    "logout": {
+      "title": "Log Out",
+      "desc": "Sign out of your Breezy account."
     }
   },
   "moderation": {
@@ -200,6 +221,29 @@
     "decision": "Moderation decision",
     "reportedBy": "Reported by",
     "author": "Author:",
-    "reports": "report(s)"
+    "reports": "report(s)",
+    "createAccount": "Create Account",
+    "accountCreated": "Account created successfully",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "roleUser": "User",
+    "roleModerator": "Moderator",
+    "roleAdmin": "Admin"
+  },
+  "toast": {
+    "postReported": "Post reported successfully",
+    "userReported": "User reported successfully"
+  },
+  "notifications": {
+    "clearRead": "Clear read",
+    "empty": "No notifications yet."
+  },
+  "followersPage": {
+    "empty": "No followers yet."
+  },
+  "followingPage": {
+    "empty": "Not following anyone yet."
   }
 }
