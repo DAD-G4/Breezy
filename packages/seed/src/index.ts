@@ -61,18 +61,27 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const convId = (a: number, b: number) => `${Math.min(a, b)}-${Math.max(a, b)}`;
 
 /**
- * Attend que la base ET les tables (créées par le `sync` des services au
- * démarrage) soient disponibles, via une sonde findOne.
+ * Attend que PostgreSQL soit joignable, puis matérialise le schéma relationnel
+ * via `sequelize.sync()`.
+ *
+ * En production, les services n'auto-syncent pas (cf. connectPostgres, qui ne
+ * sync qu'en dehors de NODE_ENV=production). Ce one-shot `seed` — qui démarre
+ * après que Postgres soit `healthy` — est donc le point unique qui crée les
+ * tables avant tout peuplement. Importer @breezy/shared enregistre les 5
+ * modèles Postgres (User, Profile, Follower, Ban, BlockedUser), donc sync()
+ * crée bien l'ensemble du schéma. Idempotent : sans `force` ni `alter`, sync()
+ * laisse intactes les tables existantes → relancer le seed est sûr.
  */
-async function waitForSchema(retries = 40, delayMs = 2000): Promise<void> {
+async function ensureSchema(retries = 40, delayMs = 2000): Promise<void> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      await UserModel.findOne({ where: { email: '__seed_probe__' } });
-      console.log('✅ Base de données et tables prêtes.');
+      await sequelize.authenticate();
+      await sequelize.sync();
+      console.log('✅ PostgreSQL joignable et schéma prêt.');
       return;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.log(`⏳ En attente de la base/tables (${attempt}/${retries}) : ${msg}`);
+      console.log(`⏳ En attente de PostgreSQL (${attempt}/${retries}) : ${msg}`);
       await sleep(delayMs);
     }
   }
@@ -319,7 +328,7 @@ async function seedMessages(id: Record<string, number>): Promise<void> {
 
 async function seed(): Promise<void> {
   console.log('🌱 Seed Breezy — démarrage');
-  await waitForSchema();
+  await ensureSchema();
   await connectMongo();
 
   // 1) PostgreSQL : comptes + profils + abonnements

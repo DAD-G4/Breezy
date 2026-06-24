@@ -95,7 +95,7 @@ describe('Ban-at-login Integration Tests', () => {
     expect(res.body).toHaveProperty('message', 'Login successful');
     expect(res.body.data.user.email).toBe(userCredentials.email);
 
-    const setCookie = res.headers['set-cookie'] as string[];
+    const setCookie = res.headers['set-cookie'] as unknown as string[];
     expect(setCookie).toBeDefined();
     expect(setCookie.some((c: string) => c.startsWith('accessToken='))).toBe(true);
   });

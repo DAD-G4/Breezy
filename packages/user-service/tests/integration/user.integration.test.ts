@@ -12,7 +12,6 @@ import {
 } from '@breezy/shared/src/test-utils';
 import { sequelize } from '@breezy/shared/src/config/connection';
 import { Follower } from '@breezy/shared/src/models/postgres';
-import PostModel from '@breezy/shared/src/models/mongodb/Post';
 import { errorHandler } from '@breezy/shared';
 import usersRoutes from '../../src/routes/users';
 import followsRoutes from '../../src/routes/follows';

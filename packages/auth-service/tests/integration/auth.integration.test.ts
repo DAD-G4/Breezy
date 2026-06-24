@@ -20,7 +20,7 @@ function buildApp() {
 }
 
 function extractCookie(res: request.Response, name: string): string | undefined {
-  const setCookie = res.headers['set-cookie'];
+  const setCookie = res.headers['set-cookie'] as unknown as string[] | undefined;
   if (!setCookie) return undefined;
   const match = setCookie.find((c: string) => c.startsWith(`${name}=`));
   if (!match) return undefined;
@@ -241,7 +241,7 @@ describe('Auth Integration Tests', () => {
         .post('/api/auth/logout')
         .expect(200);
 
-      const setCookie = res.headers['set-cookie'] as string[];
+      const setCookie = res.headers['set-cookie'] as unknown as string[];
       expect(setCookie).toBeDefined();
       expect(setCookie.some((c: string) => c.startsWith('accessToken=;'))).toBe(true);
       expect(setCookie.some((c: string) => c.startsWith('refreshToken=;'))).toBe(true);

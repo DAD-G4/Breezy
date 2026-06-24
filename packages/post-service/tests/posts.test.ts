@@ -28,6 +28,9 @@ jest.mock('@breezy/shared', () => {
     UserModel: mockUserModel,
     NotificationModel: mockNotificationModel,
     Ban: { findOne: jest.fn().mockResolvedValue(null) },
+    // Block enforcement: controllers query BlockedUser via isBlockedBetween.
+    // Default: nobody is blocked, so the model must be stubbed (no real DB).
+    BlockedUser: { findOne: jest.fn().mockResolvedValue(null) },
     success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
       const code = statusCode || 200;
       const body: any = { data };

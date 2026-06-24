@@ -53,7 +53,6 @@ describe('DM Integration Tests', () => {
   let userToken: string;
   let testUser: any;
   let otherUser: any;
-  let otherUserToken: string;
 
   beforeEach(async () => {
     const result = await createTestUser({
@@ -73,12 +72,6 @@ describe('DM Integration Tests', () => {
       username: 'receiver',
     });
     otherUser = otherResult.user;
-    otherUserToken = generateToken({
-      id: otherUser.id,
-      username: otherUser.username,
-      email: 'receiver@test.com',
-      role: 'user',
-    });
   });
 
   describe('POST /api/dms/send — Send Message', () => {

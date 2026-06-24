@@ -19,6 +19,9 @@ jest.mock('@breezy/shared', () => {
     ...actual,
     UserModel: mockUserModel,
     ProfileModel: mockProfileModel,
+    // Ban-at-login check: login() queries Ban.findOne. Default: no ban.
+    // Stub it so the unit test never hits a real Postgres connection.
+    Ban: { findOne: jest.fn().mockResolvedValue(null) },
     getJwtSecret: jest.fn(() => process.env.JWT_SECRET || 'default-secret'),
     success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
       const code = statusCode || 200;

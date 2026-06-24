@@ -44,6 +44,9 @@ jest.mock('@breezy/shared', () => {
     ...actual,
     DirectMessageModel: mockDirectMessageModel,
     NotificationModel: mockNotificationModel,
+    // Block enforcement: the controller calls isBlockedBetween → BlockedUser.findOne.
+    // Default: not blocked. Must be stubbed so unit tests never touch a real DB.
+    BlockedUser: { findOne: jest.fn().mockResolvedValue(null) },
     Ban: mockBan,
     success: mockSuccess,
     error: mockError,

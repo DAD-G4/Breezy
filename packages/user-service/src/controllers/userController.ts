@@ -1,4 +1,4 @@
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import { Op } from 'sequelize';
 import { UserModel, ProfileModel, Follower, BlockedUser, PostModel, success, error, AuthRequest } from '@breezy/shared';
 

@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { Op } from 'sequelize';
-import { ReportModel as Report, AuthRequest, Ban, UserModel, UserRole, ROLE_HIERARCHY, success, error } from '@breezy/shared';
+import { ReportModel as Report, AuthRequest, Ban, UserModel, ROLE_HIERARCHY, success, error } from '@breezy/shared';
 
 export async function createReport(
   req: AuthRequest,
