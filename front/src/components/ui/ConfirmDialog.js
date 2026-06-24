@@ -63,7 +63,7 @@ export default function ConfirmDialog({
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-sm bg-white dark:bg-deep-space-blue rounded-2xl shadow-2xl border border-gray-200 dark:border-steel-blue/30 overflow-hidden animate-in zoom-in-95 fade-in duration-200"
+        className="w-full max-w-sm bg-white dark:bg-surface rounded-2xl shadow-2xl border border-gray-200 dark:border-steel-blue/30 overflow-hidden animate-in zoom-in-95 fade-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6 flex flex-col items-center text-center gap-3">

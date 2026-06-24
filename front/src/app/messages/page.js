@@ -108,7 +108,7 @@ export default function MessagesInboxPage() {
             <Link
               key={conv.username}
               href={`/messages/${encodeURIComponent(conv.username)}`}
-              className={`flex items-center gap-4 p-4 rounded-xl border ${conv.unread ? 'border-steel-blue/50 dark:border-steel-blue bg-blue-50/50 dark:bg-steel-blue/10' : 'border-gray-100 dark:border-steel-blue/20 bg-white dark:bg-deep-space-blue'} hover:shadow-md transition-all duration-200`}
+              className={`flex items-center gap-4 p-4 rounded-xl border ${conv.unread ? 'border-steel-blue/50 dark:border-steel-blue bg-blue-50/50 dark:bg-steel-blue/10' : 'border-gray-100 dark:border-steel-blue/20 bg-white dark:bg-surface'} hover:shadow-md transition-all duration-200`}
             >
               <div className="w-12 h-12 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                 {conv.displayName.charAt(0).toUpperCase()}
@@ -147,7 +147,7 @@ export default function MessagesInboxPage() {
           onClick={() => setComposeOpen(false)}
         >
           <div
-            className="w-full max-w-md bg-white dark:bg-deep-space-blue rounded-2xl shadow-xl border border-gray-200 dark:border-steel-blue/30 overflow-hidden"
+            className="w-full max-w-md bg-white dark:bg-surface rounded-2xl shadow-xl border border-gray-200 dark:border-steel-blue/30 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/10">

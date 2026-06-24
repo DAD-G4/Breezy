@@ -72,7 +72,7 @@ export default function BlockedUsersPage() {
           {!loading && blockedUsers.map((u) => (
             <div
               key={u.id}
-              className="flex items-center gap-3 p-4 border border-gray-200 dark:border-steel-blue/20 rounded-xl bg-white dark:bg-deep-space-blue/60"
+              className="flex items-center gap-3 p-4 border border-gray-200 dark:border-steel-blue/20 rounded-xl bg-white dark:bg-surface/70"
             >
               <Link
                 href={`/profile/${u.username}`}

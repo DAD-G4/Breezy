@@ -238,7 +238,7 @@ export default function ModerationPage() {
               <p className="text-center py-10 text-gray-500">{t('moderation.noReports')}</p>
             ) : (
               reports.map((report) => (
-                <div key={report.id} className="p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm">
+                <div key={report.id} className="p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-surface shadow-sm">
                   <div className="flex justify-between items-start mb-2">
                     <span className="px-3 py-1 bg-brick-red/10 text-brick-red text-xs font-bold rounded-full">
                       {report.reason}
@@ -276,7 +276,7 @@ export default function ModerationPage() {
               <select 
                 value={userFilter}
                 onChange={(e) => setUserFilter(e.target.value)}
-                className="text-sm bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-lg px-3 py-1.5 outline-none text-deep-space-blue dark:text-papaya-whip cursor-pointer shadow-sm"
+                className="text-sm bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/40 rounded-lg px-3 py-1.5 outline-none text-deep-space-blue dark:text-papaya-whip cursor-pointer shadow-sm"
               >
                 <option value="all">{t('moderation.filterAll')}</option>
                 <option value="active">{t('moderation.statusActive')}</option>
@@ -290,7 +290,7 @@ export default function ModerationPage() {
                 <p className="text-center py-10 text-gray-500">{t('moderation.noUsers')}</p>
               ) : (
                 filteredUsers.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm">
+                  <div key={user.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-surface shadow-sm">
                     
                     <div className="flex flex-col">
                       <span className="font-bold text-deep-space-blue dark:text-papaya-whip">@{user.username}</span>
@@ -332,7 +332,7 @@ export default function ModerationPage() {
         {/* CONTENU : CRÉATION DE COMPTE (Admin) */}
         {activeTab === "accounts" && isAdmin && (
           <div className="flex flex-col gap-4">
-            <form onSubmit={handleCreateAccount} className="flex flex-col gap-4 p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm">
+            <form onSubmit={handleCreateAccount} className="flex flex-col gap-4 p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-surface shadow-sm">
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip">{t('moderation.username')}</label>
                 <input

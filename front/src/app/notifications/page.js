@@ -72,7 +72,7 @@ export default function NotificationsPage() {
               className={`flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 text-left w-full hover:shadow-md ${
                 notif.unread
                   ? "border-steel-blue/50 dark:border-steel-blue bg-blue-50/50 dark:bg-steel-blue/10"
-                  : "border-gray-100 dark:border-steel-blue/20 bg-white dark:bg-deep-space-blue"
+                  : "border-gray-100 dark:border-steel-blue/20 bg-white dark:bg-surface"
               }`}
             >
               <div className="w-11 h-11 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold shrink-0">

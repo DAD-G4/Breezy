@@ -57,7 +57,7 @@ export default function SettingsPage() {
         {/* DARK MODE TOGGLE */}
         <button
           onClick={toggleDarkMode}
-          className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-deep-space-blue shadow-sm hover:shadow-md dark:hover:border-steel-blue/70 transition-all duration-200 text-left group"
+          className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-surface shadow-sm hover:shadow-md dark:hover:border-steel-blue/70 transition-all duration-200 text-left group"
         >
           <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-white/5 flex items-center justify-center text-steel-blue flex-shrink-0 group-hover:scale-110 transition-transform">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +89,7 @@ export default function SettingsPage() {
         <div className="flex flex-col">
           <button
             onClick={() => setOpenDropdown(!openDropdown)}
-            className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-deep-space-blue shadow-sm hover:shadow-md dark:hover:border-steel-blue/70 transition-all duration-200 text-left group"
+            className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-surface shadow-sm hover:shadow-md dark:hover:border-steel-blue/70 transition-all duration-200 text-left group"
           >
             <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-white/5 flex items-center justify-center text-steel-blue flex-shrink-0 group-hover:scale-110 transition-transform">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +120,7 @@ export default function SettingsPage() {
           </button>
 
           {openDropdown && (
-            <div className="mx-4 mt-2 p-2 bg-white dark:bg-deep-space-blue border border-gray-100 dark:border-steel-blue/30 rounded-xl shadow-inner flex flex-col gap-1">
+            <div className="mx-4 mt-2 p-2 bg-white dark:bg-surface border border-gray-100 dark:border-steel-blue/30 rounded-xl shadow-inner flex flex-col gap-1">
               {languageOptions.map((option) => (
                 <button
                   key={option.value}
@@ -141,7 +141,7 @@ export default function SettingsPage() {
         {/* LOGOUT BUTTON */}
         <button
           onClick={logout}
-          className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-deep-space-blue shadow-sm hover:shadow-md dark:hover:border-steel-blue/70 transition-all duration-200 text-left group"
+          className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-surface shadow-sm hover:shadow-md dark:hover:border-steel-blue/70 transition-all duration-200 text-left group"
         >
           <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-white/5 flex items-center justify-center text-steel-blue flex-shrink-0 group-hover:scale-110 transition-transform">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,7 +162,7 @@ export default function SettingsPage() {
         {/* BLOCKED USERS → page dédiée */}
         <Link
           href="/settings/blocked"
-          className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-deep-space-blue shadow-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+          className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-surface shadow-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
         >
           <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-white/5 flex items-center justify-center text-steel-blue flex-shrink-0">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

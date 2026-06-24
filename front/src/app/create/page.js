@@ -91,7 +91,7 @@ export default function CreatePostPage() {
         {/* Carte de création */}
         <form 
           onSubmit={handleSubmit} 
-          className="p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm dark:shadow-[0_0_15px_rgba(102,155,188,0.15)] flex flex-col gap-4 transition-all"
+          className="p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-surface shadow-sm dark:shadow-[0_0_15px_rgba(102,155,188,0.15)] flex flex-col gap-4 transition-all"
         >
           
           {/* Section Utilisateur A REDIRIGER VERS L'USER PROFILE */}

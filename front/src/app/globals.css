@@ -8,6 +8,11 @@
   --color-papaya-whip: #fdf0d5;
   --color-deep-space-blue: #003049;
   --color-steel-blue: #669bbc;
+
+  /* Thème sombre : fond quasi-noir (page) + surface légèrement plus claire
+     (cartes) pour un rendu élégant avec relief, plutôt que le bleu foncé. */
+  --color-night: #0a0a0c;
+  --color-surface: #17181d;
 }
 
 /* ──────────────────────────────────────────────────────────────────────

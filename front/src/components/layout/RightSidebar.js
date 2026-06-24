@@ -67,7 +67,7 @@ export default function RightSidebar() {
         </form>
 
         {/* TENDANCES */}
-        <section className="bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/30 rounded-2xl overflow-hidden">
+        <section className="bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/30 rounded-2xl overflow-hidden">
           <h2 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip px-4 pt-4 pb-2">
             {t('rightSidebar.trendsTitle')}
           </h2>
@@ -100,7 +100,7 @@ export default function RightSidebar() {
 
         {/* SUGGESTIONS */}
         {suggestions.length > 0 && (
-          <section className="bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/30 rounded-2xl overflow-hidden">
+          <section className="bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/30 rounded-2xl overflow-hidden">
             <h2 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip px-4 pt-4 pb-2">
               {t('rightSidebar.suggestionsTitle')}
             </h2>

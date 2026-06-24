@@ -194,7 +194,7 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
                 onClick={() => setIsMenuOpen(false)}
               ></div>
 
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-xl shadow-lg dark:shadow-[0_5px_20px_rgba(0,0,0,0.5)] z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/40 rounded-xl shadow-lg dark:shadow-[0_5px_20px_rgba(0,0,0,0.5)] z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
                 
                 {isOwner && (
                   <>

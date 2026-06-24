@@ -43,7 +43,7 @@ export default function LoginPage() {
           <BreezyBadge className="w-24 h-24 drop-shadow-lg" />
         </div>
 
-        <div className="w-full max-w-sm border-2 border-deep-space-blue dark:border-papaya-whip rounded-lg p-6 bg-white dark:bg-deep-space-blue shadow-xl transition-colors duration-300">
+        <div className="w-full max-w-sm border-2 border-deep-space-blue dark:border-papaya-whip rounded-lg p-6 bg-white dark:bg-surface shadow-xl transition-colors duration-300">
           
           <h1 className="text-2xl font-bold text-center mb-6 pb-4 border-b-2 border-deep-space-blue/20 dark:border-papaya-whip/20">
             Login

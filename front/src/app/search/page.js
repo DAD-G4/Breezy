@@ -273,7 +273,7 @@ function SearchContent() {
             <Link
               key={u.id}
               href={`/profile/${u.username}`}
-              className="flex items-center gap-3 p-4 border border-gray-200 dark:border-steel-blue/20 rounded-xl bg-white dark:bg-deep-space-blue/60 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+              className="flex items-center gap-3 p-4 border border-gray-200 dark:border-steel-blue/20 rounded-xl bg-white dark:bg-surface/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             >
               <div className="w-11 h-11 rounded-full bg-steel-blue flex items-center justify-center text-white text-sm font-bold overflow-hidden shrink-0">
                 {u.avatar_url ? (

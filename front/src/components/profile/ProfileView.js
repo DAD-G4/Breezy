@@ -197,7 +197,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="p-6 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm dark:shadow-[0_0_15px_rgba(102,155,188,0.15)] transition-all flex flex-col gap-4">
+      <section className="p-6 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-surface shadow-sm dark:shadow-[0_0_15px_rgba(102,155,188,0.15)] transition-all flex flex-col gap-4">
         
         {/* Avatar + Nom à gauche et Bouton abonner/edit à droite */}
         <div className="flex justify-between items-center w-full">
@@ -208,7 +208,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
               className={`relative group ${isOwnProfile && isEditing ? "cursor-pointer" : ""}`}
               onClick={() => isOwnProfile && isEditing && fileInputRef.current?.click()}
             >
-              <div className="w-20 h-20 rounded-full bg-steel-blue flex items-center justify-center text-white text-2xl font-bold border-2 border-white dark:border-deep-space-blue overflow-hidden">
+              <div className="w-20 h-20 rounded-full bg-steel-blue flex items-center justify-center text-white text-2xl font-bold border-2 border-white dark:border-night overflow-hidden">
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar" className="w-full h-20 object-cover" />
                 ) : (
@@ -282,7 +282,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
                     {menuOpen && (
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                        <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-xl shadow-lg z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
+                        <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/40 rounded-xl shadow-lg z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
                           <button
                             onClick={() => { setMenuOpen(false); setConfirmReportOpen(true); }}
                             disabled={reported}

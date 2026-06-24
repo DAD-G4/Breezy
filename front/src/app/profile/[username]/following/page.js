@@ -31,7 +31,7 @@ function UserCard({ u, currentUserId, onFollowChange, t }) {
   };
 
   return (
-    <div className="flex items-center gap-3 p-4 border border-gray-200 dark:border-steel-blue/20 rounded-xl bg-white dark:bg-deep-space-blue/60">
+    <div className="flex items-center gap-3 p-4 border border-gray-200 dark:border-steel-blue/20 rounded-xl bg-white dark:bg-surface/70">
       <Link href={`/profile/${u.username}`} className="flex-shrink-0">
         <div className="w-11 h-11 rounded-full bg-steel-blue flex items-center justify-center text-white text-sm font-bold overflow-hidden">
           {u.avatar_url ? (

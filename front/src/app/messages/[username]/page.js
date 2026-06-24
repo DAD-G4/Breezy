@@ -101,7 +101,7 @@ export default function ConversationPage({ params }) {
     <AppShell>
       <div className="flex flex-col h-full">
 
-        <header className="sticky top-0 z-10 bg-gray-100/80 dark:bg-deep-space-blue/80 backdrop-blur-lg border-b border-gray-200/60 dark:border-steel-blue/20">
+        <header className="sticky top-0 z-10 bg-gray-100/80 dark:bg-night/85 backdrop-blur-lg border-b border-gray-200/60 dark:border-steel-blue/20">
           <div className="flex items-center gap-3 px-4 py-3">
             <button
               onClick={() => router.back()}
@@ -115,10 +115,10 @@ export default function ConversationPage({ params }) {
 
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-deep-space-blue shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-night shadow-sm">
                   {title.charAt(0).toUpperCase()}
                 </div>
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-white dark:border-deep-space-blue rounded-full" />
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-white dark:border-night rounded-full" />
               </div>
               <div className="min-w-0">
                 <h1 className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip truncate leading-tight">
@@ -192,7 +192,7 @@ export default function ConversationPage({ params }) {
 
       <form
         onSubmit={handleSend}
-        className="fixed bottom-[65px] left-0 right-0 md:sticky md:bottom-0 md:left-auto md:right-auto px-4 py-3 bg-gray-100/90 dark:bg-deep-space-blue/95 backdrop-blur-lg border-t border-gray-200/60 dark:border-steel-blue/20 z-30"
+        className="fixed bottom-[65px] left-0 right-0 md:sticky md:bottom-0 md:left-auto md:right-auto px-4 py-3 bg-gray-100/90 dark:bg-night/95 backdrop-blur-lg border-t border-gray-200/60 dark:border-steel-blue/20 z-30"
       >
         <div className="flex items-end gap-2">
           <input
