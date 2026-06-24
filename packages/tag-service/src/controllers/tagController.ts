@@ -31,3 +31,19 @@ export async function searchPostsByTag(req: Request, res: Response): Promise<voi
     },
   });
 }
+
+export async function getTrending(_req: Request, res: Response): Promise<void> {
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const trendingTags = await Post.aggregate([
+    { $match: { created_at: { $gte: sevenDaysAgo } } },
+    { $unwind: '$tags' },
+    { $group: { _id: '$tags', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 10 },
+    { $project: { _id: 0, tag: '$_id', count: 1 } },
+  ]);
+
+  success(res, { tags: trendingTags });
+}

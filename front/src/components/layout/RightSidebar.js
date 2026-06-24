@@ -1,17 +1,34 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { getTrending } from "@/services/tags";
 
 export default function RightSidebar() {
   const { t } = useLanguage();
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  const [trends, setTrends] = useState([]);
+  const [trendsLoading, setTrendsLoading] = useState(true);
 
-  const trends = [
-    { tag: "#Breezy", count: `1 240 ${t('rightSidebar.posts')}` },
-    { tag: "#NextJS", count: `980 ${t('rightSidebar.posts')}` },
-    { tag: "#DevWeb", count: `642 ${t('rightSidebar.posts')}` },
-    { tag: "#OpenSource", count: `311 ${t('rightSidebar.posts')}` },
-  ];
+  useEffect(() => {
+    let cancelled = false;
+    getTrending()
+      .then((data) => { if (!cancelled) setTrends(data); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setTrendsLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    setQuery("");
+  };
 
   const suggestions = [
     { name: "Alice", username: "alice" },
@@ -24,16 +41,18 @@ export default function RightSidebar() {
       <div className="sticky top-4 flex flex-col gap-4">
         
         {/* BARRE DE RECHERCHE */}
-        <div className="relative">
+        <form onSubmit={handleSearch} className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           </span>
           <input
             type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder={t('rightSidebar.searchPlaceholder')}
             className="w-full pl-11 pr-4 py-2.5 rounded-full bg-gray-100 dark:bg-black/30 text-deep-space-blue dark:text-papaya-whip placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-steel-blue transition-all"
           />
-        </div>
+        </form>
 
         {/* TENDANCES */}
         <section className="bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/30 rounded-2xl overflow-hidden">
@@ -41,15 +60,29 @@ export default function RightSidebar() {
             {t('rightSidebar.trendsTitle')}
           </h2>
           <ul>
-            {trends.map((tItem) => (
-              <li
-                key={tItem.tag}
-                className="px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-              >
-                <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip">{tItem.tag}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{tItem.count}</p>
-              </li>
-            ))}
+            {trendsLoading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <li key={`skeleton-${i}`} className="px-4 py-3 animate-pulse">
+                    <div className="h-4 w-24 rounded bg-gray-200 dark:bg-white/10 mb-1.5" />
+                    <div className="h-3 w-16 rounded bg-gray-100 dark:bg-white/5" />
+                  </li>
+                ))
+              : trends.map((tItem) => (
+                  <li key={tItem.tag}>
+                    <Link
+                      href={`/search?q=${encodeURIComponent(tItem.tag)}`}
+                      className="block px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    >
+                      <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip">
+                        #{tItem.tag}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {tItem.count} {t('rightSidebar.posts')}
+                      </p>
+                    </Link>
+                  </li>
+                ))
+            }
           </ul>
         </section>
 
