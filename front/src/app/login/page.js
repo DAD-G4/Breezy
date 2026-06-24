@@ -6,12 +6,14 @@ import Header from "../../components/layout/Header";
 import BreezyBadge from "../../components/ui/BreezyBadge";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
+import { useTheme } from "../../context/ThemeContext";
 import { getApiErrorMessage } from "../../lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const { t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -105,6 +107,34 @@ export default function LoginPage() {
             </div>
           </form>
         </div>
+
+        {/* Bascule de thème accessible au VISITEUR (Fx23 — pas besoin d'être
+            connecté). Toggle clair/sombre via le ThemeContext global. */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={theme === "dark" ? "Activer le thème clair" : "Activer le thème sombre"}
+          className="mt-8 flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 dark:border-white/20 text-sm font-medium text-deep-space-blue dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+        >
+          {theme === "dark" ? (
+            <>
+              {/* Soleil → revenir au clair */}
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="4" />
+                <path strokeLinecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" />
+              </svg>
+              Mode clair
+            </>
+          ) : (
+            <>
+              {/* Lune → passer au sombre */}
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+              Mode sombre
+            </>
+          )}
+        </button>
       </main>
     </div>
   );
