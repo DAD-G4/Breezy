@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { UserModel, ProfileModel, success, error, getJwtSecret, validateRegisterInput } from '@breezy/shared';
+import { UserModel, ProfileModel, success, error, getJwtSecret, validateRegisterInput, UserRole } from '@breezy/shared';
 
 const JWT_SECRET = getJwtSecret();
 const SALT_ROUNDS = 10;
@@ -103,6 +103,54 @@ export async function register(req: Request, res: Response): Promise<void> {
   setAuthCookies(res, userData);
 
   success(res, { user: userData }, 'User created successfully', 201);
+}
+
+/**
+ * POST /api/auth/admin/register
+ * Admin-only: create a new user account with optional role assignment.
+ * Does NOT auto-login — admin stays on their own session.
+ */
+export async function adminRegister(req: Request, res: Response): Promise<void> {
+  const { email, username: rawUsername, password, role } = req.body;
+  const username = rawUsername?.toLowerCase?.() ?? rawUsername;
+
+  const validationErrors = validateRegisterInput({ email, username, password });
+  if (validationErrors.length > 0) {
+    error(res, validationErrors.join(', '), 400);
+    return;
+  }
+
+  const existingUser = await UserModel.findOne({ where: { email } });
+  if (existingUser) {
+    error(res, 'Email already in use', 409);
+    return;
+  }
+
+  const existingUsername = await UserModel.findOne({ where: { username } });
+  if (existingUsername) {
+    error(res, 'Username already in use', 409);
+    return;
+  }
+
+  const allowedRoles = [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN];
+  const assignedRole = allowedRoles.includes(role) ? role : UserRole.USER;
+
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+  const user = await UserModel.create({
+    email,
+    username,
+    password_hash: passwordHash,
+    role: assignedRole,
+  });
+
+  await ProfileModel.create({
+    user_id: user.id,
+    display_name: username,
+  });
+
+  const userData = { id: user.id, username: user.username, email: user.email, role: user.role };
+  success(res, { user: userData }, 'Account created successfully', 201);
 }
 
 /**

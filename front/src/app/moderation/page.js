@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import AppShell from "@/components/layout/AppShell";
 import { useLanguage } from "@/context/LanguageContext";
 import { getApiErrorMessage } from "@/lib/api";
-import { listReports, resolveReport, banUser, unbanUser, listBans } from "@/services/moderation";
+import { listReports, resolveReport, banUser, unbanUser, listUsers } from "@/services/moderation";
 import { getPost, deletePost } from "@/services/posts";
 import { resolveUsers } from "@/services/users";
+import { adminRegister } from "@/services/auth";
 import { useRequireAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -19,8 +20,12 @@ export default function ModerationPage() {
   const [reports, setReports] = useState([]);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
+  const [accountForm, setAccountForm] = useState({ username: "", email: "", password: "", role: "user" });
+  const [accountSuccess, setAccountSuccess] = useState("");
+  const [accountError, setAccountError] = useState("");
 
   const isStaff = user?.role === "moderator" || user?.role === "admin";
+  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
     if (!loading && user && !isStaff) {
@@ -89,20 +94,17 @@ export default function ModerationPage() {
     return () => { active = false; };
   }, []);
 
-  // Utilisateurs bannis (GET /api/moderation/bans).
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const { bans } = await listBans();
-        const banList = bans || [];
-        const banUserIds = banList.map((b) => b.user_id);
-        const banUsers = await resolveUsers(banUserIds);
-        const mapped = banList.map((b, i) => ({
-          id: b.user_id,
-          username: banUsers[i]?.username || `user${b.user_id}`,
-          status: "banned",
-          reportsCount: 0,
+        const { users: userList } = await listUsers();
+        const mapped = (userList || []).map((u) => ({
+          id: u.id,
+          username: u.username,
+          role: u.role,
+          status: u.status,
+          ban: u.ban,
         }));
         if (active) setUsers(mapped);
       } catch {
@@ -134,16 +136,15 @@ export default function ModerationPage() {
     }
   };
 
-  // Ban / unban (POST /ban, DELETE /ban/:userId).
   const handleUpdateUserStatus = async (id, newStatus) => {
     if (newStatus === "active") {
-      const ban = users.find((u) => u.id === id);
-      setUsers((us) => us.filter((u) => u.id !== id));
+      const previousUser = users.find((u) => u.id === id);
+      setUsers((us) => us.map((u) => (u.id === id ? { ...u, status: "active", ban: null } : u)));
       try {
         await unbanUser(id);
       } catch (err) {
         console.error('[Moderation] Failed to unban user:', err);
-        if (ban) setUsers(prev => [...prev, ban]);
+        if (previousUser) setUsers(prev => prev.map((u) => (u.id === id ? previousUser : u)));
       }
     } else {
       const previousUser = users.find((u) => u.id === id);
@@ -152,8 +153,21 @@ export default function ModerationPage() {
         await banUser(id, t('moderation.decision'));
       } catch (err) {
         console.error('[Moderation] Failed to ban user:', err);
-        setUsers(prev => prev.map((u) => (u.id === id && previousUser ? { ...u, status: previousUser.status } : u)));
+        setUsers(prev => prev.map((u) => (u.id === id && previousUser ? previousUser : u)));
       }
+    }
+  };
+
+  const handleCreateAccount = async (e) => {
+    e.preventDefault();
+    setAccountError("");
+    setAccountSuccess("");
+    try {
+      await adminRegister(accountForm);
+      setAccountSuccess(t("moderation.accountCreated"));
+      setAccountForm({ username: "", email: "", password: "", role: "user" });
+    } catch (err) {
+      setAccountError(getApiErrorMessage(err, t("moderation.accessDenied")));
     }
   };
 
@@ -206,6 +220,15 @@ export default function ModerationPage() {
             {t('moderation.tabUsers')}
             {activeTab === "users" && <span className="absolute bottom-0 left-0 w-full h-1 bg-steel-blue rounded-t-full"></span>}
           </button>
+          {isAdmin && (
+            <button 
+              onClick={() => setActiveTab("accounts")}
+              className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === "accounts" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-papaya-whip"}`}
+            >
+              {t('moderation.createAccount')}
+              {activeTab === "accounts" && <span className="absolute bottom-0 left-0 w-full h-1 bg-steel-blue rounded-t-full"></span>}
+            </button>
+          )}
         </div>
 
         {/* CONTENU : SIGNALEMENTS (Fx20) */}
@@ -257,7 +280,6 @@ export default function ModerationPage() {
               >
                 <option value="all">{t('moderation.filterAll')}</option>
                 <option value="active">{t('moderation.statusActive')}</option>
-                <option value="suspended">{t('moderation.statusSuspended')}</option>
                 <option value="banned">{t('moderation.statusBanned')}</option>
               </select>
             </div>
@@ -272,29 +294,31 @@ export default function ModerationPage() {
                     
                     <div className="flex flex-col">
                       <span className="font-bold text-deep-space-blue dark:text-papaya-whip">@{user.username}</span>
-                      <span className="text-xs text-gray-500">{user.reportsCount} {t('moderation.reports')}</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                          user.role === "admin" ? "bg-purple-100 text-purple-700" :
+                          user.role === "moderator" ? "bg-blue-100 text-blue-700" :
+                          "bg-gray-100 text-gray-600"
+                        }`}>
+                          {user.role}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      {/* Badge de statut */}
                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                         user.status === "active" ? "bg-green-100 text-green-700" :
-                        user.status === "suspended" ? "bg-orange-100 text-orange-700" :
                         "bg-red-100 text-red-700"
                       }`}>
-                        {user.status === "active" ? t('moderation.statusActive') : 
-                         user.status === "suspended" ? t('moderation.statusSuspended') : 
-                         t('moderation.statusBanned')}
+                        {user.status === "active" ? t('moderation.statusActive') : t('moderation.statusBanned')}
                       </span>
 
-                      {/* Actions rapides */}
                       <select 
                         value={user.status}
                         onChange={(e) => handleUpdateUserStatus(user.id, e.target.value)}
                         className="text-sm bg-gray-100 dark:bg-black/30 border border-gray-200 dark:border-steel-blue/40 rounded-lg px-2 py-1.5 outline-none text-deep-space-blue dark:text-papaya-whip cursor-pointer"
                       >
                         <option value="active">{t('moderation.actionActive')}</option>
-                        <option value="suspended">{t('moderation.actionSuspend')}</option>
                         <option value="banned">{t('moderation.actionBan')}</option>
                       </select>
                     </div>
@@ -302,6 +326,63 @@ export default function ModerationPage() {
                 ))
               )}
             </div>
+          </div>
+        )}
+
+        {/* CONTENU : CRÉATION DE COMPTE (Admin) */}
+        {activeTab === "accounts" && isAdmin && (
+          <div className="flex flex-col gap-4">
+            <form onSubmit={handleCreateAccount} className="flex flex-col gap-4 p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip">{t('moderation.username')}</label>
+                <input
+                  type="text"
+                  value={accountForm.username}
+                  onChange={(e) => setAccountForm({ ...accountForm, username: e.target.value })}
+                  required
+                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip text-sm outline-none focus:border-steel-blue"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip">{t('moderation.email')}</label>
+                <input
+                  type="email"
+                  value={accountForm.email}
+                  onChange={(e) => setAccountForm({ ...accountForm, email: e.target.value })}
+                  required
+                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip text-sm outline-none focus:border-steel-blue"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip">{t('moderation.password')}</label>
+                <input
+                  type="password"
+                  value={accountForm.password}
+                  onChange={(e) => setAccountForm({ ...accountForm, password: e.target.value })}
+                  required
+                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip text-sm outline-none focus:border-steel-blue"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-bold text-deep-space-blue dark:text-papaya-whip">{t('moderation.role')}</label>
+                <select
+                  value={accountForm.role}
+                  onChange={(e) => setAccountForm({ ...accountForm, role: e.target.value })}
+                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip text-sm outline-none focus:border-steel-blue cursor-pointer"
+                >
+                  <option value="user">{t('moderation.roleUser')}</option>
+                  <option value="moderator">{t('moderation.roleModerator')}</option>
+                  <option value="admin">{t('moderation.roleAdmin')}</option>
+                </select>
+              </div>
+
+              {accountError && <p className="text-sm text-brick-red font-semibold">{accountError}</p>}
+              {accountSuccess && <p className="text-sm text-green-600 dark:text-green-400 font-semibold">{accountSuccess}</p>}
+
+              <button type="submit" className="self-end px-6 py-2 bg-steel-blue hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
+                {t('moderation.createAccount')}
+              </button>
+            </form>
           </div>
         )}
 
