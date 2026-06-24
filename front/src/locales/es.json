@@ -3,7 +3,8 @@
     "back": "Volver",
     "removeImage": "Eliminar imagen",
     "me": "Yo",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "close": "Cerrar"
   },
   "sidebar": {
     "home": "Inicio",
@@ -100,7 +101,9 @@
     "loadError": "No se pudieron cargar las conversaciones.",
     "empty": "No hay conversaciones aún.",
     "notFound": "Conversación no encontrada.",
-    "noMessages": "Sin mensajes. ¡Empieza la conversación!"
+    "noMessages": "Sin mensajes. ¡Empieza la conversación!",
+    "new": "Nuevo mensaje",
+    "searchUser": "Buscar un usuario…"
   },
   "post": {
     "loadError": "No se pudo cargar la publicación.",
@@ -114,7 +117,8 @@
     "loginRequired": "Inicia sesión para ver tu perfil.",
     "logout": "Cerrar sesión",
     "notFound": "Perfil no encontrado.",
-    "loadError": "No se pudo cargar el perfil."
+    "loadError": "No se pudo cargar el perfil.",
+    "lines": "líneas"
   },
   "postDetails": {
     "commentPosted": "Nuevo comentario publicado",

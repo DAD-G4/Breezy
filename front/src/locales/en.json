@@ -3,7 +3,8 @@
     "back": "Back",
     "removeImage": "Remove image",
     "me": "Me",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "close": "Close"
   },
   "sidebar": {
     "home": "Home",
@@ -100,7 +101,9 @@
     "loadError": "Could not load conversations.",
     "empty": "No conversations yet.",
     "notFound": "Conversation not found.",
-    "noMessages": "No messages. Start the conversation!"
+    "noMessages": "No messages. Start the conversation!",
+    "new": "New message",
+    "searchUser": "Search for a user…"
   },
   "post": {
     "loadError": "Could not load the post.",
@@ -114,7 +117,8 @@
     "loginRequired": "Log in to see your profile.",
     "logout": "Log out",
     "notFound": "Profile not found.",
-    "loadError": "Could not load the profile."
+    "loadError": "Could not load the profile.",
+    "lines": "lines"
   },
   "postDetails": {
     "commentPosted": "New comment posted",

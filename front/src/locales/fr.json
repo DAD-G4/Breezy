@@ -3,7 +3,8 @@
     "back": "Retour",
     "removeImage": "Supprimer l'image",
     "me": "Moi",
-    "loading": "Chargement..."
+    "loading": "Chargement...",
+    "close": "Fermer"
   },
   "sidebar": {
     "home": "Accueil",
@@ -100,7 +101,9 @@
     "loadError": "Impossible de charger les conversations.",
     "empty": "Aucune conversation pour le moment.",
     "notFound": "Conversation introuvable.",
-    "noMessages": "Aucun message. Démarrez la conversation !"
+    "noMessages": "Aucun message. Démarrez la conversation !",
+    "new": "Nouveau message",
+    "searchUser": "Rechercher un utilisateur…"
   },
   "post": {
     "loadError": "Impossible de charger le post.",
@@ -114,7 +117,8 @@
     "loginRequired": "Connectez-vous pour voir votre profil.",
     "logout": "Se déconnecter",
     "notFound": "Profil introuvable.",
-    "loadError": "Impossible de charger le profil."
+    "loadError": "Impossible de charger le profil.",
+    "lines": "lignes"
   },
   "postDetails": {
     "commentPosted": "Nouveau commentaire posté",
