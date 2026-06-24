@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AppShell from "@/components/layout/AppShell";
+import Toast from "@/components/ui/Toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { getApiErrorMessage } from "@/lib/api";
 import { listReports, resolveReport, banUser, unbanUser, listUsers } from "@/services/moderation";
@@ -21,9 +22,10 @@ export default function ModerationPage() {
   const [reports, setReports] = useState([]);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
-  const [accountForm, setAccountForm] = useState({ username: "", email: "", password: "", role: "user" });
-  const [accountSuccess, setAccountSuccess] = useState("");
+  const [accountForm, setAccountForm] = useState({ username: "", email: "", password: "" });
   const [accountError, setAccountError] = useState("");
+  const [toastMsg, setToastMsg] = useState("");
+  const [toastId, setToastId] = useState(0);
 
   const isStaff = user?.role === "moderator" || user?.role === "admin";
   const isAdmin = user?.role === "admin";
@@ -162,11 +164,20 @@ export default function ModerationPage() {
   const handleCreateAccount = async (e) => {
     e.preventDefault();
     setAccountError("");
-    setAccountSuccess("");
     try {
-      await adminRegister(accountForm);
-      setAccountSuccess(t("moderation.accountCreated"));
-      setAccountForm({ username: "", email: "", password: "", role: "user" });
+      // adminRegister NE connecte PAS le nouvel utilisateur : l'admin garde sa session.
+      const data = await adminRegister(accountForm);
+      const created = data?.user;
+      if (created) {
+        // Ajout immédiat à la liste des utilisateurs.
+        setUsers((prev) => [
+          { id: created.id, username: created.username, role: created.role, status: "active", ban: null },
+          ...prev,
+        ]);
+      }
+      setToastMsg(t("moderation.accountCreated"));
+      setToastId((n) => n + 1); // remonte le Toast à chaque création
+      setAccountForm({ username: "", email: "", password: "" });
     } catch (err) {
       setAccountError(getApiErrorMessage(err, t("moderation.accessDenied")));
     }
@@ -393,21 +404,7 @@ export default function ModerationPage() {
                   className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-white text-sm outline-none focus:border-steel-blue"
                 />
               </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-bold text-deep-space-blue dark:text-white">{t('moderation.role')}</label>
-                <select
-                  value={accountForm.role}
-                  onChange={(e) => setAccountForm({ ...accountForm, role: e.target.value })}
-                  className="px-3 py-2 border border-gray-200 dark:border-steel-blue/40 rounded-lg bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-white text-sm outline-none focus:border-steel-blue cursor-pointer"
-                >
-                  <option value="user">{t('moderation.roleUser')}</option>
-                  <option value="moderator">{t('moderation.roleModerator')}</option>
-                  <option value="admin">{t('moderation.roleAdmin')}</option>
-                </select>
-              </div>
-
               {accountError && <p className="text-sm text-brick-red font-semibold">{accountError}</p>}
-              {accountSuccess && <p className="text-sm text-green-600 dark:text-green-400 font-semibold">{accountSuccess}</p>}
 
               <button type="submit" className="self-end px-6 py-2 bg-steel-blue hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
                 {t('moderation.createAccount')}
@@ -417,6 +414,8 @@ export default function ModerationPage() {
         )}
 
       </div>
+
+      {toastMsg && <Toast key={toastId} message={toastMsg} />}
     </AppShell>
   );
 }
