@@ -1,6 +1,11 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { getNotifications, markAllRead as svcMarkAllRead } from "../services/notifications";
+import {
+  getNotifications,
+  markAllRead as svcMarkAllRead,
+  deleteNotification as svcDeleteNotification,
+  deleteAllRead as svcDeleteAllRead,
+} from "../services/notifications";
 import { resolveUser } from "../services/users";
 import { relativeTime } from "../lib/mappers";
 
@@ -54,5 +59,15 @@ export function useNotifications(t, locale) {
     await svcMarkAllRead(ids);
   }, [notifications]);
 
-  return { notifications, unreadCount, markAllRead };
+  const deleteNotification = useCallback(async (id) => {
+    setNotifications((ns) => ns.filter((n) => n.id !== id));
+    await svcDeleteNotification(id);
+  }, []);
+
+  const deleteAllReadNotifications = useCallback(async () => {
+    setNotifications((ns) => ns.filter((n) => n.unread));
+    await svcDeleteAllRead();
+  }, []);
+
+  return { notifications, unreadCount, markAllRead, deleteNotification, deleteAllRead: deleteAllReadNotifications };
 }
