@@ -117,7 +117,7 @@
     "loadError": "Impossible de charger le profil."
   },
   "postDetails": {
-    "commentPosted": "Nouveau commentaire posté :",
+    "commentPosted": "Nouveau commentaire posté",
     "addCommentPlaceholder": "Ajouter un commentaire..."
   },
   "publicProfile": {
@@ -140,11 +140,14 @@
     "followingLabel": "Abonnements",
     "saveButton": "Sauvegarder",
     "cancelButton": "Annuler",
-    "yourPosts": "Vos posts :",
-    "userPosts": "Posts de {{name}} :",
+    "yourPosts": "Vos posts",
+    "userPosts": "Posts de {{name}}",
     "report": "Signaler l'utilisateur",
     "reportUser": "Signaler cet utilisateur",
-    "reported": "Utilisateur signalé ✓"
+    "reported": "Utilisateur signalé ✓",
+    "blocked": "Utilisateur bloqué",
+    "blockUser": "Bloquer cet utilisateur",
+    "unblock": "Débloquer"
   },
   "postCard": {
     "report": "Signaler le post",
@@ -197,6 +200,12 @@
     "logout": {
       "title": "Se déconnecter",
       "desc": "Se déconnecter de votre compte Breezy."
+    },
+    "blockedUsers": {
+      "title": "Utilisateurs bloqués",
+      "desc": "Gérer les utilisateurs que vous avez bloqués.",
+      "empty": "Aucun utilisateur bloqué.",
+      "unblock": "Débloquer"
     }
   },
   "moderation": {
@@ -213,14 +222,14 @@
     "actionActive": "Activer le compte",
     "actionSuspend": "Suspendre le compte",
     "actionBan": "Bannir définitivement",
-    "filterStatus": "Filtrer par statut :",
+    "filterStatus": "Filtrer par statut",
     "filterAll": "Tous",
     "noUsers": "Aucun utilisateur ne correspond à ce filtre.",
     "deletedContent": "Contenu indisponible",
     "accessDenied": "Accès réservé à la modération.",
     "decision": "Décision de modération",
     "reportedBy": "Signalé par",
-    "author": "Auteur :",
+    "author": "Auteur",
     "reports": "signalement(s)",
     "createAccount": "Créer un compte",
     "accountCreated": "Compte créé avec succès",

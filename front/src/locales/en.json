@@ -117,7 +117,7 @@
     "loadError": "Could not load the profile."
   },
   "postDetails": {
-    "commentPosted": "New comment posted:",
+    "commentPosted": "New comment posted",
     "addCommentPlaceholder": "Add a comment..."
   },
   "publicProfile": {
@@ -140,11 +140,14 @@
     "followingLabel": "Following",
     "saveButton": "Save",
     "cancelButton": "Cancel",
-    "yourPosts": "Your posts:",
-    "userPosts": "{{name}}'s posts:",
+    "yourPosts": "Your posts",
+    "userPosts": "{{name}}'s posts",
     "report": "Report user",
     "reportUser": "Report this user",
-    "reported": "User reported ✓"
+    "reported": "User reported ✓",
+    "blocked": "User blocked",
+    "blockUser": "Block this user",
+    "unblock": "Unblock"
   },
   "postCard": {
     "report": "Report post",
@@ -197,6 +200,12 @@
     "logout": {
       "title": "Log Out",
       "desc": "Sign out of your Breezy account."
+    },
+    "blockedUsers": {
+      "title": "Blocked Users",
+      "desc": "Manage users you have blocked.",
+      "empty": "No blocked users.",
+      "unblock": "Unblock"
     }
   },
   "moderation": {
@@ -213,14 +222,14 @@
     "actionActive": "Activate account",
     "actionSuspend": "Suspend account",
     "actionBan": "Ban permanently",
-    "filterStatus": "Filter by status:",
+    "filterStatus": "Filter by status",
     "filterAll": "All",
     "noUsers": "No users match this filter.",
     "deletedContent": "Content unavailable",
     "accessDenied": "Moderation access only.",
     "decision": "Moderation decision",
     "reportedBy": "Reported by",
-    "author": "Author:",
+    "author": "Author",
     "reports": "report(s)",
     "createAccount": "Create Account",
     "accountCreated": "Account created successfully",
