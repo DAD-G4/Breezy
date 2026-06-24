@@ -17,15 +17,20 @@ export function ThemeProvider({ children }) {
   }, []);
 
   const toggleTheme = () => {
+    const root = document.documentElement;
+
+    // Active la transition douce uniquement le temps de la bascule, puis la retire
+    // (évite d'animer survols/menus, qui doivent rester instantanés).
+    root.classList.add("theme-transition");
+    window.clearTimeout(toggleTheme._timer);
+    toggleTheme._timer = window.setTimeout(() => {
+      root.classList.remove("theme-transition");
+    }, 450);
+
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
-
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    root.classList.toggle("dark", newTheme === "dark");
   };
 
   return (

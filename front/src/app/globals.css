@@ -9,3 +9,28 @@
   --color-deep-space-blue: #003049;
   --color-steel-blue: #669bbc;
 }
+
+/* ──────────────────────────────────────────────────────────────────────
+   Transition douce clair ⇄ sombre.
+   La transition n'est active QUE pendant la bascule : la classe
+   `.theme-transition` est posée sur <html> par ThemeContext le temps du
+   changement, puis retirée. On évite ainsi d'animer les survols, les
+   ouvertures de menus, etc. (qui doivent rester instantanés), et on
+   respecte la préférence « réduire les animations ».
+   ────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-transition,
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition:
+      background-color 400ms ease,
+      border-color 400ms ease,
+      color 300ms ease,
+      fill 300ms ease,
+      stroke 300ms ease,
+      box-shadow 400ms ease,
+      opacity 300ms ease !important;
+    transition-delay: 0ms !important;
+  }
+}
