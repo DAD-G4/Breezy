@@ -151,9 +151,11 @@ services:
     environment:
       PORT: 3007
       POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
       JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
     depends_on:
       - postgres
+      - mongo
     volumes:
       - media_uploads:/app/packages/media-service/uploads
 
