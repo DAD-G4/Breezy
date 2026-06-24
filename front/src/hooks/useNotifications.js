@@ -7,7 +7,8 @@ import {
   deleteNotification as svcDeleteNotification,
   deleteAllRead as svcDeleteAllRead,
 } from "../services/notifications";
-import { resolveUser } from "../services/users";
+import { getUnreadCount } from "../services/dm";
+import { resolveUser, ping } from "../services/users";
 import { relativeTime } from "../lib/mappers";
 
 const ACTION_KEY = {
@@ -19,6 +20,7 @@ const ACTION_KEY = {
 
 export function useNotifications(t, locale) {
   const [notifications, setNotifications] = useState([]);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -46,6 +48,15 @@ export function useNotifications(t, locale) {
       } catch (err) {
         console.error('[Notifications] Failed to fetch:', err);
       }
+      // Compteur de messages privés non lus (pour la pastille rouge).
+      try {
+        const { unreadCount } = await getUnreadCount();
+        if (active) setUnreadMessages(unreadCount || 0);
+      } catch {
+        /* silencieux */
+      }
+      // Présence en ligne : on signale que l'utilisateur est actif.
+      ping().catch(() => {});
     };
 
     fetchNotifications();
@@ -83,5 +94,5 @@ export function useNotifications(t, locale) {
     await svcDeleteAllRead();
   }, []);
 
-  return { notifications, unreadCount, markRead, markAllRead, deleteNotification, deleteAllRead: deleteAllReadNotifications };
+  return { notifications, unreadCount, unreadMessages, markRead, markAllRead, deleteNotification, deleteAllRead: deleteAllReadNotifications };
 }

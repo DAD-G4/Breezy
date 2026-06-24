@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "../../context/LanguageContext";
+import { useNotificationsContext } from "../../context/NotificationsContext";
 
 export default function BottomNav() {
   const { t } = useLanguage();
   const pathname = usePathname();
+  const { unreadMessages } = useNotificationsContext();
 
   const isActive = (href) => {
     if (href === "/") return pathname === "/";
@@ -39,13 +41,16 @@ export default function BottomNav() {
       </Link>
 
       {/* bouton Messages */}
-      <Link 
+      <Link
         href="/messages"
-        className={`p-2 rounded-xl transition-colors ${isActive("/messages") ? "text-steel-blue dark:text-white font-bold" : "text-gray-400 hover:text-steel-blue dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}
+        className={`relative p-2 rounded-xl transition-colors ${isActive("/messages") ? "text-steel-blue dark:text-white font-bold" : "text-gray-400 hover:text-steel-blue dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}
         aria-label={t('sidebar.messages')}>
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
+        {unreadMessages > 0 && (
+          <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-brick-red ring-2 ring-white dark:ring-surface" />
+        )}
       </Link>
 
       {/* bouton Paramètres */}
