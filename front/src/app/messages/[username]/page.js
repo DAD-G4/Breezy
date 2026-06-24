@@ -48,6 +48,18 @@ export default function ConversationPage({ params }) {
       try {
         const u = await getProfileByUsername(username);
         const displayName = u.profile?.display_name || u.username;
+        const blocked = !!u.is_blocked;
+        // On fixe l'autre utilisateur AVANT de charger la conversation : en cas
+        // de blocage, le backend refuse la lecture (403). On affiche alors la
+        // bannière « bloqué » (input masqué) plutôt que de tomber dans le catch
+        // avec une erreur générique qui cassait l'affichage.
+        if (active) {
+          setOtherUser({ id: u.id, displayName, lastActive: u.profile?.last_active || null, isBlocked: blocked });
+        }
+        if (blocked) {
+          if (active) setMessages([]);
+          return;
+        }
         const { messages: raw } = await getConversation(u.id);
         const mapped = (raw || []).map((m) => ({
           id: m._id,
@@ -56,10 +68,7 @@ export default function ConversationPage({ params }) {
           created_at: m.created_at,
           read: !!m.is_read,
         }));
-        if (active) {
-          setOtherUser({ id: u.id, displayName, lastActive: u.profile?.last_active || null, isBlocked: !!u.is_blocked });
-          setMessages(mapped);
-        }
+        if (active) setMessages(mapped);
         // Marque la conversation comme lue (best-effort).
         markConversationRead(u.id).catch(() => {});
       } catch (err) {

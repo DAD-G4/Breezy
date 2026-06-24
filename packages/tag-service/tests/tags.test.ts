@@ -34,6 +34,9 @@ jest.mock('@breezy/shared', () => {
     }),
     checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
     Ban: { findOne: jest.fn().mockResolvedValue(null) },
+    // Search now hides blocked users' posts → controller queries BlockedUser.
+    // Default: no blocks, so the tag filter stays unchanged.
+    BlockedUser: { findAll: jest.fn().mockResolvedValue([]) },
   };
 });
 

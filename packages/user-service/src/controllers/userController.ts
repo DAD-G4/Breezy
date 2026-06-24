@@ -148,7 +148,24 @@ export async function searchUsers(req: AuthRequest, res: Response): Promise<void
     }
   }
 
-  const results = merged.slice(0, 20).map((u: any) => {
+  // Masque les utilisateurs bloqués (dans un sens ou l'autre) : ils ne doivent
+  // apparaître ni dans la recherche, ni dans le compositeur « + Message ».
+  const me = req.user?.id;
+  let blockedIds = new Set<number>();
+  if (me) {
+    const blocks = await BlockedUser.findAll({
+      where: { [Op.or]: [{ blocker_id: me }, { blocked_id: me }] },
+      attributes: ['blocker_id', 'blocked_id'],
+    });
+    blockedIds = new Set(
+      blocks.map((b: any) =>
+        b.get('blocker_id') === me ? b.get('blocked_id') : b.get('blocker_id')
+      )
+    );
+  }
+  const visible = merged.filter((u: any) => !blockedIds.has(u.get('id')));
+
+  const results = visible.slice(0, 20).map((u: any) => {
     const profile = u.get('profile');
     return {
       id: u.get('id'),

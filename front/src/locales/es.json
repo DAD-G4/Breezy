@@ -95,7 +95,7 @@
   },
   "conversation": {
     "placeholder": "Tu mensaje...",
-    "blocked": "No puedes enviar mensajes a este usuario."
+    "blocked": "Has bloqueado a esta persona."
   },
   "messagesInbox": {
     "searchPlaceholder": "Buscar un mensaje..."

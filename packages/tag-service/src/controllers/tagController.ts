@@ -1,7 +1,27 @@
 import { Request, Response } from 'express';
-import { PostModel as Post, success, error } from '@breezy/shared';
+import { Op } from 'sequelize';
+import { PostModel as Post, BlockedUser, success, error, AuthRequest } from '@breezy/shared';
 
-export async function searchPostsByTag(req: Request, res: Response): Promise<void> {
+/**
+ * IDs des utilisateurs en relation de blocage (dans un sens OU l'autre) avec
+ * `me`. Sert à masquer leurs posts dans la recherche, comme dans le feed.
+ */
+async function blockedUserIds(me: number | undefined): Promise<number[]> {
+  if (!me) return [];
+  const rows = await BlockedUser.findAll({
+    where: { [Op.or]: [{ blocker_id: me }, { blocked_id: me }] },
+    attributes: ['blocker_id', 'blocked_id'],
+  });
+  const ids = new Set<number>();
+  for (const r of rows as any[]) {
+    const blocker = r.get('blocker_id');
+    const blocked = r.get('blocked_id');
+    ids.add(blocker === me ? blocked : blocker);
+  }
+  return [...ids];
+}
+
+export async function searchPostsByTag(req: AuthRequest, res: Response): Promise<void> {
   const q = req.query.q;
 
   if (!q || typeof q !== 'string' || q.trim().length === 0) {
@@ -17,7 +37,13 @@ export async function searchPostsByTag(req: Request, res: Response): Promise<voi
   // Recherche partielle (insensible à la casse) : « bree » trouve « breezy ».
   // On échappe les caractères spéciaux regex pour éviter toute injection.
   const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const tagFilter = { tags: { $regex: escaped, $options: 'i' } };
+  const tagFilter: Record<string, unknown> = { tags: { $regex: escaped, $options: 'i' } };
+
+  // Masque les posts des utilisateurs bloqués (dans un sens ou l'autre).
+  const blockedIds = await blockedUserIds(req.user?.id);
+  if (blockedIds.length > 0) {
+    tagFilter.user_id = { $nin: blockedIds };
+  }
 
   const posts = await Post.find(tagFilter)
     .sort({ created_at: -1 })

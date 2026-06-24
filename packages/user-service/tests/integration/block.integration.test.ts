@@ -235,4 +235,46 @@ describe('Block Integration Tests', () => {
       expect(res.body.data.is_blocked).toBe(false);
     });
   });
+
+  describe('GET /api/users/search — excludes blocked users', () => {
+    const ids = (res: request.Response) =>
+      (res.body.data.users as any[]).map((u) => u.id);
+
+    it('returns the target when no block exists', async () => {
+      const res = await request(app)
+        .get('/api/users/search?q=blocked')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(ids(res)).toContain(targetUser.id);
+    });
+
+    it('hides a user the viewer has blocked', async () => {
+      await request(app)
+        .post(`/api/users/block/${targetUser.id}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      const res = await request(app)
+        .get('/api/users/search?q=blocked')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(ids(res)).not.toContain(targetUser.id);
+    });
+
+    it('hides a user who has blocked the viewer (reverse direction)', async () => {
+      await request(app)
+        .post(`/api/users/block/${testUser.id}`)
+        .set('Authorization', `Bearer ${targetToken}`)
+        .expect(200);
+
+      const res = await request(app)
+        .get('/api/users/search?q=blocked')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(ids(res)).not.toContain(targetUser.id);
+    });
+  });
 });
