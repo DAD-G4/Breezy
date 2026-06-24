@@ -226,9 +226,17 @@ export async function updateProfile(req: AuthRequest, res: Response): Promise<vo
 
   const { display_name, bio, avatar_url } = req.body;
 
-  if (bio !== undefined && bio !== null && bio.length > 160) {
-    error(res, 'Bio must be 160 characters or less', 400);
-    return;
+  let normalizedBio = bio;
+  if (bio !== undefined && bio !== null) {
+    if (bio.length > 160) {
+      error(res, 'Bio must be 160 characters or less', 400);
+      return;
+    }
+    normalizedBio = bio.replace(/\n{3,}/g, '\n\n');
+    if (normalizedBio.split('\n').length > 5) {
+      error(res, 'Bio cannot exceed 5 lines', 400);
+      return;
+    }
   }
   if (display_name !== undefined && display_name !== null && display_name.length > 50) {
     error(res, 'Display name must be 50 characters or less', 400);
@@ -244,7 +252,7 @@ export async function updateProfile(req: AuthRequest, res: Response): Promise<vo
 
   const updatedFields: Record<string, any> = {};
   if (display_name !== undefined) updatedFields.display_name = display_name;
-  if (bio !== undefined) updatedFields.bio = bio;
+  if (bio !== undefined) updatedFields.bio = normalizedBio;
   if (avatar_url !== undefined) updatedFields.avatar_url = avatar_url;
 
   await profile.update(updatedFields);
