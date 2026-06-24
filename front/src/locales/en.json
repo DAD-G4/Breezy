@@ -107,7 +107,9 @@
     "new": "New message",
     "searchUser": "Search for a user…",
     "read": "Read",
-    "sent": "Sent"
+    "sent": "Sent",
+    "online": "Online",
+    "offline": "Offline"
   },
   "post": {
     "loadError": "Could not load the post.",

@@ -32,6 +32,19 @@ export async function getProfile(req: AuthRequest, res: Response): Promise<void>
   success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount, is_following: isFollowing });
 }
 
+/**
+ * PUT /api/users/ping
+ * Met à jour last_active de l'utilisateur courant (présence en ligne).
+ */
+export async function ping(req: AuthRequest, res: Response): Promise<void> {
+  if (!req.user) {
+    error(res, 'Authentication required', 401);
+    return;
+  }
+  await ProfileModel.update({ last_active: new Date() }, { where: { user_id: req.user.id } });
+  success(res, null, 'ok');
+}
+
 /** True si le viewer (connecté) suit l'utilisateur cible. */
 async function viewerFollows(viewerId: number | undefined, targetId: number): Promise<boolean> {
   if (!viewerId || viewerId === targetId) return false;

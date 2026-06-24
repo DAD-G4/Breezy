@@ -57,7 +57,7 @@ export default function ConversationPage({ params }) {
           read: !!m.is_read,
         }));
         if (active) {
-          setOtherUser({ id: u.id, displayName });
+          setOtherUser({ id: u.id, displayName, lastActive: u.profile?.last_active || null });
           setMessages(mapped);
         }
         // Marque la conversation comme lue (best-effort).
@@ -97,6 +97,10 @@ export default function ConversationPage({ params }) {
   };
 
   const title = otherUser?.displayName || username;
+  // En ligne si actif il y a moins de ~70s (le ping est émis toutes les 25s).
+  const isOnline = otherUser?.lastActive
+    ? Date.now() - new Date(otherUser.lastActive).getTime() < 70000
+    : false;
 
   return (
     <AppShell>
@@ -119,7 +123,10 @@ export default function ConversationPage({ params }) {
                 <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-night shadow-sm">
                   {title.charAt(0).toUpperCase()}
                 </div>
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-white dark:border-night rounded-full" />
+                <span
+                  className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white dark:border-night rounded-full ${isOnline ? "bg-emerald-400" : "bg-gray-300 dark:bg-gray-500"}`}
+                  title={isOnline ? t('messages.online') : t('messages.offline')}
+                />
               </div>
               <div className="min-w-0">
                 <h1 className="text-sm font-bold text-deep-space-blue dark:text-white truncate leading-tight">

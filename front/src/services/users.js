@@ -53,6 +53,11 @@ export async function getSuggestions() {
   return res.data.data.users;
 }
 
+// PUT /api/users/ping → marque l'utilisateur courant comme actif (présence en ligne).
+export async function ping() {
+  await api.put("/users/ping");
+}
+
 // GET /api/users/followers/:id → { users: [...] }
 export async function getFollowers(userId) {
   const res = await api.get(`/users/followers/${userId}`);

@@ -107,7 +107,9 @@
     "new": "Nouveau message",
     "searchUser": "Rechercher un utilisateur…",
     "read": "Lu",
-    "sent": "Envoyé"
+    "sent": "Envoyé",
+    "online": "En ligne",
+    "offline": "Hors ligne"
   },
   "post": {
     "loadError": "Impossible de charger le post.",

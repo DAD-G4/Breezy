@@ -107,7 +107,9 @@
     "new": "Nuevo mensaje",
     "searchUser": "Buscar un usuario…",
     "read": "Leído",
-    "sent": "Enviado"
+    "sent": "Enviado",
+    "online": "En línea",
+    "offline": "Desconectado"
   },
   "post": {
     "loadError": "No se pudo cargar la publicación.",

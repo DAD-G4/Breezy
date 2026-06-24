@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken, checkBan, createBanChecker, Ban, asyncHandler } from '@breezy/shared';
-import { getProfile, getBatchProfiles, updateProfile, updateSettings, getFollowers, getFollowing, searchUsers, getSuggestions } from '../controllers/userController';
+import { getProfile, getBatchProfiles, updateProfile, updateSettings, getFollowers, getFollowing, searchUsers, getSuggestions, ping } from '../controllers/userController';
 
 const router = Router();
 
@@ -9,6 +9,7 @@ const banChecker = createBanChecker(Ban);
 router.use(authenticateToken);
 router.use(checkBan(banChecker));
 
+router.put('/ping', asyncHandler(ping));
 router.get('/search', asyncHandler(searchUsers));
 router.get('/suggestions', asyncHandler(getSuggestions));
 router.get('/profile/:id', asyncHandler(getProfile));
