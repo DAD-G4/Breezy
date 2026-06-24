@@ -20,6 +20,11 @@ const ACTION_KEY = {
   comment: "header.notif.commented",
 };
 
+// Cadence du rafraîchissement live (notifs, badge DM, détection de message
+// entrant → popup). Plus court = popup/notifs plus rapides, légèrement plus
+// d'appels (négligeable à cette échelle).
+const POLL_INTERVAL_MS = 6000;
+
 export function useNotifications(t, locale) {
   const [notifications, setNotifications] = useState([]);
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -114,7 +119,7 @@ export function useNotifications(t, locale) {
 
     fetchNotifications();
     // Rafraîchissement live : refetch périodique (likes, commentaires, follows…).
-    const interval = setInterval(fetchNotifications, 15000);
+    const interval = setInterval(fetchNotifications, POLL_INTERVAL_MS);
     // Sur mobile, les navigateurs gèlent setInterval quand l'onglet passe en
     // arrière-plan. On refetch IMMÉDIATEMENT au retour de focus (sinon l'UI
     // reste figée jusqu'au prochain tick et l'utilisateur recharge à la main).
