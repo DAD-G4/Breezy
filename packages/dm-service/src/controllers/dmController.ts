@@ -73,6 +73,12 @@ export async function getConversation(req: AuthRequest, res: Response): Promise<
     return;
   }
 
+  // Blocage : impossible de consulter une conversation si l'un a bloqué l'autre.
+  if (await isBlockedBetween(req.user.id, otherUserId)) {
+    error(res, 'You cannot view this conversation', 403);
+    return;
+  }
+
   const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 50));
   const skip = (page - 1) * limit;
