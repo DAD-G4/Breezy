@@ -22,7 +22,8 @@ export function useNotifications(t, locale) {
 
   useEffect(() => {
     let active = true;
-    (async () => {
+
+    const fetchNotifications = async () => {
       try {
         const { notifications: raw } = await getNotifications();
         const mapped = await Promise.all(
@@ -45,10 +46,16 @@ export function useNotifications(t, locale) {
       } catch (err) {
         console.error('[Notifications] Failed to fetch:', err);
       }
-    })();
+    };
+
+    fetchNotifications();
+    // Rafraîchissement live : refetch périodique (likes, commentaires, follows…).
+    const interval = setInterval(fetchNotifications, 25000);
     return () => {
       active = false;
+      clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const unreadCount = notifications.filter((n) => n.unread).length;
