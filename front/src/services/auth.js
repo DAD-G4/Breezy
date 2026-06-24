@@ -19,3 +19,8 @@ export async function logout() {
   const res = await api.post("/auth/logout");
   return res.data.data;
 }
+
+export async function adminRegister({ email, username, password, role }) {
+  const res = await api.post("/auth/admin/register", { email, username, password, role });
+  return res.data.data;
+}

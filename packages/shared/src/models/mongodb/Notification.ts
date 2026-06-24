@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface INotificationDocument extends Document {
   recipient_id: number;
   sender_id: number;
-  type: 'mention' | 'like' | 'follow';
+  type: 'mention' | 'like' | 'follow' | 'dm';
   post_id: mongoose.Types.ObjectId | null;
   is_read: boolean;
   created_at: Date;
@@ -21,7 +21,7 @@ const NotificationSchema = new Schema({
   },
   type: {
     type: String,
-    enum: ['mention', 'like', 'follow'],
+    enum: ['mention', 'like', 'follow', 'dm'],
     required: true,
   },
   post_id: {

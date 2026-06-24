@@ -46,6 +46,7 @@ export default function MyProfilePage() {
         if (active) {
           setProfile({
             id: u.id,
+            username: u.username,
             name: displayName,
             bio: u.profile?.bio || "",
             avatarUrl: u.profile?.avatar_url || null,
