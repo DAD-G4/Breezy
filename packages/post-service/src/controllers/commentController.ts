@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import mongoose from 'mongoose';
-import { PostModel as Post, success, error, AuthRequest } from '@breezy/shared';
+import { PostModel as Post, NotificationModel as Notification, success, error, AuthRequest } from '@breezy/shared';
 
 export async function addComment(req: AuthRequest, res: Response): Promise<void> {
   if (!req.user) {
@@ -28,6 +28,21 @@ export async function addComment(req: AuthRequest, res: Response): Promise<void>
   if (!result) {
     error(res, 'Post not found', 404);
     return;
+  }
+
+  // Notifie l'auteur du post (sauf s'il commente son propre post).
+  if (result.user_id !== req.user.id) {
+    try {
+      await Notification.create({
+        recipient_id: result.user_id,
+        sender_id: req.user.id,
+        type: 'comment',
+        post_id: result._id,
+        is_read: false,
+      });
+    } catch (notifErr) {
+      console.error('[AddComment][Notif]', notifErr);
+    }
   }
 
   success(res, newComment, 'Comment added successfully', 201);
@@ -93,6 +108,25 @@ export async function replyToComment(req: AuthRequest, res: Response): Promise<v
   if (!result) {
     error(res, 'Post or comment not found', 404);
     return;
+  }
+
+  // Notifie l'auteur du commentaire parent (sauf s'il se répond à lui-même).
+  const parentComment = (result.comments as any[]).find(
+    (c) => c.comment_id.toString() === commentId
+  );
+  const commentAuthorId = parentComment?.user_id;
+  if (commentAuthorId != null && commentAuthorId !== req.user.id) {
+    try {
+      await Notification.create({
+        recipient_id: commentAuthorId,
+        sender_id: req.user.id,
+        type: 'comment',
+        post_id: result._id,
+        is_read: false,
+      });
+    } catch (notifErr) {
+      console.error('[Reply][Notif]', notifErr);
+    }
   }
 
   success(res, newReply, 'Reply added successfully', 201);
