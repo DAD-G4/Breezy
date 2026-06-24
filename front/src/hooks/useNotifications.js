@@ -1,5 +1,6 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   getNotifications,
   markAsRead as svcMarkAsRead,
@@ -7,8 +8,9 @@ import {
   deleteNotification as svcDeleteNotification,
   deleteAllRead as svcDeleteAllRead,
 } from "../services/notifications";
-import { getUnreadCount } from "../services/dm";
+import { getUnreadCount, getConversations } from "../services/dm";
 import { resolveUser, ping } from "../services/users";
+import { useAuth } from "../context/AuthContext";
 import { relativeTime } from "../lib/mappers";
 
 const ACTION_KEY = {
@@ -21,6 +23,21 @@ const ACTION_KEY = {
 export function useNotifications(t, locale) {
   const [notifications, setNotifications] = useState([]);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  // Popup « nouveau message » (toast en haut).
+  const [incomingMessage, setIncomingMessage] = useState(null);
+
+  // Refs lus dans la boucle de polling (pas de redémarrage de l'intervalle).
+  const { user } = useAuth();
+  const pathname = usePathname();
+  const userRef = useRef(user);
+  userRef.current = user;
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+  // Horodatage du dernier message entrant connu (anti-doublon entre polls).
+  const lastSeenTsRef = useRef(0);
+  const initializedRef = useRef(false);
+
+  const dismissIncoming = useCallback(() => setIncomingMessage(null), []);
 
   useEffect(() => {
     let active = true;
@@ -52,6 +69,42 @@ export function useNotifications(t, locale) {
       try {
         const { unreadCount } = await getUnreadCount();
         if (active) setUnreadMessages(unreadCount || 0);
+      } catch {
+        /* silencieux */
+      }
+      // Détection d'un nouveau message entrant → popup en haut. On repère le
+      // message reçu (pas de moi) le plus récent ; on déclenche la popup s'il
+      // est plus récent que le dernier connu, non lu, et qu'on n'est pas déjà
+      // sur la conversation concernée.
+      try {
+        const me = userRef.current?.id;
+        const { conversations: convs } = await getConversations();
+        let newest = null;
+        for (const c of convs || []) {
+          const lm = c.last_message;
+          if (!lm || lm.sender_id === me) continue;
+          const ts = new Date(lm.created_at).getTime();
+          if (!newest || ts > newest.ts) {
+            newest = { ts, text: lm.message_text, otherId: c.other_user_id, unread: (c.unread_count ?? 0) > 0 };
+          }
+        }
+        if (newest && newest.ts > lastSeenTsRef.current) {
+          const firstRun = !initializedRef.current;
+          lastSeenTsRef.current = newest.ts;
+          if (!firstRun && newest.unread) {
+            const sender = await resolveUser(newest.otherId);
+            const onThisConvo = pathnameRef.current === `/messages/${encodeURIComponent(sender.username)}`;
+            if (active && !onThisConvo) {
+              setIncomingMessage({
+                id: newest.ts,
+                name: sender.displayName,
+                username: sender.username,
+                text: newest.text,
+              });
+            }
+          }
+        }
+        initializedRef.current = true;
       } catch {
         /* silencieux */
       }
@@ -94,5 +147,5 @@ export function useNotifications(t, locale) {
     await svcDeleteAllRead();
   }, []);
 
-  return { notifications, unreadCount, unreadMessages, markRead, markAllRead, deleteNotification, deleteAllRead: deleteAllReadNotifications };
+  return { notifications, unreadCount, unreadMessages, incomingMessage, dismissIncoming, markRead, markAllRead, deleteNotification, deleteAllRead: deleteAllReadNotifications };
 }
