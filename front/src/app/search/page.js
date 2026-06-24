@@ -27,17 +27,34 @@ function SearchContent() {
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
   const [trending, setTrending] = useState([]);
+  const [trendingPosts, setTrendingPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
 
+  // Tendances (tags) + quelques posts tendance à afficher quand on ne cherche pas.
   useEffect(() => {
     let cancelled = false;
-    getTrending()
-      .then((data) => { if (!cancelled) setTrending((data || []).slice(0, 5)); })
-      .catch(() => {})
-      .finally(() => {});
+    (async () => {
+      try {
+        const data = await getTrending();
+        const tags = (data || []).slice(0, 5);
+        if (!cancelled) setTrending(tags);
+        if (tags[0]) {
+          const { posts: raw } = await searchByTag(tags[0].tag);
+          const ids = (raw || []).map((p) => p.user_id);
+          const authors = await resolveUsers(ids);
+          const mapped = (raw || []).slice(0, 4).map((p, i) =>
+            mapPost(p, { authorLabel: authors[i]?.displayName, authorHandle: authors[i]?.username, avatarUrl: authors[i]?.avatarUrl, currentUserId: user?.id, locale: language })
+          );
+          if (!cancelled) setTrendingPosts(mapped);
+        }
+      } catch {
+        /* silencieux */
+      }
+    })();
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearchPosts = useCallback(async (q) => {
@@ -75,8 +92,8 @@ function SearchContent() {
     }
   }, [t]);
 
-  // La soumission ne fait que mettre à jour l'URL : la recherche est déclenchée
-  // par l'effet ci-dessous (source de vérité unique = ?q=).
+  // La soumission met juste l'URL à jour (lien partageable). La recherche
+  // elle-même est déclenchée en live par l'effet debouncé ci-dessous.
   const handleSearch = (e) => {
     e.preventDefault();
     const q = query.trim().replace(/^#/, "");
@@ -84,49 +101,47 @@ function SearchContent() {
     router.push(`/search?q=${encodeURIComponent(q)}`, { scroll: false });
   };
 
-  const handleTabChange = async (tab) => {
-    setActiveTab(tab);
-    if (!searched) return;
-
-    const q = query.trim().replace(/^#/, "");
-    if (!q) return;
-
-    setError("");
-    setPosts([]);
-    setUsers([]);
-
-    if (tab === "posts") {
-      await handleSearchPosts(q);
-    } else {
-      await handleSearchUsers(q);
-    }
+  const handleTabChange = (tab) => {
+    setActiveTab(tab); // l'effet debouncé relance la recherche sur le bon onglet
   };
 
   const handleTrendingClick = (tag) => {
     setActiveTab("posts");
     setQuery(`#${tag}`);
-    router.push(`/search?q=${encodeURIComponent(tag)}`, { scroll: false });
   };
 
-  // Recherche pilotée par l'URL : se relance à chaque changement de ?q=, y
-  // compris quand on clique une tendance depuis la barre latérale alors qu'on
-  // est déjà sur la page de recherche.
+  // Annule la recherche : vide le champ et l'URL.
+  const handleClear = () => {
+    setQuery("");
+    router.push("/search", { scroll: false });
+  };
+
+  // Synchronise le champ avec l'URL (lien partagé, clic d'une tendance depuis
+  // la barre latérale alors qu'on est déjà sur /search).
   useEffect(() => {
-    const q = urlQuery.trim().replace(/^#/, "");
+    if (urlQuery) setQuery(urlQuery);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlQuery]);
+
+  // Recherche LIVE (au fil de la frappe) avec debounce, sur l'onglet actif.
+  useEffect(() => {
+    const q = query.trim().replace(/^#/, "");
     if (!q) {
       setSearched(false);
       setPosts([]);
       setUsers([]);
+      setError("");
       return;
     }
-    setQuery(urlQuery);
-    if (activeTab === "users") {
-      handleSearchUsers(q);
-    } else {
-      handleSearchPosts(q);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlQuery]);
+    const timer = setTimeout(() => {
+      if (activeTab === "users") {
+        handleSearchUsers(q);
+      } else {
+        handleSearchPosts(q);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query, activeTab, handleSearchPosts, handleSearchUsers]);
 
   return (
     <AppShell>
@@ -143,8 +158,20 @@ function SearchContent() {
             placeholder={t("search.placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue dark:focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all shadow-sm"
+            className="w-full pl-12 pr-11 py-3 rounded-full border border-gray-200 dark:border-steel-blue/40 bg-white dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue dark:focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all shadow-sm"
           />
+          {query && (
+            <button
+              type="button"
+              onClick={handleClear}
+              aria-label={t("search.clear") || "Effacer"}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-deep-space-blue dark:hover:text-papaya-whip transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </form>
 
         {/* ONGLETS */}
@@ -177,7 +204,7 @@ function SearchContent() {
           </button>
         </div>
 
-        {/* TENDANCES */}
+        {/* TENDANCES (tags) — uniquement quand on ne cherche pas */}
         {!searched && trending.length > 0 && (
           <div className="flex flex-col gap-2">
             <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
@@ -194,6 +221,18 @@ function SearchContent() {
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* POSTS TENDANCE — aperçu quand on ne cherche pas */}
+        {!searched && trendingPosts.length > 0 && (
+          <div className="flex flex-col gap-1">
+            <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+              {t("search.trendingPosts")}
+            </h2>
+            {trendingPosts.map((post) => (
+              <PostCard key={post.id} post={post} currentUserId={user?.id} />
+            ))}
           </div>
         )}
 

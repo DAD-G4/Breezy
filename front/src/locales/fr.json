@@ -89,7 +89,9 @@
     "error": "Recherche impossible.",
     "tabPosts": "Posts",
     "tabUsers": "Utilisateurs",
-    "trending": "Tendances"
+    "trending": "Tendances",
+    "clear": "Effacer la recherche",
+    "trendingPosts": "Posts tendance"
   },
   "conversation": {
     "placeholder": "Votre message..."

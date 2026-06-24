@@ -89,7 +89,9 @@
     "error": "Search failed.",
     "tabPosts": "Posts",
     "tabUsers": "Users",
-    "trending": "Trending"
+    "trending": "Trending",
+    "clear": "Clear search",
+    "trendingPosts": "Trending posts"
   },
   "conversation": {
     "placeholder": "Your message..."

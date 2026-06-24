@@ -89,7 +89,9 @@
     "error": "Búsqueda fallida.",
     "tabPosts": "Publicaciones",
     "tabUsers": "Usuarios",
-    "trending": "Tendencias"
+    "trending": "Tendencias",
+    "clear": "Borrar búsqueda",
+    "trendingPosts": "Publicaciones populares"
   },
   "conversation": {
     "placeholder": "Tu mensaje..."
