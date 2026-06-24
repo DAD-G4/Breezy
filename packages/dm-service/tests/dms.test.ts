@@ -1,4 +1,15 @@
 // Jest mocks must be hoisted - set up before any imports
+jest.mock('@breezy/shared/src/models/mongodb/Notification', () => ({
+  __esModule: true,
+  default: {
+    create: jest.fn(),
+    find: jest.fn(),
+    findOne: jest.fn(),
+    countDocuments: jest.fn(),
+    updateMany: jest.fn(),
+  },
+}));
+
 jest.mock('@breezy/shared/src/models/mongodb/DirectMessage', () => ({
   __esModule: true,
   default: {
@@ -16,8 +27,10 @@ import express from 'express';
 import request from 'supertest';
 import { createMockSuccess, createMockError, createMockAuthenticateToken, createMockCheckBan, createMockBan } from '@breezy/shared/src/test-utils';
 import DirectMessageModel from '@breezy/shared/src/models/mongodb/DirectMessage';
+import NotificationModel from '@breezy/shared/src/models/mongodb/Notification';
 
 const mockDirectMessageModel = DirectMessageModel as any;
+const mockNotificationModel = NotificationModel as any;
 
 const mockSuccess = createMockSuccess();
 const mockError = createMockError();
@@ -30,6 +43,7 @@ jest.mock('@breezy/shared', () => {
   return {
     ...actual,
     DirectMessageModel: mockDirectMessageModel,
+    NotificationModel: mockNotificationModel,
     Ban: mockBan,
     success: mockSuccess,
     error: mockError,
