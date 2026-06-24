@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { connectMongo, errorHandler, notFound, healthRouter } from '@breezy/shared';
 import tagRoutes from './routes/tags';
 
@@ -6,6 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3004;
 
 app.use(express.json());
+app.use(cookieParser());
 
 // Health check
 app.use('/api/health', healthRouter);

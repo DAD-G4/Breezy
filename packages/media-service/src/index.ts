@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { connectPostgres, connectMongo, errorHandler, notFound, healthRouter } from '@breezy/shared';
 import mediaRoutes from './routes/media';
 
@@ -6,6 +7,8 @@ const app = express();
 const PORT = process.env.PORT || 3007;
 
 app.use(express.json());
+app.use(cookieParser());
+
 app.use('/api/health', healthRouter);
 app.use('/api/media', mediaRoutes);
 app.use(notFound);
