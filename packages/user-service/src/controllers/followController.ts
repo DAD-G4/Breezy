@@ -1,5 +1,14 @@
 import { Response } from 'express';
-import { NotificationModel as Notification, Follower, success, error, AuthRequest } from '@breezy/shared';
+import { NotificationModel as Notification, Follower, UserModel, success, error, AuthRequest } from '@breezy/shared';
+
+/**
+ * Notifications de nouveau follower (Fx16) : réservées aux utilisateurs STANDARD.
+ * La matrice exclut explicitement modérateurs et admins (User ✅, Mod ❌, Admin ❌).
+ */
+async function recipientIsStandardUser(userId: number): Promise<boolean> {
+  const u = await UserModel.findByPk(userId, { attributes: ['role'] });
+  return !!u && u.role === 'user';
+}
 
 export async function followUser(req: AuthRequest, res: Response): Promise<void> {
   if (!req.user) {
@@ -21,13 +30,16 @@ export async function followUser(req: AuthRequest, res: Response): Promise<void>
       following_id: followingId,
     });
 
-    await Notification.create({
-      recipient_id: followingId,
-      sender_id: req.user.id,
-      type: 'follow',
-      post_id: null,
-      is_read: false,
-    });
+    // Notif uniquement si le destinataire est un utilisateur standard (Fx16).
+    if (await recipientIsStandardUser(followingId)) {
+      await Notification.create({
+        recipient_id: followingId,
+        sender_id: req.user.id,
+        type: 'follow',
+        post_id: null,
+        is_read: false,
+      });
+    }
 
     success(res, follow, 'Successfully followed user');
   } catch (err: any) {
