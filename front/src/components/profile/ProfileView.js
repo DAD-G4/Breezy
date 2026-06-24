@@ -10,6 +10,16 @@ import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
 import Toast from "../ui/Toast";
 
+// Limite de mise en forme de la bio : au plus MAX_BIO_LINES lignes, et pas de
+// lignes vides multiples consécutives (au plus une ligne vide d'affilée).
+const MAX_BIO_LINES = 5;
+
+function limitBioLineBreaks(text) {
+  const collapsed = text.replace(/\n{3,}/g, "\n\n");
+  const lines = collapsed.split("\n");
+  return lines.length <= MAX_BIO_LINES ? collapsed : lines.slice(0, MAX_BIO_LINES).join("\n");
+}
+
 // composant reçoit les infos de base (initialUser) et un booléen (isOwnProfile)
 export default function ProfileView({ initialUser, isOwnProfile }) {
   const { t } = useLanguage();
@@ -313,14 +323,21 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
         <div>
           {isEditing && isOwnProfile ? (
             <div>
-              <textarea 
-                value={bio} 
-                onChange={(e) => setBio(e.target.value)}
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(limitBioLineBreaks(e.target.value))}
+                onKeyDown={(e) => {
+                  // Bloque l'ajout d'un saut de ligne au-delà de la limite.
+                  if (e.key === "Enter" && (bio?.split("\n").length || 0) >= MAX_BIO_LINES) {
+                    e.preventDefault();
+                  }
+                }}
                 maxLength={160}
+                rows={5}
                 className="w-full p-3 text-sm rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none border border-steel-blue resize-none min-h-[80px]"
                 autoFocus
               />
-              <p className="text-xs text-gray-400 dark:text-gray-500 text-right mt-1">{bio?.length || 0}/160</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 text-right mt-1">{bio?.length || 0}/160 · {bio?.split("\n").length || 1}/{MAX_BIO_LINES} {t('profile.lines') || 'lignes'}</p>
             </div>
           ) : (
             <p className="text-sm text-deep-space-blue/80 dark:text-papaya-whip/80 leading-relaxed whitespace-pre-wrap break-words overflow-hidden">
