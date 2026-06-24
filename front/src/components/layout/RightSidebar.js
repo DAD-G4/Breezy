@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { getTrending } from "@/services/tags";
 import { getSuggestions, follow } from "@/services/users";
@@ -10,6 +10,9 @@ import { getSuggestions, follow } from "@/services/users";
 export default function RightSidebar() {
   const { t } = useLanguage();
   const router = useRouter();
+  const pathname = usePathname();
+  // La barre de recherche est masquée sur la page recherche (doublon).
+  const isSearchPage = pathname?.startsWith("/search");
   const [query, setQuery] = useState("");
   const [trends, setTrends] = useState([]);
   const [trendsLoading, setTrendsLoading] = useState(true);
@@ -52,19 +55,21 @@ export default function RightSidebar() {
     <aside className="hidden xl:block w-80 shrink-0 px-4 py-4">
       <div className="sticky top-4 flex flex-col gap-4">
         
-        {/* BARRE DE RECHERCHE */}
-        <form onSubmit={handleSearch} className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-          </span>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t('rightSidebar.searchPlaceholder')}
-            className="w-full pl-11 pr-4 py-2.5 rounded-full bg-gray-100 dark:bg-black/30 text-deep-space-blue dark:text-white placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-steel-blue transition-all"
-          />
-        </form>
+        {/* BARRE DE RECHERCHE (masquée sur la page recherche) */}
+        {!isSearchPage && (
+          <form onSubmit={handleSearch} className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </span>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t('rightSidebar.searchPlaceholder')}
+              className="w-full pl-11 pr-4 py-2.5 rounded-full bg-gray-100 dark:bg-black/30 text-deep-space-blue dark:text-white placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-steel-blue transition-all"
+            />
+          </form>
+        )}
 
         {/* TENDANCES */}
         <section className="bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/30 rounded-2xl overflow-hidden">
