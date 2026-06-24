@@ -19,9 +19,10 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const initialQuery = searchParams.get("q") || "";
+  // Terme courant lu dans l'URL — réactif : change à chaque navigation /search?q=...
+  const urlQuery = searchParams.get("q") || "";
 
-  const [query, setQuery] = useState(initialQuery);
+  const [query, setQuery] = useState(urlQuery);
   const [activeTab, setActiveTab] = useState("posts");
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
@@ -48,7 +49,7 @@ function SearchContent() {
       const userIds = (raw || []).map((p) => p.user_id);
       const authors = await resolveUsers(userIds);
       const mapped = (raw || []).map((p, i) =>
-        mapPost(p, { authorLabel: authors[i]?.displayName, currentUserId: user?.id, locale: language })
+        mapPost(p, { authorLabel: authors[i]?.displayName, avatarUrl: authors[i]?.avatarUrl, currentUserId: user?.id, locale: language })
       );
       setPosts(mapped);
     } catch (err) {
@@ -74,18 +75,13 @@ function SearchContent() {
     }
   }, [t]);
 
-  const handleSearch = async (e) => {
+  // La soumission ne fait que mettre à jour l'URL : la recherche est déclenchée
+  // par l'effet ci-dessous (source de vérité unique = ?q=).
+  const handleSearch = (e) => {
     e.preventDefault();
     const q = query.trim().replace(/^#/, "");
     if (!q) return;
-
     router.push(`/search?q=${encodeURIComponent(q)}`, { scroll: false });
-
-    if (activeTab === "posts") {
-      await handleSearchPosts(q);
-    } else {
-      await handleSearchUsers(q);
-    }
   };
 
   const handleTabChange = async (tab) => {
@@ -106,20 +102,31 @@ function SearchContent() {
     }
   };
 
-  const handleTrendingClick = async (tag) => {
-    setQuery(`#${tag}`);
+  const handleTrendingClick = (tag) => {
     setActiveTab("posts");
+    setQuery(`#${tag}`);
     router.push(`/search?q=${encodeURIComponent(tag)}`, { scroll: false });
-    await handleSearchPosts(tag);
   };
 
+  // Recherche pilotée par l'URL : se relance à chaque changement de ?q=, y
+  // compris quand on clique une tendance depuis la barre latérale alors qu'on
+  // est déjà sur la page de recherche.
   useEffect(() => {
-    if (!initialQuery) return;
-    const q = initialQuery.replace(/^#/, "");
-    if (!q) return;
-
-    handleSearchPosts(q);
-  }, []);
+    const q = urlQuery.trim().replace(/^#/, "");
+    if (!q) {
+      setSearched(false);
+      setPosts([]);
+      setUsers([]);
+      return;
+    }
+    setQuery(urlQuery);
+    if (activeTab === "users") {
+      handleSearchUsers(q);
+    } else {
+      handleSearchPosts(q);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlQuery]);
 
   return (
     <AppShell>
