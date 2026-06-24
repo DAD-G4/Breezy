@@ -2,6 +2,7 @@
 
 import { useState, use, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import AppShell from "../../../components/layout/AppShell";
 import PostCard from "../../../components/feed/PostCard";
 import { getApiErrorMessage } from "../../../lib/api";
@@ -61,9 +62,9 @@ export default function PostDetailsPage({ params }) {
           const ca = authorMap[c.user_id];
           const replies = (c.replies || []).map((r) => {
             const ra = authorMap[r.user_id];
-            return { id: r.reply_id, username: ra?.displayName, time: relativeTime(r.created_at, language), content: r.content };
+            return { id: r.reply_id, username: ra?.displayName, authorHandle: ra?.username, time: relativeTime(r.created_at, language), content: r.content };
           });
-          return { id: c.comment_id, userId: c.user_id, username: ca?.displayName, time: relativeTime(c.created_at, language), content: c.content, replies };
+          return { id: c.comment_id, userId: c.user_id, username: ca?.displayName, authorHandle: ca?.username, time: relativeTime(c.created_at, language), content: c.content, replies };
         });
 
         if (active) {
@@ -95,6 +96,7 @@ export default function PostDetailsPage({ params }) {
         {
           id: created.comment_id,
           username: myName,
+          authorHandle: user?.username,
           time: t('post.justNow'),
           content: created.content,
           replies: [],
@@ -124,7 +126,7 @@ export default function PostDetailsPage({ params }) {
                 ...c,
                 replies: [
                   ...(c.replies || []),
-                  { id: created.reply_id, username: myName, time: t('post.justNow'), content: created.content },
+                  { id: created.reply_id, username: myName, authorHandle: user?.username, time: t('post.justNow'), content: created.content },
                 ],
               }
             : c
@@ -199,12 +201,22 @@ export default function PostDetailsPage({ params }) {
           {comments.map((comment) => (
             <div key={comment.id} className="flex flex-col gap-3 p-3 bg-white dark:bg-deep-space-blue border border-gray-100 dark:border-steel-blue/20 rounded-xl shadow-sm">
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-steel-blue flex-shrink-0 flex items-center justify-center text-white font-bold text-xs">
-                  {comment.username.charAt(0).toUpperCase()}
-                </div>
+                {comment.authorHandle ? (
+                  <Link href={`/profile/${comment.authorHandle}`} className="w-8 h-8 rounded-full bg-steel-blue flex-shrink-0 flex items-center justify-center text-white font-bold text-xs hover:opacity-80 transition-opacity">
+                    {comment.username.charAt(0).toUpperCase()}
+                  </Link>
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-steel-blue flex-shrink-0 flex items-center justify-center text-white font-bold text-xs">
+                    {comment.username.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <div className="flex flex-col flex-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip">{comment.username}</span>
+                    {comment.authorHandle ? (
+                      <Link href={`/profile/${comment.authorHandle}`} className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip hover:underline">{comment.username}</Link>
+                    ) : (
+                      <span className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip">{comment.username}</span>
+                    )}
                     <span className="text-xs text-gray-500 dark:text-gray-400">{comment.time}</span>
                   </div>
                   <p className="text-sm text-deep-space-blue/90 dark:text-papaya-whip/90 mt-1">{comment.content}</p>
@@ -237,12 +249,22 @@ export default function PostDetailsPage({ params }) {
                 <div className="flex flex-col gap-2 pl-11">
                   {comment.replies.map((reply) => (
                     <div key={reply.id} className="flex gap-2 items-start">
-                      <div className="w-6 h-6 rounded-full bg-steel-blue/70 flex-shrink-0 flex items-center justify-center text-white font-bold text-[10px]">
-                        {reply.username.charAt(0).toUpperCase()}
-                      </div>
+                      {reply.authorHandle ? (
+                        <Link href={`/profile/${reply.authorHandle}`} className="w-6 h-6 rounded-full bg-steel-blue/70 flex-shrink-0 flex items-center justify-center text-white font-bold text-[10px] hover:opacity-80 transition-opacity">
+                          {reply.username.charAt(0).toUpperCase()}
+                        </Link>
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-steel-blue/70 flex-shrink-0 flex items-center justify-center text-white font-bold text-[10px]">
+                          {reply.username.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <div className="flex flex-col">
                         <div className="flex items-baseline gap-2">
-                          <span className="font-bold text-xs text-deep-space-blue dark:text-papaya-whip">{reply.username}</span>
+                          {reply.authorHandle ? (
+                            <Link href={`/profile/${reply.authorHandle}`} className="font-bold text-xs text-deep-space-blue dark:text-papaya-whip hover:underline">{reply.username}</Link>
+                          ) : (
+                            <span className="font-bold text-xs text-deep-space-blue dark:text-papaya-whip">{reply.username}</span>
+                          )}
                           <span className="text-[10px] text-gray-500 dark:text-gray-400">{reply.time}</span>
                         </div>
                         <p className="text-xs text-deep-space-blue/90 dark:text-papaya-whip/90">{reply.content}</p>
