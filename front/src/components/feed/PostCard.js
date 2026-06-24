@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { toggleLike, updatePost, deletePost } from "../../services/posts";
 import { report } from "../../services/moderation";
+import { blockUser } from "../../services/users";
 import { useLanguage } from "../../context/LanguageContext";
 import ImageModal from "../ui/ImageModal";
 import Toast from "../ui/Toast";
@@ -202,8 +203,12 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
                 <hr className="border-gray-100 dark:border-white/10" />
 
                 <button 
-                  onClick={() => {
-                    alert(t('postCard.blockAlert').replace('{{username}}', post.username));
+                  onClick={async () => {
+                    try {
+                      await blockUser(post.userId);
+                    } catch (err) {
+                      console.error('[PostCard] Failed to block user:', err);
+                    }
                     setIsMenuOpen(false);
                   }}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brick-red hover:bg-brick-red/10 dark:hover:bg-brick-red/40 transition-colors"

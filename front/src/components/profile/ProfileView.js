@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import PostCard from "../feed/PostCard";
-import { follow, unfollow, updateProfile } from "../../services/users";
+import { follow, unfollow, updateProfile, blockUser, unblockUser, getBlockedUsers } from "../../services/users";
 import { upload } from "../../services/media";
 import { report } from "../../services/moderation";
 import { useLanguage } from "../../context/LanguageContext";
@@ -29,9 +29,21 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
   const [isFollowing, setIsFollowing] = useState(initialUser.isFollowing || false); // Est-ce que l'utilisateur actuel folow ce profil ?
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [reported, setReported] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
   const fileInputRef = useRef(null);
+
+  // Check if the viewed user is blocked by the current user
+  useEffect(() => {
+    if (isOwnProfile || !user?.id) return;
+    getBlockedUsers()
+      .then((blocked) => {
+        const blockedIds = (blocked || []).map((u) => u.id);
+        setIsBlocked(blockedIds.includes(initialUser.id));
+      })
+      .catch(() => {});
+  }, [isOwnProfile, user?.id, initialUser.id]);
 
   // Fx10 — Photo de profil : upload média puis sauvegarde de l'avatar_url.
   const handleAvatarChange = async (e) => {
@@ -147,6 +159,26 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
     }
   };
 
+  const handleBlock = async () => {
+    try {
+      await blockUser(initialUser.id);
+      setIsBlocked(true);
+      setIsFollowing(false);
+      setFollowers((prev) => prev - 1);
+    } catch (err) {
+      console.error('[Profile] Failed to block user:', err);
+    }
+  };
+
+  const handleUnblock = async () => {
+    try {
+      await unblockUser(initialUser.id);
+      setIsBlocked(false);
+    } catch (err) {
+      console.error('[Profile] Failed to unblock user:', err);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <section className="p-6 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm dark:shadow-[0_0_15px_rgba(102,155,188,0.15)] transition-all flex flex-col gap-4">
@@ -205,28 +237,50 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
             )
           ) : (
             <div className="flex items-center gap-2">
-              <button 
-                onClick={handleFollowToggle}
-                disabled={isFollowLoading}
-                className={`ml-3 px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 ${
-                  isFollowing 
-                    ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-papaya-whip border border-gray-200 dark:border-white/20" 
-                    : "bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
-                } ${isFollowLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                {isFollowing ? t('profileView.following') : t('profileView.follow')}
-              </button>
-              <button 
-                onClick={handleReport}
-                disabled={reported}
-                className={`px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 ${
-                  reported
-                    ? "bg-gray-100 dark:bg-white/10 text-gray-400 dark:text-gray-500 cursor-default"
-                    : "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
-                }`}
-              >
-                {reported ? t('profileView.reported') : t('profileView.report')}
-              </button>
+              {!isBlocked ? (
+                <>
+                  <button 
+                    onClick={handleFollowToggle}
+                    disabled={isFollowLoading}
+                    className={`ml-3 px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 ${
+                      isFollowing 
+                        ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-papaya-whip border border-gray-200 dark:border-white/20" 
+                        : "bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
+                    } ${isFollowLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {isFollowing ? t('profileView.following') : t('profileView.follow')}
+                  </button>
+                  <button 
+                    onClick={handleReport}
+                    disabled={reported}
+                    className={`px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 ${
+                      reported
+                        ? "bg-gray-100 dark:bg-white/10 text-gray-400 dark:text-gray-500 cursor-default"
+                        : "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                    }`}
+                  >
+                    {reported ? t('profileView.reported') : t('profileView.report')}
+                  </button>
+                  <button 
+                    onClick={handleBlock}
+                    className="px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                  >
+                    {t('profileView.blockUser')}
+                  </button>
+                </>
+              ) : (
+                <div className="flex items-center gap-3 ml-3">
+                  <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                    {t('profileView.blocked')}
+                  </span>
+                  <button 
+                    onClick={handleUnblock}
+                    className="px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
+                  >
+                    {t('profileView.unblock')}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -258,14 +312,18 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
         {/* Bio */}
         <div>
           {isEditing && isOwnProfile ? (
-            <textarea 
-              value={bio} 
-              onChange={(e) => setBio(e.target.value)}
-              className="w-full p-3 text-sm rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none border border-steel-blue resize-none min-h-[80px]"
-              autoFocus
-            />
+            <div>
+              <textarea 
+                value={bio} 
+                onChange={(e) => setBio(e.target.value)}
+                maxLength={160}
+                className="w-full p-3 text-sm rounded-lg bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none border border-steel-blue resize-none min-h-[80px]"
+                autoFocus
+              />
+              <p className="text-xs text-gray-400 dark:text-gray-500 text-right mt-1">{bio?.length || 0}/160</p>
+            </div>
           ) : (
-            <p className="text-sm text-deep-space-blue/80 dark:text-papaya-whip/80 leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-deep-space-blue/80 dark:text-papaya-whip/80 leading-relaxed whitespace-pre-wrap break-words overflow-hidden">
               {bio}
             </p>
           )}

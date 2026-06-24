@@ -72,9 +72,7 @@ export async function resolveUser(userId) {
     userCache.set(userId, info);
     return info;
   } catch {
-    const fallback = { username: `user${userId}`, displayName: `Utilisateur ${userId}`, avatarUrl: null };
-    userCache.set(userId, fallback);
-    return fallback;
+    return { username: `user${userId}`, displayName: `Utilisateur ${userId}`, avatarUrl: null };
   }
 }
 
@@ -108,12 +106,28 @@ export async function resolveUsers(ids) {
         const id = chunk[idx];
         if (result.status === "fulfilled") {
           userCache.set(String(id), mapUser(result.value));
-        } else {
-          userCache.set(String(id), { username: `user${id}`, displayName: `Utilisateur ${id}`, avatarUrl: null });
         }
       });
     }
   }
 
   return strIds.map((id) => userCache.get(id));
+}
+
+// POST /api/users/block/:id — Block a user
+export async function blockUser(userId) {
+  const res = await api.post(`/users/block/${userId}`);
+  return res.data.data;
+}
+
+// DELETE /api/users/block/:id — Unblock a user
+export async function unblockUser(userId) {
+  const res = await api.delete(`/users/block/${userId}`);
+  return res.data.data;
+}
+
+// GET /api/users/blocked — Get list of blocked users
+export async function getBlockedUsers() {
+  const res = await api.get("/users/blocked");
+  return res.data.data.users;
 }
