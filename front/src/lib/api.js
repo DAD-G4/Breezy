@@ -16,17 +16,29 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Réponse : si le backend renvoie 401 (token absent/expiré), on purge la session
-// et on redirige vers /login — sauf si on y est déjà (échec de connexion).
+// Réponse : sur 401 (access token expiré), on tente UN renouvellement via
+// /auth/refresh (refresh token 7 j) puis on rejoue la requête. Si le refresh
+// échoue, on redirige vers /login. Les routes d'auth elles-mêmes ne déclenchent
+// pas de refresh (pour éviter les boucles).
+const AUTH_ROUTE = /\/auth\/(login|refresh|me|logout|register)/;
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (
-      typeof window !== "undefined" &&
-      error.response?.status === 401 &&
-      !window.location.pathname.startsWith("/login")
-    ) {
-      window.location.href = "/login";
+  async (error) => {
+    const original = error.config || {};
+    const status = error.response?.status;
+    const url = original.url || "";
+
+    if (status === 401 && !AUTH_ROUTE.test(url) && !original._retry) {
+      original._retry = true;
+      try {
+        await api.post("/auth/refresh");
+        return api(original); // rejoue la requête avec le nouveau cookie
+      } catch {
+        if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+          window.location.href = "/login";
+        }
+      }
     }
     return Promise.reject(error);
   }

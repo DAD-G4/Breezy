@@ -221,6 +221,30 @@ export async function me(req: Request, res: Response): Promise<void> {
 }
 
 /**
+ * POST /api/auth/refresh
+ * Émet un nouveau accessToken (et refreshToken) à partir du refreshToken cookie.
+ * Permet de prolonger la session sans re-login (l'access token expire en 1h).
+ */
+export async function refresh(req: Request, res: Response): Promise<void> {
+  const token = (req as any).cookies?.refreshToken;
+
+  if (!token) {
+    error(res, 'No refresh token', 401);
+    return;
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as JwtPayload;
+    const userData = { id: decoded.id, username: decoded.username, email: decoded.email, role: decoded.role };
+    setAuthCookies(res, userData);
+    success(res, { user: userData }, 'Token refreshed');
+  } catch {
+    clearAuthCookies(res);
+    error(res, 'Invalid refresh token', 401);
+  }
+}
+
+/**
  * POST /api/auth/logout
  * Clear auth cookies.
  */
