@@ -39,8 +39,11 @@ export default function LoginPage() {
 
       <main className="flex-1 flex flex-col items-center justify-center p-6">
         
-        <div className="mb-8">
-          <BreezyBadge className="w-24 h-24 drop-shadow-lg" />
+        <div className="mb-8 flex flex-col items-center">
+          <BreezyBadge className="w-40 h-40 drop-shadow-lg" />
+          <span className="mt-2 text-4xl font-extrabold tracking-wider text-steel-blue">
+            BREEZY
+          </span>
         </div>
 
         <div className="w-full max-w-sm border-2 border-deep-space-blue dark:border-white rounded-lg p-6 bg-white dark:bg-surface shadow-xl transition-colors duration-300">

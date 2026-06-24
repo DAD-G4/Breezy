@@ -62,13 +62,8 @@ export default function LeftSidebar() {
   return (
     <aside className="hidden md:flex flex-col sticky top-0 h-screen w-20 lg:w-64 shrink-0 border-r border-gray-200 dark:border-white/10 bg-white dark:bg-surface px-2 lg:px-4 py-4 gap-1 z-50">
       
-      <Link href="/" className="flex flex-col items-center px-3 py-3 lg:items-start">
-        <BreezyBadge className="w-20 h-20 shrink-0" />
-        {pathname?.startsWith("/moderation") && (
-          <span className="mt-1 text-2xl font-extrabold tracking-wider text-steel-blue">
-            BREEZY
-          </span>
-        )}
+      <Link href="/" className="flex items-center px-3 py-3 justify-center lg:justify-start">
+        <BreezyBadge className="w-14 h-14 shrink-0" />
       </Link>
 
       <nav className="flex flex-col gap-1 mt-2">
