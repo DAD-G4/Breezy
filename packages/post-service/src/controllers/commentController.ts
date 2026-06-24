@@ -33,6 +33,41 @@ export async function addComment(req: AuthRequest, res: Response): Promise<void>
   success(res, newComment, 'Comment added successfully', 201);
 }
 
+export async function deleteComment(req: AuthRequest, res: Response): Promise<void> {
+  if (!req.user) {
+    error(res, 'Authentication required', 401);
+    return;
+  }
+
+  const { id, commentId } = req.params;
+
+  const post = await Post.findById(id);
+  if (!post) {
+    error(res, 'Post not found', 404);
+    return;
+  }
+
+  const comment = (post.comments as any).find(
+    (c: any) => c.comment_id.toString() === commentId
+  );
+
+  if (!comment) {
+    error(res, 'Comment not found', 404);
+    return;
+  }
+
+  if (comment.user_id !== req.user.id) {
+    error(res, 'Unauthorized: you can only delete your own comments', 403);
+    return;
+  }
+
+  await Post.findByIdAndUpdate(id, {
+    $pull: { comments: { comment_id: new mongoose.Types.ObjectId(commentId) } },
+  });
+
+  success(res, null, 'Comment deleted successfully');
+}
+
 export async function replyToComment(req: AuthRequest, res: Response): Promise<void> {
   if (!req.user) {
     error(res, 'Authentication required', 401);

@@ -26,25 +26,14 @@ export async function getFeed(req: AuthRequest, res: Response): Promise<void> {
 
     const followedIds = followedRows.map((row: any) => row.following_id as number);
 
-    if (followedIds.length === 0) {
-      success(res, {
-        posts: [],
-        pagination: {
-          page,
-          limit,
-          total: 0,
-          totalPages: 0,
-        },
-      });
-      return;
-    }
+    const allUserIds = [...new Set([req.user.id, ...followedIds])];
 
-    const posts = await Post.find({ user_id: { $in: followedIds } })
+    const posts = await Post.find({ user_id: { $in: allUserIds } })
       .sort({ created_at: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await Post.countDocuments({ user_id: { $in: followedIds } });
+    const total = await Post.countDocuments({ user_id: { $in: allUserIds } });
 
     success(res, {
       posts,

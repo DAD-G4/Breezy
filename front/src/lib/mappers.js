@@ -26,6 +26,7 @@ export function relativeTime(dateInput, locale) {
 export function mapPost(post, { authorLabel, currentUserId, locale } = {}) {
   return {
     id: post._id,
+    userId: post.user_id,
     username: authorLabel || `user${post.user_id}`,
     time: relativeTime(post.created_at, locale),
     content: post.content,

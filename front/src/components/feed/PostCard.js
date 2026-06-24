@@ -1,33 +1,41 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { toggleLike } from "../../services/posts";
+import { toggleLike, updatePost, deletePost } from "../../services/posts";
 import { report } from "../../services/moderation";
 import { useLanguage } from "../../context/LanguageContext";
+import ImageModal from "../ui/ImageModal";
+import Toast from "../ui/Toast";
 
-export default function PostCard({ post, disableProfileLink = false }) {
+export default function PostCard({ post, disableProfileLink = false, currentUserId, onDelete, onUpdate }) {
   const { t } = useLanguage();
-  // Etats pour gérer le like (initialisés depuis les données du post)
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
   const [reported, setReported] = useState(false);
 
-  // Fx20 — Signaler : POST /api/moderation/report { target_type, target_id, reason }
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(post.content);
+  const [editSaving, setEditSaving] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  const isOwner = currentUserId != null && post.userId === currentUserId;
+
   const handleReport = async () => {
     setIsMenuOpen(false);
     if (reported) return;
     try {
       await report({ targetType: "post", targetId: post.id, reason: "Contenu inapproprié" });
       setReported(true);
+      setShowToast(true);
     } catch (err) {
       console.error('[PostCard] Failed to report:', err);
       setReported(false);
     }
   };
 
-  // Fx6 — Liker : POST /api/posts/:id/like (toggle côté backend).
-  // UI optimiste : on bascule tout de suite, puis on recale avec la réponse
-  // (ou on annule si l'appel échoue).
   const handleLike = async () => {
     const prevLiked = isLiked;
     const prevCount = likesCount;
@@ -40,16 +48,71 @@ export default function PostCard({ post, disableProfileLink = false }) {
       setIsLiked(liked);
       setLikesCount(count);
     } catch (err) {
-      // Rollback : on remet l'état d'avant le clic.
       setIsLiked(prevLiked);
       setLikesCount(prevCount);
     }
   };
 
-  //Etat pour gérer le menu déroulant 3 points
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const handleDelete = async () => {
+    setIsMenuOpen(false);
+    if (!window.confirm(t('postCard.delete'))) return;
+    try {
+      await deletePost(post.id);
+      onDelete?.(post.id);
+    } catch (err) {
+      console.error('[PostCard] Failed to delete:', err);
+    }
+  };
 
-  // on stock l'avatar nom dans une variable
+  const handleEditStart = () => {
+    setIsMenuOpen(false);
+    setEditContent(post.content);
+    setIsEditing(true);
+  };
+
+  const handleEditCancel = () => {
+    setIsEditing(false);
+    setEditContent(post.content);
+  };
+
+  const handleEditSave = async () => {
+    const trimmed = editContent.trim();
+    if (!trimmed || trimmed === post.content) {
+      setIsEditing(false);
+      return;
+    }
+    setEditSaving(true);
+    try {
+      await updatePost(post.id, trimmed);
+      onUpdate?.(post.id, trimmed);
+      setIsEditing(false);
+    } catch (err) {
+      console.error('[PostCard] Failed to update:', err);
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const renderContentWithHashtags = (content) => {
+    if (!content) return null;
+    const parts = content.split(/(#\w+)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('#')) {
+        const tag = part.slice(1);
+        return (
+          <Link
+            key={i}
+            href={`/search?q=${tag}`}
+            className="text-steel-blue hover:underline font-medium"
+          >
+            {part}
+          </Link>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
   const userInfoContent = (
     <>
       <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold dark:shadow-[0_0_10px_rgba(102,155,188,0.5)] overflow-hidden group-hover/author:opacity-80 transition-opacity">
@@ -71,7 +134,6 @@ export default function PostCard({ post, disableProfileLink = false }) {
     <article className="p-4 border-b border-gray-200 dark:border-steel-blue/40 bg-transparent transition-colors duration-200">      
       <div className="flex justify-between items-start mb-3">
         
-        {/* CONDITION pour désactiver le lien vers le profil */}
         {disableProfileLink ? (
           <div className="flex items-center gap-3">
             {userInfoContent}
@@ -82,9 +144,7 @@ export default function PostCard({ post, disableProfileLink = false }) {
           </Link>
         )}
 
-        {/* MENU DU POST 3 PETITS POINTS  */}
         <div className="relative">
-          {/* bouton pour ouvrir/fermer */}
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="text-gray-500 hover:text-deep-space-blue dark:hover:text-papaya-whip transition-colors p-1 rounded-full hover:bg-slate-100 dark:hover:bg-white/10"
@@ -94,19 +154,41 @@ export default function PostCard({ post, disableProfileLink = false }) {
             </svg>
           </button>
 
-          {/* Si menu est ouvert, on affiche */}
           {isMenuOpen && (
             <>
-              {/* Overlay invisible, clique ailleurs pour fermer*/}
               <div 
                 className="fixed inset-0 z-10" 
                 onClick={() => setIsMenuOpen(false)}
               ></div>
 
-              {/* boîte */}
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-xl shadow-lg dark:shadow-[0_5px_20px_rgba(0,0,0,0.5)] z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
                 
-                {/* Signaler (Fx20) */}
+                {isOwner && (
+                  <>
+                    <button
+                      onClick={handleEditStart}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-papaya-whip hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                    >
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      {t('postCard.edit')}
+                    </button>
+
+                    <button
+                      onClick={handleDelete}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brick-red hover:bg-brick-red/10 dark:hover:bg-brick-red/40 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      {t('postCard.delete')}
+                    </button>
+
+                    <hr className="border-gray-100 dark:border-white/10" />
+                  </>
+                )}
+
                 <button
                   onClick={handleReport}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-papaya-whip hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
@@ -117,10 +199,8 @@ export default function PostCard({ post, disableProfileLink = false }) {
                   {reported ? t('postCard.reported') : t('postCard.report')}
                 </button>
 
-                {/* Séparateur */}
                 <hr className="border-gray-100 dark:border-white/10" />
 
-                {/* Bloquer*/}
                 <button 
                   onClick={() => {
                     alert(t('postCard.blockAlert').replace('{{username}}', post.username));
@@ -140,14 +220,54 @@ export default function PostCard({ post, disableProfileLink = false }) {
         </div>
       </div>
 
-      <p className="text-sm text-deep-space-blue dark:text-papaya-whip/90 mb-3 leading-relaxed">
-        {post.content}
-      </p>
+      {isEditing ? (
+        <div className="mb-3">
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            autoFocus
+            maxLength={280}
+            className="w-full p-3 text-sm rounded-xl bg-gray-100 dark:bg-black/20 text-deep-space-blue dark:text-papaya-whip outline-none border border-steel-blue resize-none min-h-[80px] transition-colors"
+          />
+          <div className="flex items-center gap-2 mt-2">
+            <button
+              onClick={handleEditSave}
+              disabled={editSaving || !editContent.trim()}
+              className="px-4 py-1.5 text-sm font-semibold bg-steel-blue text-white rounded-full hover:bg-deep-space-blue transition-colors disabled:opacity-50"
+            >
+              {editSaving ? t('postCard.editing') : t('postCard.save')}
+            </button>
+            <button
+              onClick={handleEditCancel}
+              disabled={editSaving}
+              className="px-4 py-1.5 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-deep-space-blue dark:hover:text-papaya-whip transition-colors"
+            >
+              {t('postCard.cancel')}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="text-sm text-deep-space-blue dark:text-papaya-whip/90 mb-3 leading-relaxed">
+          {renderContentWithHashtags(post.content)}
+        </p>
+      )}
 
       {post.imageUrl && (
-        <div className="mb-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-          <img src={post.imageUrl} alt={t('postCard.imageAlt')} className="w-full h-auto object-cover" />
-        </div>
+        <>
+          <div
+            className="mb-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 cursor-zoom-in"
+            onClick={() => setLightboxOpen(true)}
+          >
+            <img src={post.imageUrl} alt={t('postCard.imageAlt')} className="w-full h-auto object-cover" />
+          </div>
+          {lightboxOpen && (
+            <ImageModal
+              src={post.imageUrl}
+              alt={t('postCard.imageAlt')}
+              onClose={() => setLightboxOpen(false)}
+            />
+          )}
+        </>
       )}
 
       {post.videoUrl && (
@@ -158,7 +278,6 @@ export default function PostCard({ post, disableProfileLink = false }) {
 
       <div className="flex gap-6 mt-2 text-gray-500 dark:text-gray-400">
         
-        {/* Bouton Commentaire */}
         <Link 
           href={`/post/${post.id}`} 
           className="flex items-center gap-1.5 hover:text-steel-blue transition-colors group text-gray-500 dark:text-gray-400"
@@ -171,7 +290,6 @@ export default function PostCard({ post, disableProfileLink = false }) {
           <span className="text-xs font-medium">{post.commentsCount || 0}</span>
         </Link>
 
-        {/* Bouton Like */}
         <button 
           onClick={handleLike}
           className={`flex items-center gap-1.5 transition-colors group ${isLiked ? 'text-brick-red' : 'hover:text-brick-red text-gray-500 dark:text-gray-400'}`}
@@ -185,6 +303,10 @@ export default function PostCard({ post, disableProfileLink = false }) {
         </button>
 
       </div>
+
+      {showToast && (
+        <Toast message={t('toast.postReported')} />
+      )}
     </article>
   );
 }

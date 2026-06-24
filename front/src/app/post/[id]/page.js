@@ -6,7 +6,7 @@ import AppShell from "../../../components/layout/AppShell";
 import PostCard from "../../../components/feed/PostCard";
 import { getApiErrorMessage } from "../../../lib/api";
 import { mapPost, relativeTime } from "../../../lib/mappers";
-import { getPost, addComment, addReply } from "../../../services/posts";
+import { getPost, addComment, addReply, deleteComment } from "../../../services/posts";
 import { resolveUsers } from "../../../services/users";
 import { useAuth, useRequireAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
@@ -33,7 +33,7 @@ export default function PostDetailsPage({ params }) {
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
 
-  const myName = user?.username || "Moi";
+  const myName = user?.username || t("common.me");
 
   // GET /api/posts/:id — post réel + ses commentaires (auteurs résolus).
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function PostDetailsPage({ params }) {
             const ra = authorMap[r.user_id];
             return { id: r.reply_id, username: ra?.displayName, time: relativeTime(r.created_at, language), content: r.content };
           });
-          return { id: c.comment_id, username: ca?.displayName, time: relativeTime(c.created_at, language), content: c.content, replies };
+          return { id: c.comment_id, userId: c.user_id, username: ca?.displayName, time: relativeTime(c.created_at, language), content: c.content, replies };
         });
 
         if (active) {
@@ -137,6 +137,15 @@ export default function PostDetailsPage({ params }) {
     }
   };
 
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await deleteComment(postId, commentId);
+      setComments(comments.filter((c) => c.id !== commentId));
+    } catch (err) {
+      setError(getApiErrorMessage(err, t('post.deleteCommentError')));
+    }
+  };
+
   return (
     <AppShell>
       <div className="flex flex-col p-4 gap-4">
@@ -159,7 +168,12 @@ export default function PostDetailsPage({ params }) {
         )}
 
         {!loading && !loadError && mainPost && (
-          <PostCard post={mainPost} />
+          <PostCard
+            post={mainPost}
+            currentUserId={user?.id}
+            onDelete={() => router.push('/')}
+            onUpdate={(postId, content) => setMainPost((prev) => (prev?.id === postId ? { ...prev, content } : prev))}
+          />
         )}
 
         {!loading && !loadError && mainPost && (
@@ -196,15 +210,25 @@ export default function PostDetailsPage({ params }) {
                   <p className="text-sm text-deep-space-blue/90 dark:text-papaya-whip/90 mt-1">{comment.content}</p>
 
                   {/* Bouton Répondre (Fx8) */}
+                  <div className="flex items-center gap-3 mt-1.5">
                   <button
                     onClick={() => {
                       setReplyingTo(replyingTo === comment.id ? null : comment.id);
                       setReplyText("");
                     }}
-                    className="text-xs font-semibold text-steel-blue hover:underline w-fit mt-1.5"
+                    className="text-xs font-semibold text-steel-blue hover:underline w-fit"
                   >
                     {t('commentSection.reply')}
                   </button>
+                  {comment.userId === user?.id && (
+                    <button
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="text-xs font-semibold text-brick-red hover:underline w-fit"
+                    >
+                      {t('commentSection.delete')}
+                    </button>
+                  )}
+                  </div>
                 </div>
               </div>
 
