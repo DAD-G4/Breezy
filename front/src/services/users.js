@@ -41,6 +41,24 @@ export async function unfollow(userId) {
   return res.data.data;
 }
 
+// GET /api/users/search?q=query → { users: [...] }
+export async function searchUsers(q) {
+  const res = await api.get("/users/search", { params: { q } });
+  return res.data.data.users;
+}
+
+// GET /api/users/followers/:id → { users: [...] }
+export async function getFollowers(userId) {
+  const res = await api.get(`/users/followers/${userId}`);
+  return res.data.data;
+}
+
+// GET /api/users/following/:id → { users: [...] }
+export async function getFollowing(userId) {
+  const res = await api.get(`/users/following/${userId}`);
+  return res.data.data;
+}
+
 // Résout un user_id en infos affichables (nom + avatar), avec cache.
 export async function resolveUser(userId) {
   if (userCache.has(userId)) return userCache.get(userId);

@@ -32,7 +32,7 @@ export type { SuccessResponse, ErrorResponse } from './utils/response';
 // alias to avoid name clash with type interfaces
 export { User as UserModel, UserAttributes, UserCreationAttributes } from './models/postgres/User';
 export { Profile as ProfileModel, ProfileAttributes, ProfileCreationAttributes } from './models/postgres/Profile';
-export { Follower, Ban } from './models/postgres';
+export { Follower, Ban, BlockedUser } from './models/postgres';
 export { sequelize } from './config/connection';
 
 export { default as PostModel } from './models/mongodb/Post';

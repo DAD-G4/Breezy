@@ -1,4 +1,5 @@
 import { Response, Request } from 'express';
+import { Op } from 'sequelize';
 import { UserModel, ProfileModel, Follower, PostModel, success, error, AuthRequest } from '@breezy/shared';
 
 /**
@@ -56,6 +57,68 @@ export async function getProfileByUsername(req: Request, res: Response): Promise
   ]);
 
   success(res, { ...user.toJSON(), followers_count: followersCount, following_count: followingCount, post_count: postsCount });
+}
+
+/**
+ * GET /api/users/search?q=query
+ * Searches users by username or display_name (case-insensitive).
+ * Returns up to 20 matching users with profile info.
+ */
+export async function searchUsers(req: AuthRequest, res: Response): Promise<void> {
+  const q = (req.query.q as string || '').trim();
+
+  if (!q) {
+    success(res, { users: [] });
+    return;
+  }
+
+  const pattern = `%${q}%`;
+
+  const users = await UserModel.findAll({
+    where: {
+      [Op.or]: [
+        { username: { [Op.iLike]: pattern } },
+      ],
+    },
+    include: [{ model: ProfileModel, as: 'profile' }],
+    attributes: { exclude: ['password_hash'] },
+    limit: 20,
+  });
+
+  const profileMatches = await ProfileModel.findAll({
+    where: { display_name: { [Op.iLike]: pattern } },
+    include: [{
+      model: UserModel,
+      as: 'user',
+      attributes: { exclude: ['password_hash'] },
+    }],
+    limit: 20,
+  });
+
+  const seenIds = new Set(users.map((u: any) => u.get('id')));
+  const merged = [...users];
+
+  for (const p of profileMatches) {
+    const u = (p as any).get('user');
+    if (u && !seenIds.has(u.get('id'))) {
+      seenIds.add(u.get('id'));
+      u.dataValues.profile = p.toJSON();
+      merged.push(u);
+    }
+  }
+
+  const results = merged.slice(0, 20).map((u: any) => {
+    const profile = u.get('profile');
+    return {
+      id: u.get('id'),
+      username: u.get('username'),
+      display_name: profile?.display_name || u.get('username'),
+      avatar_url: profile?.avatar_url || null,
+      bio: profile?.bio || '',
+    };
+  });
+
+  success(res, { users: results });
 }
 
 /**
@@ -181,4 +244,104 @@ export async function updateSettings(req: AuthRequest, res: Response): Promise<v
   await profile.update(updatedFields);
 
   success(res, profile, 'Settings updated successfully');
+}
+
+/**
+ * GET /api/users/followers/:id
+ * Returns the list of users who follow the given user.
+ */
+export async function getFollowers(req: AuthRequest, res: Response): Promise<void> {
+  const { id } = req.params;
+  const userId = parseInt(id, 10);
+
+  const user = await UserModel.findByPk(userId, { attributes: ['id'] });
+  if (!user) {
+    error(res, 'User not found', 404);
+    return;
+  }
+
+  const follows = await Follower.findAll({
+    where: { following_id: userId },
+    include: [
+      {
+        model: UserModel,
+        as: 'follower',
+        attributes: { exclude: ['password_hash'] },
+        include: [{ model: ProfileModel, as: 'profile' }],
+      },
+    ],
+    order: [['created_at', 'DESC']],
+  });
+
+  const followers = await Promise.all(
+    follows.map(async (f: any) => {
+      const u = f.get('follower');
+      if (!u) return null;
+      const uid = u.get('id') as number;
+      const [followerCount, followingCount] = await Promise.all([
+        Follower.count({ where: { following_id: uid } }),
+        Follower.count({ where: { follower_id: uid } }),
+      ]);
+      return {
+        id: uid,
+        username: u.get('username'),
+        display_name: u.get('profile')?.display_name || u.get('username'),
+        avatar_url: u.get('profile')?.avatar_url || null,
+        follower_count: followerCount,
+        following_count: followingCount,
+      };
+    })
+  );
+
+  success(res, { users: followers.filter(Boolean) });
+}
+
+/**
+ * GET /api/users/following/:id
+ * Returns the list of users that the given user follows.
+ */
+export async function getFollowing(req: AuthRequest, res: Response): Promise<void> {
+  const { id } = req.params;
+  const userId = parseInt(id, 10);
+
+  const user = await UserModel.findByPk(userId, { attributes: ['id'] });
+  if (!user) {
+    error(res, 'User not found', 404);
+    return;
+  }
+
+  const follows = await Follower.findAll({
+    where: { follower_id: userId },
+    include: [
+      {
+        model: UserModel,
+        as: 'following',
+        attributes: { exclude: ['password_hash'] },
+        include: [{ model: ProfileModel, as: 'profile' }],
+      },
+    ],
+    order: [['created_at', 'DESC']],
+  });
+
+  const followingList = await Promise.all(
+    follows.map(async (f: any) => {
+      const u = f.get('following');
+      if (!u) return null;
+      const uid = u.get('id') as number;
+      const [followerCount, followingCount] = await Promise.all([
+        Follower.count({ where: { following_id: uid } }),
+        Follower.count({ where: { follower_id: uid } }),
+      ]);
+      return {
+        id: uid,
+        username: u.get('username'),
+        display_name: u.get('profile')?.display_name || u.get('username'),
+        avatar_url: u.get('profile')?.avatar_url || null,
+        follower_count: followerCount,
+        following_count: followingCount,
+      };
+    })
+  );
+
+  success(res, { users: followingList.filter(Boolean) });
 }

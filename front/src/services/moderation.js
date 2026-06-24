@@ -40,3 +40,9 @@ export async function listBans() {
   const res = await api.get("/moderation/bans");
   return res.data.data;
 }
+
+// GET /api/moderation/users → { users, pagination }
+export async function listUsers() {
+  const res = await api.get("/moderation/users");
+  return res.data.data;
+}

@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { Op } from 'sequelize';
 import { ReportModel as Report, AuthRequest, Ban, UserModel, UserRole, ROLE_HIERARCHY, success, error } from '@breezy/shared';
 
 export async function createReport(
@@ -141,6 +142,58 @@ export async function listBans(
 
   success(res, {
     bans,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  });
+}
+
+export async function listAllUsers(
+  req: AuthRequest,
+  res: Response
+): Promise<void> {
+  const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
+  const offset = (page - 1) * limit;
+
+  const [users, total] = await Promise.all([
+    UserModel.findAll({
+      attributes: ['id', 'username', 'email', 'role', 'is_validated', 'created_at'],
+      offset,
+      limit,
+      order: [['created_at', 'DESC']],
+      include: [{
+        model: Ban,
+        as: 'bans',
+        required: false,
+        where: {
+          [Op.or]: [
+            { expires_at: null },
+            { expires_at: { [Op.gt]: new Date() } },
+          ],
+        },
+        attributes: ['id', 'reason', 'expires_at', 'created_at'],
+      }],
+    }),
+    UserModel.count(),
+  ]);
+
+  const mapped = users.map((u: any) => ({
+    id: u.id,
+    username: u.username,
+    email: u.email,
+    role: u.role,
+    is_validated: u.is_validated,
+    created_at: u.created_at,
+    status: u.bans && u.bans.length > 0 ? 'banned' : 'active',
+    ban: u.bans && u.bans.length > 0 ? u.bans[0] : null,
+  }));
+
+  success(res, {
+    users: mapped,
     pagination: {
       page,
       limit,
