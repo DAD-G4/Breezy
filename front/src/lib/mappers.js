@@ -22,13 +22,15 @@ export function relativeTime(dateInput, locale) {
 
 // Transforme un post backend (document MongoDB) vers la forme attendue par PostCard.
 // authorLabel : nom affiché de l'auteur (résolu via usersService.resolveUser).
+// authorHandle : @handle réel de l'auteur (sert au lien /profile/<handle>).
 // avatarUrl : URL de la photo de profil de l'auteur (résolue côté appelant).
 // currentUserId : id de l'utilisateur connecté, pour savoir s'il a déjà liké.
-export function mapPost(post, { authorLabel, currentUserId, locale, avatarUrl } = {}) {
+export function mapPost(post, { authorLabel, authorHandle, currentUserId, locale, avatarUrl } = {}) {
   return {
     id: post._id,
     userId: post.user_id,
     username: authorLabel || `user${post.user_id}`,
+    authorHandle: authorHandle || null,
     avatarUrl: avatarUrl || null,
     time: relativeTime(post.created_at, locale),
     content: post.content,

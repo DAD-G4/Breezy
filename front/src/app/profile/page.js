@@ -41,7 +41,7 @@ export default function MyProfilePage() {
         const displayName = u.profile?.display_name || u.username;
         const ownerAvatar = u.profile?.avatar_url || null;
         const posts = userPosts.posts.map((p) =>
-          mapPost(p, { authorLabel: displayName, avatarUrl: ownerAvatar, currentUserId: user.id, locale: language })
+          mapPost(p, { authorLabel: displayName, authorHandle: u.username, avatarUrl: ownerAvatar, currentUserId: user.id, locale: language })
         );
 
         if (active) {

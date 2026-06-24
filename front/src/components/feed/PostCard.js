@@ -167,12 +167,12 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
     <article className="p-4 border-b border-gray-200 dark:border-steel-blue/40 bg-transparent transition-colors duration-200">      
       <div className="flex justify-between items-start mb-3">
         
-        {disableProfileLink ? (
+        {disableProfileLink || !post.authorHandle ? (
           <div className="flex items-center gap-3">
             {userInfoContent}
           </div>
         ) : (
-          <Link href={`/profile/${post.username}`} className="flex items-center gap-3 group/author cursor-pointer">
+          <Link href={`/profile/${post.authorHandle}`} className="flex items-center gap-3 group/author cursor-pointer">
             {userInfoContent}
           </Link>
         )}

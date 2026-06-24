@@ -34,7 +34,7 @@ function SearchContent() {
   useEffect(() => {
     let cancelled = false;
     getTrending()
-      .then((data) => { if (!cancelled) setTrending(data || []); })
+      .then((data) => { if (!cancelled) setTrending((data || []).slice(0, 5)); })
       .catch(() => {})
       .finally(() => {});
     return () => { cancelled = true; };
@@ -49,7 +49,7 @@ function SearchContent() {
       const userIds = (raw || []).map((p) => p.user_id);
       const authors = await resolveUsers(userIds);
       const mapped = (raw || []).map((p, i) =>
-        mapPost(p, { authorLabel: authors[i]?.displayName, avatarUrl: authors[i]?.avatarUrl, currentUserId: user?.id, locale: language })
+        mapPost(p, { authorLabel: authors[i]?.displayName, authorHandle: authors[i]?.username, avatarUrl: authors[i]?.avatarUrl, currentUserId: user?.id, locale: language })
       );
       setPosts(mapped);
     } catch (err) {

@@ -38,7 +38,7 @@ export default function PublicProfilePage({ params }) {
         const userPosts = await getUserPosts(u.id);
         const ownerAvatar = u.profile?.avatar_url || null;
         const posts = (userPosts.posts || []).map((p) =>
-          mapPost(p, { authorLabel: displayName, avatarUrl: ownerAvatar, currentUserId: user?.id, locale: language })
+          mapPost(p, { authorLabel: displayName, authorHandle: u.username, avatarUrl: ownerAvatar, currentUserId: user?.id, locale: language })
         );
 
         if (active) {

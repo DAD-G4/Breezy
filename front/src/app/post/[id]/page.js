@@ -56,7 +56,7 @@ export default function PostDetailsPage({ params }) {
         allUserIds.forEach((id, i) => { authorMap[id] = allAuthors[i]; });
 
         const author = authorMap[post.user_id];
-        const mapped = mapPost(post, { authorLabel: author?.displayName, avatarUrl: author?.avatarUrl, currentUserId: user?.id, locale: language });
+        const mapped = mapPost(post, { authorLabel: author?.displayName, authorHandle: author?.username, avatarUrl: author?.avatarUrl, currentUserId: user?.id, locale: language });
 
         const mappedComments = (post.comments || []).map((c) => {
           const ca = authorMap[c.user_id];
