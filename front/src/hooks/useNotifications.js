@@ -61,7 +61,7 @@ export function useNotifications(t, locale) {
 
     fetchNotifications();
     // Rafraîchissement live : refetch périodique (likes, commentaires, follows…).
-    const interval = setInterval(fetchNotifications, 25000);
+    const interval = setInterval(fetchNotifications, 15000);
     return () => {
       active = false;
       clearInterval(interval);

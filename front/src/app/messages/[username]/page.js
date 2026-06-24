@@ -10,6 +10,9 @@ import { useAuth, useRequireAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { relativeTime } from "@/lib/mappers";
 
+// Rafraîchissement live de la conversation ouverte (polling léger).
+const MESSAGES_POLL_MS = 8000;
+
 export default function ConversationPage({ params }) {
   useRequireAuth();
   const router = useRouter();
@@ -26,6 +29,10 @@ export default function ConversationPage({ params }) {
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const scrollContainerRef = useRef(null);
+  // « Collé en bas » : on ne suit les nouveaux messages que si l'utilisateur est
+  // déjà en bas. S'il a remonté pour lire l'historique, le polling ne doit pas
+  // le ramener brutalement en bas.
+  const stickToBottomRef = useRef(true);
 
   // Place le fil sur le dernier message en ne faisant défiler QUE le conteneur
   // interne (scrollIntoView ferait défiler toute la page/fenêtre).
@@ -34,8 +41,13 @@ export default function ConversationPage({ params }) {
     if (c) c.scrollTop = c.scrollHeight;
   };
 
+  const handleScroll = () => {
+    const c = scrollContainerRef.current;
+    if (c) stickToBottomRef.current = c.scrollHeight - c.scrollTop - c.clientHeight < 80;
+  };
+
   useEffect(() => {
-    scrollToBottom();
+    if (stickToBottomRef.current) scrollToBottom();
   }, [messages]);
 
   // Résolution username → id, puis chargement de la conversation.
@@ -81,6 +93,39 @@ export default function ConversationPage({ params }) {
       active = false;
     };
   }, [username, user]);
+
+  // Rafraîchissement live : refetch périodique des messages de la conversation
+  // ouverte (sauf si bloquée). On fusionne par id pour conserver les messages
+  // locaux pas encore renvoyés par le serveur (optimistes / tout juste envoyés).
+  useEffect(() => {
+    if (!user || !otherUser?.id || otherUser.isBlocked) return;
+    let active = true;
+    const interval = setInterval(async () => {
+      try {
+        const { messages: raw } = await getConversation(otherUser.id);
+        if (!active) return;
+        const mapped = (raw || []).map((m) => ({
+          id: m._id,
+          mine: m.sender_id === user.id,
+          text: m.message_text,
+          created_at: m.created_at,
+          read: !!m.is_read,
+        }));
+        setMessages((prev) => {
+          const serverIds = new Set(mapped.map((m) => m.id));
+          const localExtras = prev.filter((m) => !serverIds.has(m.id));
+          return [...mapped, ...localExtras];
+        });
+        markConversationRead(otherUser.id).catch(() => {});
+      } catch {
+        /* erreurs de polling ignorées */
+      }
+    }, MESSAGES_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [user, otherUser?.id, otherUser?.isBlocked]);
 
   // Fx17 — Envoi : POST /api/dms/send { recipient_id, message_text } (UI optimiste).
   const handleSend = async (e) => {
@@ -149,7 +194,7 @@ export default function ConversationPage({ params }) {
           </div>
         </header>
 
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
           {loading && (
             <div className="flex justify-center py-12">
               <div className="flex gap-1.5">

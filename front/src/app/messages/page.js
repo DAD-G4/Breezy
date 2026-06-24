@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AppShell from "../../components/layout/AppShell";
@@ -45,36 +45,39 @@ export default function MessagesInboxPage() {
     router.push(`/messages/${encodeURIComponent(username)}`);
   };
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      setLoading(true);
+  // Chargement (silencieux lors des rafraîchissements périodiques pour ne pas
+  // faire clignoter le spinner ni effacer la liste déjà affichée).
+  const loadConversations = useCallback(async ({ silent } = {}) => {
+    if (!silent) setLoading(true);
+    try {
+      const { conversations: raw } = await getConversations();
+      const otherIds = (raw || []).map((c) => c.other_user_id);
+      const others = await resolveUsers(otherIds);
+      const list = (raw || []).map((c, i) => {
+        const other = others[i];
+        return {
+          username: other?.username,
+          displayName: other?.displayName,
+          lastMessage: c.last_message?.message_text || "",
+          time: relativeTime(c.last_message?.created_at, language),
+          unread: (c.unread_count ?? 0) > 0,
+        };
+      });
+      setConversations(list);
       setError("");
-      try {
-        const { conversations: raw } = await getConversations();
-        const otherIds = (raw || []).map((c) => c.other_user_id);
-        const others = await resolveUsers(otherIds);
-        const list = (raw || []).map((c, i) => {
-          const other = others[i];
-          return {
-            username: other?.username,
-            displayName: other?.displayName,
-            lastMessage: c.last_message?.message_text || "",
-            time: relativeTime(c.last_message?.created_at, language),
-            unread: (c.unread_count ?? 0) > 0,
-          };
-        });
-        if (active) setConversations(list);
-      } catch (err) {
-        if (active) setError(getApiErrorMessage(err, t('messages.loadError')));
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
+    } catch (err) {
+      if (!silent) setError(getApiErrorMessage(err, t('messages.loadError')));
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  }, [language, t]);
+
+  useEffect(() => {
+    loadConversations();
+    // Rafraîchissement live de la boîte de réception.
+    const interval = setInterval(() => loadConversations({ silent: true }), 12000);
+    return () => clearInterval(interval);
+  }, [loadConversations]);
 
   return (
     <AppShell>

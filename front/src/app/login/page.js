@@ -39,7 +39,8 @@ export default function LoginPage() {
 
       <main className="flex-1 flex flex-col items-center justify-center p-6">
         
-        <div className="mb-8 flex flex-col items-center">
+        {/* Logo + titre masqués en mobile (téléphone) ; visibles dès md. */}
+        <div className="mb-8 hidden md:flex flex-col items-center">
           <BreezyBadge className="w-40 h-40 drop-shadow-lg" />
           <span className="-mt-3 text-4xl font-extrabold tracking-wider text-deep-space-blue dark:text-steel-blue">
             BREEZY
