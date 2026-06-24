@@ -63,7 +63,7 @@ export default function LeftSidebar() {
     <aside className="hidden md:flex flex-col sticky top-0 h-screen w-20 lg:w-64 shrink-0 border-r border-gray-200 dark:border-white/10 bg-white dark:bg-surface px-2 lg:px-4 py-4 gap-1 z-50">
       
       <Link href="/" className="flex items-center px-3 py-3 justify-center lg:justify-start">
-        <BreezyBadge className="w-14 h-14 shrink-0" />
+        <BreezyBadge className="w-16 h-16 shrink-0" />
       </Link>
 
       <nav className="flex flex-col gap-1 mt-2">
