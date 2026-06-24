@@ -39,3 +39,15 @@
     transition-delay: 0ms !important;
   }
 }
+
+/* iOS Safari zoome automatiquement au focus d'un champ dont la police fait
+   moins de 16px (ex. `text-sm` = 14px). Ce zoom décalait/cassait l'affichage
+   (notamment la messagerie) et ne se "dézoomait" pas tout seul. On force donc
+   16px sur les champs de saisie en mobile pour neutraliser ce comportement. */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
