@@ -105,7 +105,9 @@
     "notFound": "Conversación no encontrada.",
     "noMessages": "Sin mensajes. ¡Empieza la conversación!",
     "new": "Nuevo mensaje",
-    "searchUser": "Buscar un usuario…"
+    "searchUser": "Buscar un usuario…",
+    "read": "Leído",
+    "sent": "Enviado"
   },
   "post": {
     "loadError": "No se pudo cargar la publicación.",

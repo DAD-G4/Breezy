@@ -105,7 +105,9 @@
     "notFound": "Conversation not found.",
     "noMessages": "No messages. Start the conversation!",
     "new": "New message",
-    "searchUser": "Search for a user…"
+    "searchUser": "Search for a user…",
+    "read": "Read",
+    "sent": "Sent"
   },
   "post": {
     "loadError": "Could not load the post.",

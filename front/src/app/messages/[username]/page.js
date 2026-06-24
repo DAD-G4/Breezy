@@ -54,6 +54,7 @@ export default function ConversationPage({ params }) {
           mine: m.sender_id === user.id,
           text: m.message_text,
           created_at: m.created_at,
+          read: !!m.is_read,
         }));
         if (active) {
           setOtherUser({ id: u.id, displayName });
@@ -79,7 +80,7 @@ export default function ConversationPage({ params }) {
     if (!text || !otherUser || sending) return;
 
     setSending(true);
-    const optimistic = { id: `tmp-${Date.now()}`, mine: true, text, created_at: new Date().toISOString() };
+    const optimistic = { id: `tmp-${Date.now()}`, mine: true, text, created_at: new Date().toISOString(), read: false };
     setMessages((m) => [...m, optimistic]);
     setNewMessage("");
     try {
@@ -181,8 +182,21 @@ export default function ConversationPage({ params }) {
                 `}
               >
                 {msg.text}
-                <p className={`text-[10px] mt-1 ${msg.mine ? "text-white/60" : "text-gray-400 dark:text-gray-500"}`}>
+                <p className={`text-[10px] mt-1 flex items-center gap-1 ${msg.mine ? "justify-end text-white/60" : "text-gray-400 dark:text-gray-500"}`}>
                   {relativeTime(msg.created_at, language)}
+                  {msg.mine && (
+                    msg.read ? (
+                      // Lu : double coche
+                      <span className="inline-flex items-center text-sky-300" title={t('messages.read')}>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2 13l3.5 3.5L11 11" /><path strokeLinecap="round" strokeLinejoin="round" d="M9 13l3.5 3.5L22 7" /></svg>
+                      </span>
+                    ) : (
+                      // Envoyé : simple coche
+                      <span className="inline-flex items-center text-white/50" title={t('messages.sent')}>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      </span>
+                    )
+                  )}
                 </p>
               </div>
             </div>

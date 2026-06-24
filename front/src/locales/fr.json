@@ -105,7 +105,9 @@
     "notFound": "Conversation introuvable.",
     "noMessages": "Aucun message. Démarrez la conversation !",
     "new": "Nouveau message",
-    "searchUser": "Rechercher un utilisateur…"
+    "searchUser": "Rechercher un utilisateur…",
+    "read": "Lu",
+    "sent": "Envoyé"
   },
   "post": {
     "loadError": "Impossible de charger le post.",
