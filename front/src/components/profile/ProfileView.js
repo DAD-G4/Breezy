@@ -9,6 +9,7 @@ import { report } from "../../services/moderation";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
 import Toast from "../ui/Toast";
+import ConfirmDialog from "../ui/ConfirmDialog";
 
 // Limite de mise en forme de la bio : au plus MAX_BIO_LINES lignes, et pas de
 // lignes vides multiples consécutives (au plus une ligne vide d'affilée).
@@ -41,6 +42,9 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
   const [reported, setReported] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmBlockOpen, setConfirmBlockOpen] = useState(false);
+  const [confirmReportOpen, setConfirmReportOpen] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -159,6 +163,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
 
   // Fx20 — Signaler un utilisateur.
   const handleReport = async () => {
+    setConfirmReportOpen(false);
     if (reported) return;
     try {
       await report({ targetType: "user", targetId: String(initialUser.id), reason: "Problématique" });
@@ -170,6 +175,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
   };
 
   const handleBlock = async () => {
+    setConfirmBlockOpen(false);
     try {
       await blockUser(initialUser.id);
       setIsBlocked(true);
@@ -249,41 +255,65 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
             <div className="flex items-center gap-2">
               {!isBlocked ? (
                 <>
-                  <button 
+                  <button
                     onClick={handleFollowToggle}
                     disabled={isFollowLoading}
                     className={`ml-3 px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 ${
-                      isFollowing 
-                        ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-papaya-whip border border-gray-200 dark:border-white/20" 
+                      isFollowing
+                        ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-papaya-whip border border-gray-200 dark:border-white/20"
                         : "bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
                     } ${isFollowLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     {isFollowing ? t('profileView.following') : t('profileView.follow')}
                   </button>
-                  <button 
-                    onClick={handleReport}
-                    disabled={reported}
-                    className={`px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 ${
-                      reported
-                        ? "bg-gray-100 dark:bg-white/10 text-gray-400 dark:text-gray-500 cursor-default"
-                        : "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
-                    }`}
-                  >
-                    {reported ? t('profileView.reported') : t('profileView.report')}
-                  </button>
-                  <button 
-                    onClick={handleBlock}
-                    className="px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
-                  >
-                    {t('profileView.blockUser')}
-                  </button>
+
+                  {/* Menu "..." : signaler / bloquer */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setMenuOpen((o) => !o)}
+                      aria-label={t('profileView.moreActions') || 'Plus'}
+                      className="p-2 rounded-full text-gray-500 hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />
+                      </svg>
+                    </button>
+
+                    {menuOpen && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                        <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-xl shadow-lg z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
+                          <button
+                            onClick={() => { setMenuOpen(false); setConfirmReportOpen(true); }}
+                            disabled={reported}
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-deep-space-blue dark:text-papaya-whip hover:bg-slate-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                          >
+                            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                            </svg>
+                            {reported ? t('profileView.reported') : t('profileView.report')}
+                          </button>
+                          <hr className="border-gray-100 dark:border-white/10" />
+                          <button
+                            onClick={() => { setMenuOpen(false); setConfirmBlockOpen(true); }}
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brick-red hover:bg-brick-red/10 dark:hover:bg-brick-red/40 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                            </svg>
+                            {t('profileView.blockUser')}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </>
               ) : (
                 <div className="flex items-center gap-3 ml-3">
                   <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
                     {t('profileView.blocked')}
                   </span>
-                  <button 
+                  <button
                     onClick={handleUnblock}
                     className="px-4 py-2 text-sm rounded-full font-bold transition-all duration-300 flex-shrink-0 bg-steel-blue text-white hover:bg-deep-space-blue shadow-md"
                   >
@@ -388,6 +418,30 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
       {showToast && (
         <Toast message={t('toast.userReported')} />
       )}
+
+      {/* Confirmations animées */}
+      <ConfirmDialog
+        open={confirmReportOpen}
+        variant="default"
+        icon="report"
+        title={t('profileView.reportConfirmTitle')}
+        message={t('profileView.reportConfirmMessage').replace('{{name}}', name)}
+        confirmLabel={t('profileView.report')}
+        cancelLabel={t('postCard.cancel')}
+        onConfirm={handleReport}
+        onCancel={() => setConfirmReportOpen(false)}
+      />
+      <ConfirmDialog
+        open={confirmBlockOpen}
+        variant="danger"
+        icon="block"
+        title={t('profileView.blockConfirmTitle')}
+        message={t('profileView.blockConfirmMessage').replace('{{name}}', name)}
+        confirmLabel={t('profileView.blockUser')}
+        cancelLabel={t('postCard.cancel')}
+        onConfirm={handleBlock}
+        onCancel={() => setConfirmBlockOpen(false)}
+      />
     </div>
   );
 }
