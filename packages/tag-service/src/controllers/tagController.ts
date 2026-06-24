@@ -14,12 +14,17 @@ export async function searchPostsByTag(req: Request, res: Response): Promise<voi
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
   const skip = (page - 1) * limit;
 
-  const posts = await Post.find({ tags: searchTerm })
+  // Recherche partielle (insensible à la casse) : « bree » trouve « breezy ».
+  // On échappe les caractères spéciaux regex pour éviter toute injection.
+  const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const tagFilter = { tags: { $regex: escaped, $options: 'i' } };
+
+  const posts = await Post.find(tagFilter)
     .sort({ created_at: -1 })
     .skip(skip)
     .limit(limit);
 
-  const total = await Post.countDocuments({ tags: searchTerm });
+  const total = await Post.countDocuments(tagFilter);
 
   success(res, {
     posts,
