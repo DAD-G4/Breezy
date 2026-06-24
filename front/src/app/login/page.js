@@ -41,7 +41,7 @@ export default function LoginPage() {
         
         <div className="mb-8 flex flex-col items-center">
           <BreezyBadge className="w-40 h-40 drop-shadow-lg" />
-          <span className="mt-2 text-4xl font-extrabold tracking-wider text-steel-blue">
+          <span className="-mt-3 text-4xl font-extrabold tracking-wider text-deep-space-blue dark:text-steel-blue">
             BREEZY
           </span>
         </div>
