@@ -25,10 +25,13 @@ export default function ConversationPage({ params }) {
   const [error, setError] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const messagesEndRef = useRef(null);
+  const scrollContainerRef = useRef(null);
 
+  // Place le fil sur le dernier message en ne faisant défiler QUE le conteneur
+  // interne (scrollIntoView ferait défiler toute la page/fenêtre).
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const c = scrollContainerRef.current;
+    if (c) c.scrollTop = c.scrollHeight;
   };
 
   useEffect(() => {
@@ -129,7 +132,7 @@ export default function ConversationPage({ params }) {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
           {loading && (
             <div className="flex justify-center py-12">
               <div className="flex gap-1.5">
@@ -184,8 +187,6 @@ export default function ConversationPage({ params }) {
               </div>
             </div>
           ))}
-
-          <div ref={messagesEndRef} />
         </div>
       </div>
 
