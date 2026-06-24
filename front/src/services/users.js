@@ -47,6 +47,12 @@ export async function searchUsers(q) {
   return res.data.data.users;
 }
 
+// GET /api/users/suggestions → { users: [...] } (à suivre : hors moi/abonnements/bloqués)
+export async function getSuggestions() {
+  const res = await api.get("/users/suggestions");
+  return res.data.data.users;
+}
+
 // GET /api/users/followers/:id → { users: [...] }
 export async function getFollowers(userId) {
   const res = await api.get(`/users/followers/${userId}`);

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { getTrending } from "@/services/tags";
+import { getSuggestions, follow } from "@/services/users";
 
 export default function RightSidebar() {
   const { t } = useLanguage();
@@ -12,6 +13,8 @@ export default function RightSidebar() {
   const [query, setQuery] = useState("");
   const [trends, setTrends] = useState([]);
   const [trendsLoading, setTrendsLoading] = useState(true);
+  const [suggestions, setSuggestions] = useState([]);
+  const [followingIds, setFollowingIds] = useState(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -19,8 +22,23 @@ export default function RightSidebar() {
       .then((data) => { if (!cancelled) setTrends((data || []).slice(0, 5)); })
       .catch(() => {})
       .finally(() => { if (!cancelled) setTrendsLoading(false); });
+    getSuggestions()
+      .then((data) => { if (!cancelled) setSuggestions(data || []); })
+      .catch(() => {});
     return () => { cancelled = true; };
   }, []);
+
+  const handleFollow = async (userId) => {
+    setFollowingIds((prev) => new Set(prev).add(userId)); // optimiste
+    try {
+      await follow(userId);
+      // une fois suivi, on retire la suggestion de la liste
+      setTimeout(() => setSuggestions((prev) => prev.filter((u) => u.id !== userId)), 600);
+    } catch (err) {
+      console.error("[RightSidebar] Failed to follow:", err);
+      setFollowingIds((prev) => { const n = new Set(prev); n.delete(userId); return n; });
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -29,12 +47,6 @@ export default function RightSidebar() {
     router.push(`/search?q=${encodeURIComponent(trimmed)}`);
     setQuery("");
   };
-
-  const suggestions = [
-    { name: "Alice", username: "alice" },
-    { name: "Bob", username: "bob" },
-    { name: "Charlie", username: "charlie" },
-  ];
 
   return (
     <aside className="hidden xl:block w-80 shrink-0 px-4 py-4">
@@ -87,31 +99,48 @@ export default function RightSidebar() {
         </section>
 
         {/* SUGGESTIONS */}
-        <section className="bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/30 rounded-2xl overflow-hidden">
-          <h2 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip px-4 pt-4 pb-2">
-            {t('rightSidebar.suggestionsTitle')}
-          </h2>
-          <ul>
-            {suggestions.map((s) => (
-              <li key={s.username} className="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
-                
-                <Link href={`/profile/${s.username}`} className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold shrink-0 group-hover:opacity-90 transition-opacity">
-                    {s.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip truncate group-hover:text-steel-blue transition-colors">{s.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{s.username}</p>
-                  </div>
-                </Link>
-                
-                <button className="ml-2 px-4 py-1.5 text-sm font-bold rounded-full bg-steel-blue text-white hover:bg-deep-space-blue transition-colors shrink-0">
-                  {t('rightSidebar.followButton')}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
+        {suggestions.length > 0 && (
+          <section className="bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/30 rounded-2xl overflow-hidden">
+            <h2 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip px-4 pt-4 pb-2">
+              {t('rightSidebar.suggestionsTitle')}
+            </h2>
+            <ul>
+              {suggestions.map((s) => {
+                const isFollowed = followingIds.has(s.id);
+                return (
+                  <li key={s.id} className="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
+
+                    <Link href={`/profile/${s.username}`} className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold shrink-0 overflow-hidden group-hover:opacity-90 transition-opacity">
+                        {s.avatar_url ? (
+                          <img src={s.avatar_url} alt={s.display_name} className="w-full h-full object-cover" />
+                        ) : (
+                          (s.display_name || s.username).charAt(0).toUpperCase()
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm text-deep-space-blue dark:text-papaya-whip truncate group-hover:text-steel-blue transition-colors">{s.display_name || s.username}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{s.username}</p>
+                      </div>
+                    </Link>
+
+                    <button
+                      onClick={() => handleFollow(s.id)}
+                      disabled={isFollowed}
+                      className={`ml-2 px-4 py-1.5 text-sm font-bold rounded-full transition-colors shrink-0 ${
+                        isFollowed
+                          ? "bg-gray-100 dark:bg-white/10 text-deep-space-blue dark:text-papaya-whip border border-gray-200 dark:border-white/20"
+                          : "bg-steel-blue text-white hover:bg-deep-space-blue"
+                      }`}
+                    >
+                      {isFollowed ? t('profileView.following') : t('rightSidebar.followButton')}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
 
         <p className="px-4 text-xs text-gray-400">
           © 2026 Breezy
