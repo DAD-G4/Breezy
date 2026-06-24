@@ -137,7 +137,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
     setIsFollowLoading(true);
 
     setIsFollowing(!prevFollowing);
-    setFollowers(prevFollowing ? prevFollowers - 1 : prevFollowers + 1);
+    setFollowers(prevFollowing ? Math.max(0, prevFollowers - 1) : prevFollowers + 1);
 
     try {
       if (prevFollowing) {
@@ -179,8 +179,10 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
     try {
       await blockUser(initialUser.id);
       setIsBlocked(true);
+      // Le blocage retire l'abonnement existant : on ne décrémente QUE si on
+      // suivait réellement, et jamais en dessous de 0.
+      if (isFollowing) setFollowers((prev) => Math.max(0, prev - 1));
       setIsFollowing(false);
-      setFollowers((prev) => prev - 1);
     } catch (err) {
       console.error('[Profile] Failed to block user:', err);
     }
