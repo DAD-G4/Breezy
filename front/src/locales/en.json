@@ -3,7 +3,13 @@
     "back": "Back",
     "removeImage": "Remove image",
     "me": "Me",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "close": "Close",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "undo": "Undo",
+    "avatar": "Avatar",
+    "emoji": "Emoji"
   },
   "sidebar": {
     "home": "Home",
@@ -15,7 +21,8 @@
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
     "notifications": "Notifications",
-    "moderation": "Moderation"
+    "moderation": "Moderation",
+    "logout": "Log out"
   },
   "header": {
     "createPostAria": "Create a post",
@@ -26,8 +33,8 @@
     "notif": {
       "liked": "liked your post.",
       "followed": "started following you.",
-      "mentioned": "mentioned you in a comment.",
-      "commented": "commented: \"Great photo!\"",
+      "mentioned": "mentioned you in a post.",
+      "commented": "commented on your post.",
       "time5m": "5 min ago",
       "time1h": "1h",
       "timeYesterday": "Yesterday",
@@ -42,11 +49,16 @@
     "followButton": "Follow"
   },
   "feed": {
-    "title": "Home"
+    "title": "Home",
+    "loginRequired": "Log in to see your feed.",
+    "loading": "Loading feed…",
+    "empty": "No posts yet. Follow users to see their activity.",
+    "loadError": "Could not load the feed."
   },
   "createPost": {
     "title": "New post",
     "placeholder": "What's happening on Breezy?",
+    "error": "Error while posting.",
     "tools": {
       "addImage": "Add an image"
     },
@@ -58,34 +70,72 @@
   },
   "login": {
     "title": "Login",
-    "emailPlaceholder": "email address:",
-    "passwordPlaceholder": "password:",
+    "emailPlaceholder": "email address",
+    "passwordPlaceholder": "password",
     "errorMessage": "Incorrect credentials. Please try again.",
-    "submitButton": "Log in",
+    "submitButton": "Connection",
     "registerButton": "Sign Up",
-    "noAccount": "Don't have an account yet?"
+    "noAccount": "Don't have an account yet?",
+    "banned": "Your account has been banned. You have been logged out."
   },
   "register": {
     "title": "Register",
-    "displayNamePlaceholder": "display name:",
-    "usernamePlaceholder": "Username (@):",
+    "displayNamePlaceholder": "display name",
+    "usernamePlaceholder": "Username (@)",
+    "emailPlaceholder": "email address",
+    "passwordPlaceholder": "password",
     "errorMessage": "Error during registration. Please check your information.",
     "submitButton": "Sign up",
     "loginButton": "Login",
     "alreadyHaveAccount": "Already have an account?"
   },
   "search": {
-    "placeholder": "Username...",
-    "noResults": "No users found for"
+    "placeholder": "Search...",
+    "noResults": "No results found for",
+    "error": "Search failed.",
+    "tabPosts": "Posts",
+    "tabUsers": "Users",
+    "trending": "Trending",
+    "clear": "Clear search",
+    "trendingPosts": "Trending posts"
   },
   "conversation": {
-    "placeholder": "Your message..."
+    "placeholder": "Your message...",
+    "blocked": "You have blocked this person."
   },
   "messagesInbox": {
     "searchPlaceholder": "Search for a message..."
   },
+  "messages": {
+    "loadError": "Could not load conversations.",
+    "empty": "No conversations yet.",
+    "notFound": "Conversation not found.",
+    "noMessages": "No messages. Start the conversation!",
+    "new": "New message",
+    "searchUser": "Search for a user…",
+    "read": "Read",
+    "sent": "Sent",
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "post": {
+    "loadError": "Could not load the post.",
+    "justNow": "Just now",
+    "commentError": "Could not add the comment.",
+    "replyError": "Could not add the reply.",
+    "deleteCommentError": "Could not delete the comment.",
+    "send": "Send"
+  },
+  "profile": {
+    "loginRequired": "Log in to see your profile.",
+    "logout": "Log out",
+    "notFound": "Profile not found.",
+    "loadError": "Could not load the profile.",
+    "lines": "lines",
+    "noPosts": "No posts yet."
+  },
   "postDetails": {
-    "commentPosted": "New comment posted:",
+    "commentPosted": "New comment posted",
     "addCommentPlaceholder": "Add a comment..."
   },
   "publicProfile": {
@@ -99,6 +149,7 @@
     "post2": "First post on Breezy."
   },
   "profileView": {
+    "editProfile": "Edit Profile",
     "editNameAria": "Edit name",
     "editBioAria": "Edit bio",
     "following": "Following",
@@ -106,22 +157,49 @@
     "followersLabel": "Followers",
     "followingLabel": "Following",
     "saveButton": "Save",
-    "yourPosts": "Your posts:",
-    "userPosts": "{{name}}'s posts:"
+    "cancelButton": "Cancel",
+    "yourPosts": "Your posts",
+    "userPosts": "{{name}}'s posts",
+    "report": "Report user",
+    "reportUser": "Report this user",
+    "reported": "User reported ✓",
+    "blocked": "User blocked",
+    "blockUser": "Block this user",
+    "unblock": "Unblock",
+    "moreActions": "More actions",
+    "reportConfirmTitle": "Report this profile?",
+    "reportConfirmMessage": "You're about to report {{name}} to moderation.",
+    "blockConfirmTitle": "Block this user?",
+    "blockConfirmMessage": "{{name}} won't be able to see your profile or interact with you.",
+    "blockedNoPosts": "You can't see this user's posts."
   },
   "postCard": {
+    "reportReason": "Inappropriate content",
     "report": "Report post",
     "reported": "Post reported ✓",
     "reportAlert": "{{username}}'s post has been reported.",
     "block": "Block {{username}}",
     "blockAlert": "You have blocked {{username}}.",
-    "imageAlt": "Post content"
+    "imageAlt": "Post content",
+    "edit": "Edit post",
+    "delete": "Delete post",
+    "editing": "Editing...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "deleteConfirmTitle": "Delete post?",
+    "deleteConfirmMessage": "This action is permanent. The post will be removed for everyone.",
+    "blockConfirmTitle": "Block this user?",
+    "blockConfirm": "Block"
   },
   "commentSection": {
     "reply": "Reply",
     "replySent": "Your reply has been sent!",
     "replyTo": "Reply to {{user}}...",
-    "comments": "Comments"
+    "comments": "Comments",
+    "delete": "Delete",
+    "deleted": "Comment deleted",
+    "comment": "Comment",
+    "empty": "No comments yet."
   },
   "settingsPage": {
     "searchPlaceholder": "Search for a setting...",
@@ -149,6 +227,16 @@
     "location": {
       "title": "Location Service",
       "desc": "Allow adding a location to your publications."
+    },
+    "logout": {
+      "title": "Log Out",
+      "desc": "Sign out of your Breezy account."
+    },
+    "blockedUsers": {
+      "title": "Blocked Users",
+      "desc": "Manage users you have blocked.",
+      "empty": "No blocked users.",
+      "unblock": "Unblock"
     }
   },
   "moderation": {
@@ -159,15 +247,49 @@
     "noReports": "No pending reports. Good job!",
     "ignore": "Ignore",
     "deletePost": "Delete post",
+    "deleteUser": "Delete user",
+    "deleteUserTitle": "Delete this user?",
+    "deleteUserMessage": "This action is permanent: the account, its posts and its messages will be deleted.",
+    "userDeleted": "User deleted",
     "statusActive": "Active",
     "statusSuspended": "Suspended",
     "statusBanned": "Banned",
     "actionActive": "Activate account",
     "actionSuspend": "Suspend account",
     "actionBan": "Ban permanently",
-    "filterStatus": "Filter by status:",
+    "filterStatus": "Filter by status",
     "filterAll": "All",
     "noUsers": "No users match this filter.",
-    "deletedContent": "Content unavailable"
+    "deletedContent": "Content unavailable",
+    "accessDenied": "Moderation access only.",
+    "decision": "Moderation decision",
+    "reportedBy": "Reported by",
+    "author": "Author",
+    "reports": "report(s)",
+    "createAccount": "Create Account",
+    "accountCreated": "Account created successfully",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "roleUser": "User",
+    "roleModerator": "Moderator",
+    "roleAdmin": "Admin",
+    "searchUsers": "Search a user…",
+    "filterReported": "Reported"
+  },
+  "toast": {
+    "postReported": "Post reported successfully",
+    "userReported": "User reported successfully"
+  },
+  "notifications": {
+    "clearRead": "Clear read",
+    "empty": "No notifications yet."
+  },
+  "followersPage": {
+    "empty": "No followers yet."
+  },
+  "followingPage": {
+    "empty": "Not following anyone yet."
   }
 }

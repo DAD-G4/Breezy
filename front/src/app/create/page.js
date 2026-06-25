@@ -1,18 +1,28 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "../../components/layout/AppShell";
 import { getApiErrorMessage } from "../../lib/api";
 import { createPost } from "../../services/posts";
 import { upload } from "../../services/media";
-import { useRequireAuth } from "../../context/AuthContext";
+import { resolveUser } from "../../services/users";
+import MentionTagAutocomplete from "../../components/ui/MentionTagAutocomplete";
+import EmojiPicker from "../../components/ui/EmojiPicker";
+import { useAuth, useRequireAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
 export default function CreatePostPage() {
   useRequireAuth();
   const router = useRouter();
   const { t } = useLanguage();
+  const { user } = useAuth();
+
+  // Avatar du créateur (résolu depuis son profil).
+  const [me, setMe] = useState(null);
+  useEffect(() => {
+    if (user?.id) resolveUser(user.id).then(setMe).catch(() => {});
+  }, [user?.id]);
 
   // etats du formulaire
   const [content, setContent] = useState("");
@@ -24,6 +34,34 @@ export default function CreatePostPage() {
 
   // simuler le clic sur l'input file caché
   const fileInputRef = useRef(null);
+  // Référence vers le <textarea> sous-jacent (pour l'insertion d'emoji au curseur).
+  const contentRef = useRef(null);
+
+  // Insère un emoji à la position du curseur en respectant la limite de 280
+  // caractères (Fx3). Si l'insertion dépassait la limite, on n'insère rien.
+  const MAX_LEN = 280;
+  const insertEmoji = (emoji) => {
+    const el = contentRef.current;
+    setContent((prev) => {
+      const hasCaret = el && typeof el.selectionStart === "number";
+      const start = hasCaret ? el.selectionStart : prev.length;
+      const end = hasCaret ? el.selectionEnd : prev.length;
+      const next = prev.slice(0, start) + emoji + prev.slice(end);
+      if (next.length > MAX_LEN) return prev; // ne pas dépasser la limite
+      const caret = start + emoji.length;
+      requestAnimationFrame(() => {
+        if (el) {
+          el.focus();
+          try {
+            el.setSelectionRange(caret, caret);
+          } catch {
+            /* ignore */
+          }
+        }
+      });
+      return next;
+    });
+  };
 
   // gérer l'ajout d'un média image OU vidéo (aperçu local + fichier conservé)
   const handleImageChange = (e) => {
@@ -62,7 +100,7 @@ export default function CreatePostPage() {
       // Retour feed apres publication
       router.push("/");
     } catch (err) {
-      setError(getApiErrorMessage(err, "Erreur lors de la publication."));
+      setError(getApiErrorMessage(err, t('createPost.error')));
     } finally {
       setIsLoading(false);
     }
@@ -76,14 +114,14 @@ export default function CreatePostPage() {
         <div className="flex items-center gap-1 mb-2">
           <button
             onClick={() => router.back()}
-            className="p-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors"
+            className="p-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors"
             aria-label={t('common.back')}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
           </button>
-          <h1 className="font-bold text-xl text-deep-space-blue dark:text-papaya-whip">
+          <h1 className="font-bold text-xl text-deep-space-blue dark:text-white">
             {t('createPost.title')}
           </h1>
         </div>
@@ -91,25 +129,32 @@ export default function CreatePostPage() {
         {/* Carte de création */}
         <form 
           onSubmit={handleSubmit} 
-          className="p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-deep-space-blue shadow-sm dark:shadow-[0_0_15px_rgba(102,155,188,0.15)] flex flex-col gap-4 transition-all"
+          className="p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-surface shadow-sm dark:shadow-[0_0_15px_rgba(102,155,188,0.15)] flex flex-col gap-4 transition-all"
         >
           
-          {/* Section Utilisateur A REDIRIGER VERS L'USER PROFILE */}
+          {/* Section Utilisateur */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold dark:shadow-[0_0_10px_rgba(102,155,188,0.5)]">
-              M
+            <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold overflow-hidden dark:shadow-[0_0_10px_rgba(102,155,188,0.5)]">
+              {me?.avatarUrl ? (
+                <img src={me.avatarUrl} alt={me.displayName || user?.username} className="w-full h-full object-cover" />
+              ) : (
+                (me?.displayName || user?.username || "?").charAt(0).toUpperCase()
+              )}
             </div>
-              <span className="font-bold text-deep-space-blue dark:text-papaya-whip text-sm">
-                {t('common.me')}
+              <span className="font-bold text-deep-space-blue dark:text-white text-sm">
+                {me?.displayName || user?.username || t('common.me')}
             </span>
           </div>
 
-          {/* Zone de texte */}
-          <textarea
+          {/* Zone de texte — limite 280 caractères (Fx3) + autocomplétion @/# */}
+          <MentionTagAutocomplete
+            as="textarea"
+            inputRef={contentRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t('createPost.placeholder')}
-            className="w-full bg-transparent resize-none outline-none text-deep-space-blue dark:text-papaya-whip placeholder:text-gray-400 min-h-[120px] text-lg"
+            maxLength={280}
+            className="w-full bg-transparent resize-none outline-none text-deep-space-blue dark:text-white placeholder:text-gray-400 min-h-[120px] text-lg"
             required={!imagePreview} // uniquement s'il y a pas d'image
           />
 
@@ -119,7 +164,7 @@ export default function CreatePostPage() {
               {mediaType === "video" ? (
                 <video src={imagePreview} controls className="w-full h-auto max-h-[420px] bg-black" />
               ) : (
-                <img src={imagePreview} alt={t('createPost.imagePreviewAlt')} className="w-full h-auto object-cover" />
+                <img src={imagePreview} alt={t('createPost.imagePreviewAlt')} className="mx-auto max-h-[340px] w-auto max-w-full object-contain" />
               )}
               {/* retirer le média */}
               <button
@@ -166,16 +211,33 @@ export default function CreatePostPage() {
                 onChange={handleImageChange}
                 className="hidden"
               />
+
+              {/* Sélecteur d'emojis (insertion au curseur, limite 280 respectée) */}
+              <EmojiPicker onSelect={insertEmoji} />
             </div>
 
-            {/* Bouton Soumission */}
-            <button 
-              type="submit" 
-              disabled={isLoading || (!content.trim() && !imagePreview)}
-              className="px-6 py-2.5 bg-steel-blue hover:bg-deep-space-blue dark:bg-papaya-whip dark:text-deep-space-blue dark:hover:bg-white text-white font-bold rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-            >
-              {isLoading ? t('createPost.submit.loading') : t('createPost.submit.default')}
-            </button>
+            {/* Compteur de caractères (Fx3) + Soumission */}
+            <div className="flex items-center gap-3">
+              <span
+                className={`text-sm font-medium tabular-nums ${
+                  content.length >= 280
+                    ? "text-brick-red"
+                    : content.length > 260
+                    ? "text-amber-500"
+                    : "text-gray-400 dark:text-gray-500"
+                }`}
+                aria-live="polite"
+              >
+                {content.length}/280
+              </span>
+              <button
+                type="submit"
+                disabled={isLoading || (!content.trim() && !imagePreview)}
+                className="px-6 py-2.5 bg-steel-blue hover:bg-deep-space-blue dark:bg-white dark:text-deep-space-blue dark:hover:bg-white text-white font-bold rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+              >
+                {isLoading ? t('createPost.submit.loading') : t('createPost.submit.default')}
+              </button>
+            </div>
 
           </div>
         </form>

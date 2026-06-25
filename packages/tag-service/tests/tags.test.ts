@@ -34,6 +34,9 @@ jest.mock('@breezy/shared', () => {
     }),
     checkBan: jest.fn((_banChecker: any) => (req: any, _res: any, next: any) => next()),
     Ban: { findOne: jest.fn().mockResolvedValue(null) },
+    // Search now hides blocked users' posts → controller queries BlockedUser.
+    // Default: no blocks, so the tag filter stays unchanged.
+    BlockedUser: { findAll: jest.fn().mockResolvedValue([]) },
   };
 });
 
@@ -78,7 +81,10 @@ describe('Tag Routes', () => {
         total: 2,
         totalPages: 1,
       });
-      expect(mockPostModel.find).toHaveBeenCalledWith({ tags: 'javascript' });
+      // Partial, case-insensitive regex search (escaped against injection).
+      expect(mockPostModel.find).toHaveBeenCalledWith({
+        tags: { $regex: 'javascript', $options: 'i' },
+      });
     });
 
     it('should perform case-insensitive search', async () => {
@@ -96,8 +102,10 @@ describe('Tag Routes', () => {
       const res = await request(app).get('/api/tags/search?q=JavaScript');
 
       expect(res.status).toBe(200);
-      // The controller lowercases the query before searching
-      expect(mockPostModel.find).toHaveBeenCalledWith({ tags: 'javascript' });
+      // The controller lowercases the query before building the regex filter.
+      expect(mockPostModel.find).toHaveBeenCalledWith({
+        tags: { $regex: 'javascript', $options: 'i' },
+      });
       expect(res.body.data.posts).toEqual(mockPosts);
     });
 

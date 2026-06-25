@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { connectPostgres, errorHandler, notFound, healthRouter } from '@breezy/shared';
 import authRoutes from './routes/auth';
 
@@ -6,6 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use('/api/health', healthRouter);
 app.use('/api/auth', authRoutes);

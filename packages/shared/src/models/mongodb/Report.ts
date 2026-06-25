@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IReportDocument extends Document {
   reported_by: number;
-  target_type: 'post' | 'comment';
+  target_type: 'post' | 'comment' | 'user';
   target_id: string;
   reason: string;
   status: 'pending' | 'resolved';
@@ -16,7 +16,7 @@ const ReportSchema = new Schema({
   },
   target_type: {
     type: String,
-    enum: ['post', 'comment'],
+    enum: ['post', 'comment', 'user'],
     required: true,
   },
   target_id: {
@@ -44,7 +44,7 @@ const ReportSchema = new Schema({
 ReportSchema.index({ status: 1, created_at: -1 });
 
 const Report: Model<IReportDocument> =
-  (mongoose.models as any).Report ||
+  (mongoose.models['Report'] as Model<IReportDocument>) ||
   mongoose.model<IReportDocument>('Report', ReportSchema);
 
 export default Report;

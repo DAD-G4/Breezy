@@ -1,17 +1,17 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTheme } from "@/context/ThemeContext";
 import BreezyBadge from "@/components/ui/BreezyBadge";
 import { useNotificationsContext } from "@/context/NotificationsContext";
 import { useAuth } from "@/context/AuthContext";
+import { resolveUser } from "@/services/users";
 
 
 function NavItem({ href, label, icon, active, onClick, hasNotif }) {
-  const base = "flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start relative";
+  const base = "flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-white hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start relative";
   const state = active ? "font-bold bg-black/5 dark:bg-white/5" : "font-medium";
   
   const content = (
@@ -19,7 +19,7 @@ function NavItem({ href, label, icon, active, onClick, hasNotif }) {
       <div className="relative">
         {icon}
         {hasNotif && (
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-brick-red border-2 border-white dark:border-deep-space-blue rounded-full"></span>
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-brick-red border-2 border-white dark:border-night rounded-full"></span>
         )}
       </div>
       <span className="hidden lg:inline text-lg">{label}</span>
@@ -42,20 +42,19 @@ function NavItem({ href, label, icon, active, onClick, hasNotif }) {
 
 export default function LeftSidebar() {
   const pathname = usePathname();
-  const { theme, toggleTheme } = useTheme();
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   // Le lien Modération n'est visible que pour modérateurs / admins.
   const isStaff = user?.role === "moderator" || user?.role === "admin";
 
-  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const { unreadCount, unreadMessages } = useNotificationsContext();
 
-  const { notifications, unreadCount, markAllRead } = useNotificationsContext();
-
-  const getNotifLink = (notif) => {
-    if (notif.type === "follow") return `/profile/${notif.username}`;
-    return `/post/${notif.postId}`;
-  };
+  // Avatar + nom du compte courant, et menu de déconnexion.
+  const [me, setMe] = useState(null);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  useEffect(() => {
+    if (user?.id) resolveUser(user.id).then(setMe).catch(() => {});
+  }, [user?.id]);
 
   // ICÔNES 
   const iconHome = <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
@@ -68,61 +67,19 @@ export default function LeftSidebar() {
   const iconModeration = <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>;
 
   return (
-    <aside className="hidden md:flex flex-col sticky top-0 h-screen w-20 lg:w-64 shrink-0 border-r border-gray-200 dark:border-white/10 bg-white dark:bg-deep-space-blue px-2 lg:px-4 py-4 gap-1 z-50">
+    <aside className="hidden md:flex flex-col sticky top-0 h-screen w-20 lg:w-64 shrink-0 border-r border-gray-200 dark:border-white/10 bg-white dark:bg-surface px-2 lg:px-4 py-4 gap-1 z-50">
       
       <Link href="/" className="flex items-center px-3 py-3 justify-center lg:justify-start">
-        <BreezyBadge className="w-14 h-14 shrink-0" />
+        <BreezyBadge className="w-16 h-16 shrink-0" />
       </Link>
 
       <nav className="flex flex-col gap-1 mt-2">
         <NavItem href="/" label={t('sidebar.home')} icon={iconHome} active={pathname === "/"} />
         <NavItem href="/search" label={t('sidebar.search')} icon={iconSearch} active={pathname === "/search"} />
         
-        <div className="relative flex">
-          <NavItem 
-            label={t('sidebar.notifications')} 
-            icon={iconNotif} 
-            active={isNotifOpen} 
-            hasNotif={unreadCount > 0}
-            onClick={() => setIsNotifOpen(!isNotifOpen)} 
-          />
-          
-          {isNotifOpen && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setIsNotifOpen(false)}></div>
-              <div className="absolute left-full top-0 ml-4 w-80 max-h-[80vh] overflow-y-auto bg-white dark:bg-deep-space-blue border border-gray-200 dark:border-steel-blue/40 rounded-2xl shadow-xl z-50 animate-in fade-in slide-in-from-left-2 duration-200 flex flex-col">
-                <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/10 sticky top-0 bg-white/90 dark:bg-deep-space-blue/90 backdrop-blur-md z-10">
-                  <h3 className="font-bold text-lg text-deep-space-blue dark:text-papaya-whip">{t('header.notificationsTitle')}</h3>
-                  <button onClick={markAllRead} className="text-sm font-medium text-steel-blue hover:underline">{t('header.markAllRead')}</button>
-                </div>
-                <div className="flex flex-col">
-                  {notifications.map((notif) => (
-                    <Link 
-                      href={getNotifLink(notif)}
-                      key={notif.id} 
-                      className={`flex items-start gap-3 p-4 border-b border-gray-50 dark:border-white/5 transition-colors hover:bg-slate-50 dark:hover:bg-white/5 ${notif.unread ? "bg-blue-50/50 dark:bg-steel-blue/10" : ""}`}
-                      onClick={() => setIsNotifOpen(false)}
-                    >
-                      <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold shrink-0">
-                        {notif.avatar}
-                      </div>
-                      <div className="flex flex-col flex-1 min-w-0">
-                        <p className="text-sm text-deep-space-blue dark:text-papaya-whip leading-snug">
-                          <span className="font-bold mr-1">{notif.user}</span>
-                          <span className="opacity-90">{notif.action}</span>
-                        </p>
-                        <span className={`text-xs mt-1 ${notif.unread ? "text-steel-blue font-semibold" : "text-gray-500 dark:text-gray-400"}`}>{notif.time}</span>
-                      </div>
-                      {notif.unread && <div className="w-2.5 h-2.5 rounded-full bg-steel-blue mt-2 shrink-0"></div>}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+        <NavItem href="/notifications" label={t('sidebar.notifications')} icon={iconNotif} active={pathname?.startsWith("/notifications")} hasNotif={unreadCount > 0} />
 
-        <NavItem href="/messages" label={t('sidebar.messages')} icon={iconMessages} active={pathname?.startsWith("/messages")} />
+        <NavItem href="/messages" label={t('sidebar.messages')} icon={iconMessages} active={pathname?.startsWith("/messages")} hasNotif={unreadMessages > 0} />
         <NavItem href="/profile" label={t('sidebar.profile')} icon={iconProfile} active={pathname?.startsWith("/profile")} />
         
         {/* BOUTON MODÉRATION — modérateurs / admins uniquement */}
@@ -133,19 +90,54 @@ export default function LeftSidebar() {
         <NavItem href="/settings" label={t('sidebar.settings')} icon={iconSettings} active={pathname?.startsWith("/settings")} />
       </nav>
 
-      <Link href="/create" className="mt-3 flex items-center justify-center gap-2 bg-steel-blue hover:bg-deep-space-blue dark:bg-papaya-whip dark:text-deep-space-blue dark:hover:bg-white text-white font-bold rounded-full p-3 lg:px-4 transition-colors shadow-md">
+      <Link href="/create" className="mt-3 flex items-center justify-center gap-2 bg-steel-blue hover:bg-deep-space-blue dark:bg-white dark:text-deep-space-blue dark:hover:bg-white text-white font-bold rounded-full p-3 lg:px-4 transition-colors shadow-md">
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
         <span className="hidden lg:inline">{t('sidebar.createPost')}</span>
       </Link>
 
-      <button onClick={toggleTheme} className="mt-auto flex items-center gap-4 px-3 py-3 rounded-full transition-colors text-deep-space-blue dark:text-papaya-whip hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start" aria-label={theme === "dark" ? t('sidebar.lightMode') : t('sidebar.darkMode')}>
-        {theme === "dark" ? (
-          <svg className="w-7 h-7 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-        ) : (
-          <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+      {/* COMPTE : avatar + nom, clic → menu de déconnexion */}
+      <div className="mt-auto relative">
+        {accountMenuOpen && (
+          <>
+            <div className="fixed inset-0 z-10" onClick={() => setAccountMenuOpen(false)} />
+            <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-surface border border-gray-200 dark:border-steel-blue/40 rounded-xl shadow-lg z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
+              <button
+                onClick={logout}
+                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brick-red hover:bg-brick-red/10 dark:hover:bg-brick-red/30 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                {t('sidebar.logout')}
+              </button>
+            </div>
+          </>
         )}
-        <span className="hidden lg:inline font-medium">{theme === "dark" ? t('sidebar.lightMode') : t('sidebar.darkMode')}</span>
-      </button>
+
+        <button
+          onClick={() => setAccountMenuOpen((o) => !o)}
+          className="w-full flex items-center gap-3 px-3 py-3 rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5 justify-center lg:justify-start"
+        >
+          <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold overflow-hidden shrink-0">
+            {me?.avatarUrl ? (
+              <img src={me.avatarUrl} alt={me.displayName || user?.username} className="w-full h-full object-cover" />
+            ) : (
+              (me?.displayName || user?.username || "?").charAt(0).toUpperCase()
+            )}
+          </div>
+          <div className="hidden lg:flex flex-col items-start min-w-0 flex-1">
+            <span className="font-bold text-sm text-deep-space-blue dark:text-white truncate max-w-[140px]">
+              {me?.displayName || user?.username}
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[140px]">
+              @{user?.username}
+            </span>
+          </div>
+          <svg className="hidden lg:block w-5 h-5 text-gray-400 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />
+          </svg>
+        </button>
+      </div>
     </aside>
   );
 }

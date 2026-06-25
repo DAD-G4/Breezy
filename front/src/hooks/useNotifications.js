@@ -1,7 +1,16 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
-import { getNotifications, markAllRead as svcMarkAllRead } from "../services/notifications";
-import { resolveUser } from "../services/users";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import {
+  getNotifications,
+  markAsRead as svcMarkAsRead,
+  markAllRead as svcMarkAllRead,
+  deleteNotification as svcDeleteNotification,
+  deleteAllRead as svcDeleteAllRead,
+} from "../services/notifications";
+import { getUnreadCount, getConversations } from "../services/dm";
+import { resolveUser, ping } from "../services/users";
+import { useAuth } from "../context/AuthContext";
 import { relativeTime } from "../lib/mappers";
 
 const ACTION_KEY = {
@@ -11,12 +20,38 @@ const ACTION_KEY = {
   comment: "header.notif.commented",
 };
 
-export function useNotifications(t, locale = "fr") {
+// Cadence du rafraîchissement live (notifs, badge DM, détection de message
+// entrant → popup). Plus court = popup/notifs plus rapides, légèrement plus
+// d'appels (négligeable à cette échelle).
+const POLL_INTERVAL_MS = 6000;
+
+export function useNotifications(t, locale) {
   const [notifications, setNotifications] = useState([]);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  // Popup « nouveau message » (toast en haut).
+  const [incomingMessage, setIncomingMessage] = useState(null);
+
+  // Refs lus dans la boucle de polling (pas de redémarrage de l'intervalle).
+  const { user } = useAuth();
+  const pathname = usePathname();
+  const userRef = useRef(user);
+  userRef.current = user;
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+  // Horodatage du dernier message entrant connu (anti-doublon entre polls).
+  const lastSeenTsRef = useRef(0);
+  const initializedRef = useRef(false);
+
+  const dismissIncoming = useCallback(() => setIncomingMessage(null), []);
 
   useEffect(() => {
+    // Pas de polling tant que l'utilisateur n'est pas connecté : sinon les appels
+    // vers des endpoints protégés renvoient 401 → l'intercepteur tente un refresh
+    // qui échoue → redirection forcée vers /login (y compris depuis /register).
+    if (!user) return;
     let active = true;
-    (async () => {
+
+    const fetchNotifications = async () => {
       try {
         const { notifications: raw } = await getNotifications();
         const mapped = await Promise.all(
@@ -36,14 +71,78 @@ export function useNotifications(t, locale = "fr") {
           })
         );
         if (active) setNotifications(mapped);
-      } catch {
-        // silencieux : pas de notifications affichées si l'appel échoue
+      } catch (err) {
+        console.error('[Notifications] Failed to fetch:', err);
       }
-    })();
+      // Compteur de messages privés non lus (pour la pastille rouge).
+      try {
+        const { unreadCount } = await getUnreadCount();
+        if (active) setUnreadMessages(unreadCount || 0);
+      } catch {
+        /* silencieux */
+      }
+      // Détection d'un nouveau message entrant → popup en haut. On repère le
+      // message reçu (pas de moi) le plus récent ; on déclenche la popup s'il
+      // est plus récent que le dernier connu, non lu, et qu'on n'est pas déjà
+      // sur la conversation concernée.
+      try {
+        const me = userRef.current?.id;
+        const { conversations: convs } = await getConversations();
+        let newest = null;
+        for (const c of convs || []) {
+          const lm = c.last_message;
+          if (!lm || lm.sender_id === me) continue;
+          const ts = new Date(lm.created_at).getTime();
+          if (!newest || ts > newest.ts) {
+            newest = { ts, text: lm.message_text, otherId: c.other_user_id, unread: (c.unread_count ?? 0) > 0 };
+          }
+        }
+        if (newest && newest.ts > lastSeenTsRef.current) {
+          const firstRun = !initializedRef.current;
+          lastSeenTsRef.current = newest.ts;
+          if (!firstRun && newest.unread) {
+            const sender = await resolveUser(newest.otherId);
+            const onThisConvo = pathnameRef.current === `/messages/${encodeURIComponent(sender.username)}`;
+            if (active && !onThisConvo) {
+              setIncomingMessage({
+                id: newest.ts,
+                name: sender.displayName,
+                username: sender.username,
+                text: newest.text,
+              });
+            }
+          }
+        }
+        initializedRef.current = true;
+      } catch {
+        /* silencieux */
+      }
+      // Présence en ligne : on signale que l'utilisateur est actif.
+      ping().catch(() => {});
+    };
+
+    fetchNotifications();
+    // Rafraîchissement live : refetch périodique (likes, commentaires, follows…).
+    const interval = setInterval(fetchNotifications, POLL_INTERVAL_MS);
+    // Sur mobile, les navigateurs gèlent setInterval quand l'onglet passe en
+    // arrière-plan. On refetch IMMÉDIATEMENT au retour de focus (sinon l'UI
+    // reste figée jusqu'au prochain tick et l'utilisateur recharge à la main).
+    const onVisible = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        fetchNotifications();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
     return () => {
       active = false;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
     };
-  }, []);
+    // (re)démarre à la connexion, s'arrête proprement à la déconnexion.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 
@@ -54,5 +153,21 @@ export function useNotifications(t, locale = "fr") {
     await svcMarkAllRead(ids);
   }, [notifications]);
 
-  return { notifications, unreadCount, markAllRead };
+  // Marque UNE notification comme lue (sans la supprimer).
+  const markRead = useCallback(async (id) => {
+    setNotifications((ns) => ns.map((n) => (n.id === id ? { ...n, unread: false } : n)));
+    await svcMarkAsRead(id).catch(() => {});
+  }, []);
+
+  const deleteNotification = useCallback(async (id) => {
+    setNotifications((ns) => ns.filter((n) => n.id !== id));
+    await svcDeleteNotification(id);
+  }, []);
+
+  const deleteAllReadNotifications = useCallback(async () => {
+    setNotifications((ns) => ns.filter((n) => n.unread));
+    await svcDeleteAllRead();
+  }, []);
+
+  return { notifications, unreadCount, unreadMessages, incomingMessage, dismissIncoming, markRead, markAllRead, deleteNotification, deleteAllRead: deleteAllReadNotifications };
 }

@@ -1,5 +1,20 @@
 import { Response } from 'express';
-import { ReportModel as Report, AuthRequest, Ban, UserModel, UserRole, success, error } from '@breezy/shared';
+import { Op } from 'sequelize';
+import {
+  ReportModel as Report,
+  AuthRequest,
+  Ban,
+  UserModel,
+  ProfileModel,
+  Follower,
+  BlockedUser,
+  PostModel,
+  NotificationModel,
+  DirectMessageModel,
+  ROLE_HIERARCHY,
+  success,
+  error,
+} from '@breezy/shared';
 
 export async function createReport(
   req: AuthRequest,
@@ -64,17 +79,6 @@ export async function resolveReport(
 
   success(res, report, 'Report resolved successfully.');
 }
-
-/**
- * Role hierarchy: user < moderator < admin.
- * A moderator can only ban users, not other moderators or admins.
- * An admin can ban anyone.
- */
-const ROLE_HIERARCHY: Record<string, number> = {
-  [UserRole.USER]: 0,
-  [UserRole.MODERATOR]: 1,
-  [UserRole.ADMIN]: 2,
-};
 
 export async function createBan(
   req: AuthRequest,
@@ -159,4 +163,130 @@ export async function listBans(
       totalPages: Math.ceil(total / limit),
     },
   });
+}
+
+export async function listAllUsers(
+  req: AuthRequest,
+  res: Response
+): Promise<void> {
+  const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
+  const offset = (page - 1) * limit;
+
+  const [users, total] = await Promise.all([
+    UserModel.findAll({
+      attributes: ['id', 'username', 'email', 'role', 'is_validated', 'created_at'],
+      offset,
+      limit,
+      order: [['created_at', 'DESC']],
+      include: [{
+        model: Ban,
+        as: 'bans',
+        required: false,
+        where: {
+          [Op.or]: [
+            { expires_at: null },
+            { expires_at: { [Op.gt]: new Date() } },
+          ],
+        },
+        attributes: ['id', 'reason', 'expires_at', 'created_at'],
+      }],
+    }),
+    UserModel.count(),
+  ]);
+
+  const mapped = users.map((u: any) => ({
+    id: u.id,
+    username: u.username,
+    email: u.email,
+    role: u.role,
+    is_validated: u.is_validated,
+    created_at: u.created_at,
+    status: u.bans && u.bans.length > 0 ? 'banned' : 'active',
+    ban: u.bans && u.bans.length > 0 ? u.bans[0] : null,
+  }));
+
+  success(res, {
+    users: mapped,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  });
+}
+
+/**
+ * DELETE /api/moderation/users/:id  (admin uniquement)
+ * Supprime définitivement un utilisateur et tout son contenu.
+ * - Postgres (transaction) : follows, blocages, bans, profil, puis l'utilisateur.
+ * - Mongo (best-effort) : ses posts, notifications, messages et signalements.
+ * Garde-fous : pas d'auto-suppression, pas de suppression d'un rôle >= au sien.
+ */
+export async function deleteUser(
+  req: AuthRequest,
+  res: Response
+): Promise<void> {
+  const userId = parseInt(req.params.id, 10);
+  if (isNaN(userId)) {
+    error(res, 'Invalid user ID.', 400);
+    return;
+  }
+
+  if (userId === req.user!.id) {
+    error(res, 'You cannot delete your own account.', 400);
+    return;
+  }
+
+  const target = await UserModel.findByPk(userId);
+  if (!target) {
+    error(res, 'User not found.', 404);
+    return;
+  }
+
+  const callerLevel = ROLE_HIERARCHY[req.user!.role] ?? 0;
+  const targetLevel = ROLE_HIERARCHY[target.role] ?? 0;
+  if (callerLevel <= targetLevel) {
+    error(res, 'Insufficient permissions to delete this user.', 403);
+    return;
+  }
+
+  // Postgres : suppression atomique des dépendances puis de l'utilisateur
+  // (aucune cascade FK n'est définie sur le schéma).
+  await UserModel.sequelize!.transaction(async (transaction) => {
+    await Follower.destroy({
+      where: { [Op.or]: [{ follower_id: userId }, { following_id: userId }] },
+      transaction,
+    });
+    await BlockedUser.destroy({
+      where: { [Op.or]: [{ blocker_id: userId }, { blocked_id: userId }] },
+      transaction,
+    });
+    await Ban.destroy({
+      where: { [Op.or]: [{ user_id: userId }, { banned_by: userId }] },
+      transaction,
+    });
+    await ProfileModel.destroy({ where: { user_id: userId }, transaction });
+    await UserModel.destroy({ where: { id: userId }, transaction });
+  });
+
+  // Mongo : nettoyage du contenu (best-effort, hors transaction Postgres).
+  await Promise.allSettled([
+    PostModel.deleteMany({ user_id: userId }),
+    NotificationModel.deleteMany({
+      $or: [{ recipient_id: userId }, { sender_id: userId }],
+    }),
+    DirectMessageModel.deleteMany({
+      $or: [{ sender_id: userId }, { recipient_id: userId }],
+    }),
+    Report.deleteMany({
+      $or: [
+        { reported_by: userId },
+        { target_type: 'user', target_id: String(userId) },
+      ],
+    }),
+  ]);
+
+  success(res, { deleted: true, id: userId }, 'User deleted successfully.');
 }

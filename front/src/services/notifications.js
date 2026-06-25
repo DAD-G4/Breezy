@@ -17,3 +17,13 @@ export async function markAsRead(id) {
 export async function markAllRead(ids) {
   await Promise.all(ids.map((id) => markAsRead(id).catch(() => {})));
 }
+
+// DELETE /api/notifications/:id — supprime une notification.
+export async function deleteNotification(id) {
+  await api.delete(`/notifications/${id}`);
+}
+
+// DELETE /api/notifications — supprime toutes les notifications lues.
+export async function deleteAllRead() {
+  await api.delete("/notifications");
+}

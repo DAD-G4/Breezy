@@ -11,6 +11,12 @@ const mockNotificationModel = {
   create: jest.fn(),
 };
 
+// Rôle du destinataire de la notif (Fx16). Par défaut 'user' (notif créée) ;
+// surchargé en 'moderator'/'admin' dans les tests dédiés.
+const mockUserModel = {
+  findByPk: jest.fn().mockResolvedValue({ role: 'user' }),
+};
+
 let mockAuthenticatedUser: { id: number; username: string; email: string; role: string } | null = null;
 
 jest.mock('@breezy/shared', () => {
@@ -19,6 +25,7 @@ jest.mock('@breezy/shared', () => {
     ...actual,
     Follower: mockFollowerModel,
     NotificationModel: mockNotificationModel,
+    UserModel: mockUserModel,
     Ban: { findOne: jest.fn().mockResolvedValue(null) },
     success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
       const code = statusCode || 200;
@@ -58,6 +65,8 @@ describe('Follow Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthenticatedUser = null;
+    mockUserModel.findByPk.mockReset();
+    mockUserModel.findByPk.mockResolvedValue({ role: 'user' });
   });
 
   describe('POST /api/users/follow/:id', () => {
@@ -89,6 +98,24 @@ describe('Follow Routes', () => {
         post_id: null,
         is_read: false,
       });
+    });
+
+    it('should NOT create a follow notification when the target is a moderator (Fx16)', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+      mockUserModel.findByPk.mockResolvedValue({ role: 'moderator' });
+
+      mockFollowerModel.create.mockResolvedValue({
+        id: 1,
+        follower_id: 1,
+        following_id: 2,
+        created_at: new Date(),
+      });
+
+      const res = await request(app).post('/api/users/follow/2');
+
+      expect(res.status).toBe(200);
+      expect(mockFollowerModel.create).toHaveBeenCalled();
+      expect(mockNotificationModel.create).not.toHaveBeenCalled();
     });
 
     it('should return 400 when trying to follow yourself', async () => {

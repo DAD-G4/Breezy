@@ -3,7 +3,13 @@
     "back": "Retour",
     "removeImage": "Supprimer l'image",
     "me": "Moi",
-    "loading": "Chargement..."
+    "loading": "Chargement...",
+    "close": "Fermer",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre",
+    "undo": "Annuler",
+    "avatar": "Avatar",
+    "emoji": "Emoji"
   },
   "sidebar": {
     "home": "Accueil",
@@ -15,7 +21,8 @@
     "lightMode": "Mode clair",
     "darkMode": "Mode sombre",
     "notifications": "Notifications",
-    "moderation": "Modération"
+    "moderation": "Modération",
+    "logout": "Se déconnecter"
   },
   "header": {
     "createPostAria": "Créer un post",
@@ -26,8 +33,8 @@
     "notif": {
       "liked": "a aimé votre publication.",
       "followed": "a commencé à vous suivre.",
-      "mentioned": "vous a mentionné dans un commentaire.",
-      "commented": "a commenté : \"Superbe photo !\"",
+      "mentioned": "vous a mentionné dans une publication.",
+      "commented": "a commenté votre publication.",
       "time5m": "Il y a 5 min",
       "time1h": "1h",
       "timeYesterday": "Hier",
@@ -42,11 +49,16 @@
     "followButton": "Suivre"
   },
   "feed": {
-    "title": "Accueil"
+    "title": "Accueil",
+    "loginRequired": "Connectez-vous pour voir votre feed.",
+    "loading": "Chargement du feed…",
+    "empty": "Aucun post pour le moment. Suivez des utilisateurs pour voir leur activité.",
+    "loadError": "Impossible de charger le feed."
   },
   "createPost": {
     "title": "Nouvelle publication",
     "placeholder": "Quoi de neuf sur Breezy ?",
+    "error": "Erreur lors de la publication.",
     "tools": {
       "addImage": "Ajouter une image"
     },
@@ -58,34 +70,72 @@
   },
   "login": {
     "title": "Connexion",
-    "emailPlaceholder": "adresse mail :",
-    "passwordPlaceholder": "mot de passe :",
+    "emailPlaceholder": "adresse mail",
+    "passwordPlaceholder": "mot de passe",
     "errorMessage": "Identifiants incorrects. Veuillez réessayer.",
-    "submitButton": "Se connecter",
+    "submitButton": "Connexion",
     "registerButton": "S'inscrire",
-    "noAccount": "Pas encore de compte ?"
+    "noAccount": "Pas encore de compte ?",
+    "banned": "Votre compte a été banni. Vous avez été déconnecté."
   },
   "register": {
     "title": "Inscription",
-    "displayNamePlaceholder": "nom d'affichage :",
-    "usernamePlaceholder": "Identifiant (@) :",
+    "displayNamePlaceholder": "nom d'affichage",
+    "usernamePlaceholder": "Identifiant (@)",
+    "emailPlaceholder": "adresse mail",
+    "passwordPlaceholder": "mot de passe",
     "errorMessage": "Erreur lors de l'inscription. Veuillez vérifier vos informations.",
     "submitButton": "S'inscrire",
     "loginButton": "Connexion",
     "alreadyHaveAccount": "Vous avez déjà un compte ?"
   },
   "search": {
-    "placeholder": "Nom d'utilisateur...",
-    "noResults": "Aucun utilisateur trouvé pour"
+    "placeholder": "Rechercher...",
+    "noResults": "Aucun résultat pour",
+    "error": "Recherche impossible.",
+    "tabPosts": "Posts",
+    "tabUsers": "Utilisateurs",
+    "trending": "Tendances",
+    "clear": "Effacer la recherche",
+    "trendingPosts": "Posts tendance"
   },
   "conversation": {
-    "placeholder": "Votre message..."
+    "placeholder": "Votre message...",
+    "blocked": "Vous avez bloqué cette personne."
   },
   "messagesInbox": {
     "searchPlaceholder": "Rechercher un message..."
   },
+  "messages": {
+    "loadError": "Impossible de charger les conversations.",
+    "empty": "Aucune conversation pour le moment.",
+    "notFound": "Conversation introuvable.",
+    "noMessages": "Aucun message. Démarrez la conversation !",
+    "new": "Nouveau message",
+    "searchUser": "Rechercher un utilisateur…",
+    "read": "Lu",
+    "sent": "Envoyé",
+    "online": "En ligne",
+    "offline": "Hors ligne"
+  },
+  "post": {
+    "loadError": "Impossible de charger le post.",
+    "justNow": "À l'instant",
+    "commentError": "Impossible d'ajouter le commentaire.",
+    "replyError": "Impossible d'ajouter la réponse.",
+    "deleteCommentError": "Impossible de supprimer le commentaire.",
+    "send": "Envoyer"
+  },
+  "profile": {
+    "loginRequired": "Connectez-vous pour voir votre profil.",
+    "logout": "Se déconnecter",
+    "notFound": "Profil introuvable.",
+    "loadError": "Impossible de charger le profil.",
+    "lines": "lignes",
+    "noPosts": "Aucun post pour l'instant."
+  },
   "postDetails": {
-    "commentPosted": "Nouveau commentaire posté :",
+    "commentPosted": "Nouveau commentaire posté",
     "addCommentPlaceholder": "Ajouter un commentaire..."
   },
   "publicProfile": {
@@ -99,6 +149,7 @@
     "post2": "Premier post sur Breezy."
   },
   "profileView": {
+    "editProfile": "Modifier le profil",
     "editNameAria": "Éditer le nom",
     "editBioAria": "Éditer la bio",
     "following": "Abonné",
@@ -106,22 +157,49 @@
     "followersLabel": "Abonnés",
     "followingLabel": "Abonnements",
     "saveButton": "Sauvegarder",
-    "yourPosts": "Vos posts :",
-    "userPosts": "Posts de {{name}} :"
+    "cancelButton": "Annuler",
+    "yourPosts": "Vos posts",
+    "userPosts": "Posts de {{name}}",
+    "report": "Signaler l'utilisateur",
+    "reportUser": "Signaler cet utilisateur",
+    "reported": "Utilisateur signalé ✓",
+    "blocked": "Utilisateur bloqué",
+    "blockUser": "Bloquer cet utilisateur",
+    "unblock": "Débloquer",
+    "moreActions": "Plus d'actions",
+    "reportConfirmTitle": "Signaler ce profil ?",
+    "reportConfirmMessage": "Vous allez signaler {{name}} à la modération.",
+    "blockConfirmTitle": "Bloquer cet utilisateur ?",
+    "blockConfirmMessage": "{{name}} ne pourra plus voir votre profil ni interagir avec vous.",
+    "blockedNoPosts": "Vous ne pouvez pas voir les publications de cet utilisateur."
   },
   "postCard": {
+    "reportReason": "Contenu inapproprié",
     "report": "Signaler le post",
     "reported": "Post signalé ✓",
     "reportAlert": "Le post de {{username}} a été signalé.",
     "block": "Bloquer {{username}}",
     "blockAlert": "Vous avez bloqué {{username}}.",
-    "imageAlt": "Contenu du post"
+    "imageAlt": "Contenu du post",
+    "edit": "Modifier le post",
+    "delete": "Supprimer le post",
+    "editing": "Modification...",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "deleteConfirmTitle": "Supprimer le post ?",
+    "deleteConfirmMessage": "Cette action est définitive. Le post sera supprimé pour tout le monde.",
+    "blockConfirmTitle": "Bloquer cet utilisateur ?",
+    "blockConfirm": "Bloquer"
   },
   "commentSection": {
     "reply": "Répondre",
     "replySent": "Votre réponse a été envoyée !",
     "replyTo": "Répondre à {{user}}...",
-    "comments": "Commentaires"
+    "comments": "Commentaires",
+    "delete": "Supprimer",
+    "deleted": "Commentaire supprimé",
+    "comment": "Commenter",
+    "empty": "Aucun commentaire pour le moment."
   },
   "settingsPage": {
     "searchPlaceholder": "Rechercher un paramètre...",
@@ -149,6 +227,16 @@
     "location": {
       "title": "Service de localisation",
       "desc": "Permettre d'ajouter un lieu à vos publications."
+    },
+    "logout": {
+      "title": "Se déconnecter",
+      "desc": "Se déconnecter de votre compte Breezy."
+    },
+    "blockedUsers": {
+      "title": "Utilisateurs bloqués",
+      "desc": "Gérer les utilisateurs que vous avez bloqués.",
+      "empty": "Aucun utilisateur bloqué.",
+      "unblock": "Débloquer"
     }
   },
   "moderation": {
@@ -159,15 +247,49 @@
     "noReports": "Aucun signalement en attente. Bon travail !",
     "ignore": "Ignorer",
     "deletePost": "Supprimer le post",
+    "deleteUser": "Supprimer l'utilisateur",
+    "deleteUserTitle": "Supprimer cet utilisateur ?",
+    "deleteUserMessage": "Cette action est définitive : le compte, ses posts et ses messages seront supprimés.",
+    "userDeleted": "Utilisateur supprimé",
     "statusActive": "Actif",
     "statusSuspended": "Suspendu",
     "statusBanned": "Banni",
     "actionActive": "Activer le compte",
     "actionSuspend": "Suspendre le compte",
     "actionBan": "Bannir définitivement",
-    "filterStatus": "Filtrer par statut :",
+    "filterStatus": "Filtrer par statut",
     "filterAll": "Tous",
     "noUsers": "Aucun utilisateur ne correspond à ce filtre.",
-    "deletedContent": "Contenu indisponible"
+    "deletedContent": "Contenu indisponible",
+    "accessDenied": "Accès réservé à la modération.",
+    "decision": "Décision de modération",
+    "reportedBy": "Signalé par",
+    "author": "Auteur",
+    "reports": "signalement(s)",
+    "createAccount": "Créer un compte",
+    "accountCreated": "Compte créé avec succès",
+    "username": "Nom d'utilisateur",
+    "email": "Adresse mail",
+    "password": "Mot de passe",
+    "role": "Rôle",
+    "roleUser": "Utilisateur",
+    "roleModerator": "Modérateur",
+    "roleAdmin": "Administrateur",
+    "searchUsers": "Rechercher un utilisateur…",
+    "filterReported": "Signalés"
+  },
+  "toast": {
+    "postReported": "Post signalé avec succès",
+    "userReported": "Utilisateur signalé avec succès"
+  },
+  "notifications": {
+    "clearRead": "Effacer les lues",
+    "empty": "Aucune notification pour le moment."
+  },
+  "followersPage": {
+    "empty": "Aucun abonné pour le moment."
+  },
+  "followingPage": {
+    "empty": "Ne suit personne pour le moment."
   }
 }

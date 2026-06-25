@@ -1,11 +1,13 @@
 import express from 'express';
-import { connectMongo, errorHandler, notFound, healthRouter } from '@breezy/shared';
+import cookieParser from 'cookie-parser';
+import { connectMongo, connectPostgres, errorHandler, notFound, healthRouter } from '@breezy/shared';
 import tagRoutes from './routes/tags';
 
 const app = express();
 const PORT = process.env.PORT || 3004;
 
 app.use(express.json());
+app.use(cookieParser());
 
 // Health check
 app.use('/api/health', healthRouter);
@@ -20,6 +22,8 @@ app.use(errorHandler);
 async function start() {
   try {
     await connectMongo();
+    // Mongo héberge les posts, mais la recherche masque les bloqués (Postgres).
+    await connectPostgres();
 
     app.listen(PORT, () => {
       console.log(`Tag service running on port ${PORT}`);

@@ -7,6 +7,8 @@ import {
   createBan,
   deleteBan,
   listBans,
+  listAllUsers,
+  deleteUser,
 } from '../controllers/moderationController';
 
 const router = Router();
@@ -21,5 +23,8 @@ router.put('/reports/:id/resolve', requireRole(UserRole.MODERATOR), asyncHandler
 router.post('/ban', requireRole(UserRole.MODERATOR), validateBanInput, asyncHandler(createBan));
 router.delete('/ban/:userId', requireRole(UserRole.ADMIN), asyncHandler(deleteBan));
 router.get('/bans', requireRole(UserRole.MODERATOR), asyncHandler(listBans));
+
+router.get('/users', requireRole(UserRole.MODERATOR), asyncHandler(listAllUsers));
+router.delete('/users/:id', requireRole(UserRole.ADMIN), asyncHandler(deleteUser));
 
 export default router;

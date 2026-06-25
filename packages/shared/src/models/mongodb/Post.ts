@@ -101,7 +101,7 @@ PostSchema.index({ user_id: 1, created_at: -1 });
 PostSchema.index({ tags: 1, created_at: -1 });
 
 const Post: Model<IPostDocument> =
-  (mongoose.models as any).Post ||
+  (mongoose.models['Post'] as Model<IPostDocument>) ||
   mongoose.model<IPostDocument>('Post', PostSchema);
 
 export default Post;

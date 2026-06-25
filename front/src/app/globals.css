@@ -8,4 +8,46 @@
   --color-papaya-whip: #fdf0d5;
   --color-deep-space-blue: #003049;
   --color-steel-blue: #669bbc;
+
+  /* Thème sombre : fond quasi-noir (page) + surface légèrement plus claire
+     (cartes) pour un rendu élégant avec relief, plutôt que le bleu foncé. */
+  --color-night: #0a0a0c;
+  --color-surface: #17181d;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Transition douce clair ⇄ sombre.
+   La transition n'est active QUE pendant la bascule : la classe
+   `.theme-transition` est posée sur <html> par ThemeContext le temps du
+   changement, puis retirée. On évite ainsi d'animer les survols, les
+   ouvertures de menus, etc. (qui doivent rester instantanés), et on
+   respecte la préférence « réduire les animations ».
+   ────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-transition,
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition:
+      background-color 400ms ease,
+      border-color 400ms ease,
+      color 300ms ease,
+      fill 300ms ease,
+      stroke 300ms ease,
+      box-shadow 400ms ease,
+      opacity 300ms ease !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+/* iOS Safari zoome automatiquement au focus d'un champ dont la police fait
+   moins de 16px (ex. `text-sm` = 14px). Ce zoom décalait/cassait l'affichage
+   (notamment la messagerie) et ne se "dézoomait" pas tout seul. On force donc
+   16px sur les champs de saisie en mobile pour neutraliser ce comportement. */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
 }

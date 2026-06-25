@@ -8,12 +8,17 @@ import { getProfileByUsername } from "@/services/users";
 import { getConversation, sendMessage, markConversationRead } from "@/services/dm";
 import { useAuth, useRequireAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { relativeTime } from "@/lib/mappers";
+import EmojiPicker from "@/components/ui/EmojiPicker";
+
+// Rafraîchissement live de la conversation ouverte (polling léger).
+const MESSAGES_POLL_MS = 8000;
 
 export default function ConversationPage({ params }) {
   useRequireAuth();
   const router = useRouter();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const resolvedParams = use(params);
   const username = decodeURIComponent(resolvedParams.username);
@@ -24,14 +29,50 @@ export default function ConversationPage({ params }) {
   const [error, setError] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const messagesEndRef = useRef(null);
+  const scrollContainerRef = useRef(null);
+  const messageInputRef = useRef(null);
 
+  // Insère un emoji à la position du curseur de l'input de message.
+  const insertMessageEmoji = (emoji) => {
+    const el = messageInputRef.current;
+    setNewMessage((prev) => {
+      const hasCaret = el && typeof el.selectionStart === "number";
+      const start = hasCaret ? el.selectionStart : prev.length;
+      const end = hasCaret ? el.selectionEnd : prev.length;
+      const next = prev.slice(0, start) + emoji + prev.slice(end);
+      const caret = start + emoji.length;
+      requestAnimationFrame(() => {
+        if (el) {
+          el.focus();
+          try {
+            el.setSelectionRange(caret, caret);
+          } catch {
+            /* ignore */
+          }
+        }
+      });
+      return next;
+    });
+  };
+  // « Collé en bas » : on ne suit les nouveaux messages que si l'utilisateur est
+  // déjà en bas. S'il a remonté pour lire l'historique, le polling ne doit pas
+  // le ramener brutalement en bas.
+  const stickToBottomRef = useRef(true);
+
+  // Place le fil sur le dernier message en ne faisant défiler QUE le conteneur
+  // interne (scrollIntoView ferait défiler toute la page/fenêtre).
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const c = scrollContainerRef.current;
+    if (c) c.scrollTop = c.scrollHeight;
+  };
+
+  const handleScroll = () => {
+    const c = scrollContainerRef.current;
+    if (c) stickToBottomRef.current = c.scrollHeight - c.scrollTop - c.clientHeight < 80;
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (stickToBottomRef.current) scrollToBottom();
   }, [messages]);
 
   // Résolution username → id, puis chargement de la conversation.
@@ -44,20 +85,31 @@ export default function ConversationPage({ params }) {
       try {
         const u = await getProfileByUsername(username);
         const displayName = u.profile?.display_name || u.username;
+        const blocked = !!u.is_blocked;
+        // On fixe l'autre utilisateur AVANT de charger la conversation : en cas
+        // de blocage, le backend refuse la lecture (403). On affiche alors la
+        // bannière « bloqué » (input masqué) plutôt que de tomber dans le catch
+        // avec une erreur générique qui cassait l'affichage.
+        if (active) {
+          setOtherUser({ id: u.id, displayName, avatarUrl: u.profile?.avatar_url || null, lastActive: u.profile?.last_active || null, isBlocked: blocked });
+        }
+        if (blocked) {
+          if (active) setMessages([]);
+          return;
+        }
         const { messages: raw } = await getConversation(u.id);
         const mapped = (raw || []).map((m) => ({
           id: m._id,
           mine: m.sender_id === user.id,
           text: m.message_text,
+          created_at: m.created_at,
+          read: !!m.is_read,
         }));
-        if (active) {
-          setOtherUser({ id: u.id, displayName });
-          setMessages(mapped);
-        }
+        if (active) setMessages(mapped);
         // Marque la conversation comme lue (best-effort).
         markConversationRead(u.id).catch(() => {});
       } catch (err) {
-        if (active) setError(getApiErrorMessage(err, "Conversation introuvable."));
+        if (active) setError(getApiErrorMessage(err, t('messages.notFound')));
       } finally {
         if (active) setLoading(false);
       }
@@ -67,6 +119,39 @@ export default function ConversationPage({ params }) {
     };
   }, [username, user]);
 
+  // Rafraîchissement live : refetch périodique des messages de la conversation
+  // ouverte (sauf si bloquée). On fusionne par id pour conserver les messages
+  // locaux pas encore renvoyés par le serveur (optimistes / tout juste envoyés).
+  useEffect(() => {
+    if (!user || !otherUser?.id || otherUser.isBlocked) return;
+    let active = true;
+    const interval = setInterval(async () => {
+      try {
+        const { messages: raw } = await getConversation(otherUser.id);
+        if (!active) return;
+        const mapped = (raw || []).map((m) => ({
+          id: m._id,
+          mine: m.sender_id === user.id,
+          text: m.message_text,
+          created_at: m.created_at,
+          read: !!m.is_read,
+        }));
+        setMessages((prev) => {
+          const serverIds = new Set(mapped.map((m) => m.id));
+          const localExtras = prev.filter((m) => !serverIds.has(m.id));
+          return [...mapped, ...localExtras];
+        });
+        markConversationRead(otherUser.id).catch(() => {});
+      } catch {
+        /* erreurs de polling ignorées */
+      }
+    }, MESSAGES_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [user, otherUser?.id, otherUser?.isBlocked]);
+
   // Fx17 — Envoi : POST /api/dms/send { recipient_id, message_text } (UI optimiste).
   const handleSend = async (e) => {
     e.preventDefault();
@@ -74,13 +159,14 @@ export default function ConversationPage({ params }) {
     if (!text || !otherUser || sending) return;
 
     setSending(true);
-    const optimistic = { id: `tmp-${Date.now()}`, mine: true, text };
+    const optimistic = { id: `tmp-${Date.now()}`, mine: true, text, created_at: new Date().toISOString(), read: false };
     setMessages((m) => [...m, optimistic]);
     setNewMessage("");
     try {
       const created = await sendMessage(otherUser.id, text);
       setMessages((m) => m.map((msg) => (msg.id === optimistic.id ? { ...msg, id: created._id || msg.id } : msg)));
-    } catch {
+    } catch (err) {
+      console.error('[Messages] Failed to send:', err);
       // Rollback du message optimiste en cas d'échec.
       setMessages((m) => m.filter((msg) => msg.id !== optimistic.id));
       setNewMessage(text);
@@ -90,85 +176,164 @@ export default function ConversationPage({ params }) {
   };
 
   const title = otherUser?.displayName || username;
+  // En ligne si actif il y a moins de ~70s (le ping est émis toutes les 25s).
+  const isOnline = otherUser?.lastActive
+    ? Date.now() - new Date(otherUser.lastActive).getTime() < 70000
+    : false;
 
   return (
-    <AppShell>
-      <div className="flex flex-col p-4 pb-32 md:pb-4">
+    <AppShell chat>
+      <div className="flex flex-col h-full min-h-0">
 
-        {/* EN-TÊTE */}
-        <div className="flex items-center gap-4 mb-6 sticky top-0 bg-gray-200/90 dark:bg-deep-space-blue/90 backdrop-blur-sm z-10 py-2 border-b border-gray-300 dark:border-steel-blue/30 -mx-4 px-4">
-          <button
-            onClick={() => router.back()}
-            className="p-2 -ml-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip rounded-full transition-all"
-          >
-            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </button>
+        <header className="sticky top-0 z-10 bg-gray-100/80 dark:bg-night/85 backdrop-blur-lg border-b border-gray-200/60 dark:border-steel-blue/20">
+          <div className="flex items-center gap-3 px-4 py-3">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center justify-center w-9 h-9 rounded-full text-steel-blue hover:bg-steel-blue/10 dark:hover:bg-steel-blue/20 active:scale-95 transition-all"
+              aria-label={t('common.back')}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
 
-          <div className="flex items-center gap-3 border border-gray-300 dark:border-steel-blue/40 px-4 py-2 rounded-full bg-white dark:bg-deep-space-blue shadow-sm">
-            <div className="w-8 h-8 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold text-sm">
-              {title.charAt(0).toUpperCase()}
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-night shadow-sm overflow-hidden">
+                  {otherUser?.avatarUrl ? (
+                    <img src={otherUser.avatarUrl} alt={title} className="w-full h-full object-cover" />
+                  ) : (
+                    (title || "?").charAt(0).toUpperCase()
+                  )}
+                </div>
+                <span
+                  className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white dark:border-night rounded-full ${isOnline ? "bg-emerald-400" : "bg-gray-300 dark:bg-gray-500"}`}
+                  title={isOnline ? t('messages.online') : t('messages.offline')}
+                />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-sm font-bold text-deep-space-blue dark:text-white truncate leading-tight">
+                  {title}
+                </h1>
+                <p className="text-xs text-gray-400 dark:text-gray-500 leading-tight">
+                  @{username}
+                </p>
+              </div>
             </div>
-            <span className="font-bold text-deep-space-blue dark:text-papaya-whip truncate max-w-[160px]">
-              {title}
-            </span>
           </div>
-        </div>
+        </header>
 
-        {/* ZONE MESSAGES */}
-        <div className="flex flex-col gap-4">
+        <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3">
           {loading && (
-            <p className="text-center text-gray-500 dark:text-gray-400 py-8">{t('common.loading')}</p>
+            <div className="flex justify-center py-12">
+              <div className="flex gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-steel-blue/40 animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-2 h-2 rounded-full bg-steel-blue/40 animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-2 h-2 rounded-full bg-steel-blue/40 animate-bounce" />
+              </div>
+            </div>
           )}
+
           {!loading && error && (
             <p className="text-center text-brick-red font-semibold py-8">{error}</p>
           )}
+
           {!loading && !error && messages.length === 0 && (
-            <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-              Aucun message. Démarrez la conversation !
-            </p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 rounded-full bg-steel-blue/10 flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-steel-blue" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+              </div>
+              <p className="text-sm text-gray-400 dark:text-gray-500">
+                {t('messages.noMessages')}
+              </p>
+            </div>
           )}
+
           {!loading && !error && messages.map((msg) => (
-            <div key={msg.id} className={`flex gap-3 ${msg.mine ? "justify-end" : "justify-start"}`}>
+            <div
+              key={msg.id}
+              className={`flex items-end gap-2 ${msg.mine ? "justify-end" : "justify-start"}`}
+            >
               {!msg.mine && (
-                <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold text-sm flex-shrink-0 mt-auto">
+                <div className="w-8 h-8 rounded-full bg-steel-blue flex items-center justify-center text-white font-semibold text-xs flex-shrink-0 shadow-sm">
                   {title.charAt(0).toUpperCase()}
                 </div>
               )}
-              <div className={`px-4 py-3 max-w-[75%] border rounded-2xl text-sm leading-relaxed bg-white dark:bg-deep-space-blue border-gray-300 dark:border-steel-blue/50 text-deep-space-blue dark:text-papaya-whip shadow-sm ${msg.mine ? "rounded-br-sm" : "rounded-bl-sm"}`}>
+
+              <div
+                className={`
+                  max-w-[78%] px-4 py-2.5 text-sm leading-relaxed shadow-sm
+                  ${msg.mine
+                    ? "bg-steel-blue text-white rounded-2xl rounded-br-md"
+                    : "bg-gray-200 dark:bg-gray-700/60 text-deep-space-blue dark:text-white rounded-2xl rounded-bl-md"
+                  }
+                `}
+              >
                 {msg.text}
+                <p className={`text-[10px] mt-1 flex items-center gap-1 ${msg.mine ? "justify-end text-white/60" : "text-gray-400 dark:text-gray-500"}`}>
+                  {relativeTime(msg.created_at, language)}
+                  {msg.mine && (
+                    msg.read ? (
+                      // Lu : double coche
+                      <span className="inline-flex items-center text-sky-300" title={t('messages.read')}>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2 13l3.5 3.5L11 11" /><path strokeLinecap="round" strokeLinejoin="round" d="M9 13l3.5 3.5L22 7" /></svg>
+                      </span>
+                    ) : (
+                      // Envoyé : simple coche
+                      <span className="inline-flex items-center text-white/50" title={t('messages.sent')}>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      </span>
+                    )
+                  )}
+                </p>
               </div>
             </div>
           ))}
-          <div ref={messagesEndRef} />
         </div>
-      </div>
 
-      {/* BARRE DE SAISIE */}
-      <form
-        onSubmit={handleSend}
-        className="fixed bottom-[65px] left-0 right-0 md:sticky md:bottom-0 md:left-auto md:right-auto p-3 bg-gray-200/95 dark:bg-deep-space-blue/95 backdrop-blur-md border-t border-gray-300 dark:border-steel-blue/40 z-30"
-      >
-        <div className="relative flex items-center">
-          <input
-            type="text"
-            placeholder={t('conversation.placeholder')}
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            className="w-full pl-4 pr-12 py-3 rounded-2xl border border-gray-300 dark:border-steel-blue/50 bg-white dark:bg-deep-space-blue text-deep-space-blue dark:text-papaya-whip outline-none focus:border-steel-blue shadow-sm"
-          />
-          <button
-            type="submit"
-            disabled={!newMessage.trim() || sending}
-            className="absolute right-2 p-2 text-steel-blue hover:text-deep-space-blue disabled:opacity-50 transition-colors"
-          >
-            <svg className="w-6 h-6 transform rotate-45 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-          </button>
+        {otherUser?.isBlocked ? (
+        <div className="shrink-0 px-4 py-4 bg-gray-100/90 dark:bg-night/95 border-t border-gray-200/60 dark:border-steel-blue/20 flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400">
+          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+          </svg>
+          <span className="text-sm font-medium">{t('conversation.blocked')}</span>
         </div>
-      </form>
+        ) : (
+        <form
+          onSubmit={handleSend}
+          className="shrink-0 px-4 py-3 bg-gray-100/90 dark:bg-night/95 border-t border-gray-200/60 dark:border-steel-blue/20"
+        >
+          <div className="flex items-end gap-2">
+            <EmojiPicker onSelect={insertMessageEmoji} />
+            <input
+              ref={messageInputRef}
+              type="text"
+              placeholder={t('conversation.placeholder')}
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              className="flex-1 px-4 py-2.5 rounded-2xl border border-gray-200 dark:border-steel-blue/30 bg-white dark:bg-gray-800 text-deep-space-blue dark:text-white text-sm outline-none focus:border-steel-blue focus:ring-2 focus:ring-steel-blue/20 transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 shadow-sm"
+            />
+            <button
+              type="submit"
+              disabled={!newMessage.trim() || sending}
+              className={`
+                flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-all shadow-sm
+                ${newMessage.trim()
+                  ? "bg-steel-blue text-white hover:bg-steel-blue/80 active:scale-95"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed"
+                }
+              `}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+              </svg>
+            </button>
+          </div>
+        </form>
+        )}
+      </div>
     </AppShell>
   );
 }

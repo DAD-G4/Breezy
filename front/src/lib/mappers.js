@@ -8,7 +8,7 @@ const RELATIVE_TIME_STRINGS = {
 };
 
 // Temps relatif court à partir d'une date ISO ("à l'instant", "3 min", "2 h", "5 j").
-export function relativeTime(dateInput, locale = "fr") {
+export function relativeTime(dateInput, locale) {
   const date = new Date(dateInput);
   const diff = Math.floor((Date.now() - date.getTime()) / 1000);
   const strings = RELATIVE_TIME_STRINGS[locale] || RELATIVE_TIME_STRINGS.fr;
@@ -22,11 +22,16 @@ export function relativeTime(dateInput, locale = "fr") {
 
 // Transforme un post backend (document MongoDB) vers la forme attendue par PostCard.
 // authorLabel : nom affiché de l'auteur (résolu via usersService.resolveUser).
+// authorHandle : @handle réel de l'auteur (sert au lien /profile/<handle>).
+// avatarUrl : URL de la photo de profil de l'auteur (résolue côté appelant).
 // currentUserId : id de l'utilisateur connecté, pour savoir s'il a déjà liké.
-export function mapPost(post, { authorLabel, currentUserId, locale } = {}) {
+export function mapPost(post, { authorLabel, authorHandle, currentUserId, locale, avatarUrl } = {}) {
   return {
     id: post._id,
+    userId: post.user_id,
     username: authorLabel || `user${post.user_id}`,
+    authorHandle: authorHandle || null,
+    avatarUrl: avatarUrl || null,
     time: relativeTime(post.created_at, locale),
     content: post.content,
     imageUrl: post.media?.type === "image" ? post.media.url : undefined,

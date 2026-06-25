@@ -36,23 +36,27 @@ export default function PublicProfilePage({ params }) {
 
         // Posts publics de cet utilisateur.
         const userPosts = await getUserPosts(u.id);
+        const ownerAvatar = u.profile?.avatar_url || null;
         const posts = (userPosts.posts || []).map((p) =>
-          mapPost(p, { authorLabel: displayName, currentUserId: user?.id, locale: language })
+          mapPost(p, { authorLabel: displayName, authorHandle: u.username, avatarUrl: ownerAvatar, currentUserId: user?.id, locale: language })
         );
 
         if (active) {
           setProfile({
             id: u.id,
+            username: u.username,
             name: displayName,
             bio: u.profile?.bio || "",
             avatarUrl: u.profile?.avatar_url || null,
             followers: u.followers_count ?? 0,
             following: u.following_count ?? 0,
+            isFollowing: !!u.is_following,
+            isBlocked: !!u.is_blocked,
             posts,
           });
         }
       } catch (err) {
-        if (active) setError(getApiErrorMessage(err, "Profil introuvable."));
+        if (active) setError(getApiErrorMessage(err, t('profile.notFound')));
       } finally {
         if (active) setLoading(false);
       }
@@ -69,7 +73,7 @@ export default function PublicProfilePage({ params }) {
         {/* fleche retour */}
         <button
           onClick={() => router.back()}
-          className="p-2 -ml-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all w-fit"
+          className="p-2 -ml-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all w-fit"
             aria-label={t('common.back')}
         >
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +88,7 @@ export default function PublicProfilePage({ params }) {
           <p className="text-center text-brick-red font-semibold py-8">{error}</p>
         )}
         {!loading && !error && profile && (
-          <ProfileView initialUser={profile} isOwnProfile={false} />
+          <ProfileView initialUser={profile} isOwnProfile={user?.id === profile.id} />
         )}
       </div>
     </AppShell>

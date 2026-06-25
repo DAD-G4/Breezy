@@ -43,6 +43,18 @@ export async function addReply(postId, commentId, content) {
   return res.data.data;
 }
 
+// DELETE /api/posts/:postId/comment/:commentId — supprime un commentaire (auteur).
+export async function deleteComment(postId, commentId) {
+  const res = await api.delete(`/posts/${postId}/comment/${commentId}`);
+  return res.data.data;
+}
+
+// PUT /api/posts/:id — met à jour le contenu d'un post (propriétaire).
+export async function updatePost(postId, content) {
+  const res = await api.put(`/posts/${postId}`, { content });
+  return res.data.data;
+}
+
 // DELETE /api/posts/:id — supprime un post (modération / propriétaire).
 export async function deletePost(postId) {
   const res = await api.delete(`/posts/${postId}`);
