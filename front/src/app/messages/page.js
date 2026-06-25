@@ -58,6 +58,7 @@ export default function MessagesInboxPage() {
         return {
           username: other?.username,
           displayName: other?.displayName,
+          avatarUrl: other?.avatarUrl,
           lastMessage: c.last_message?.message_text || "",
           time: relativeTime(c.last_message?.created_at, language),
           unread: (c.unread_count ?? 0) > 0,
@@ -113,8 +114,12 @@ export default function MessagesInboxPage() {
               href={`/messages/${encodeURIComponent(conv.username)}`}
               className={`flex items-center gap-4 p-4 rounded-xl border ${conv.unread ? 'border-steel-blue/50 dark:border-steel-blue bg-blue-50/50 dark:bg-steel-blue/10' : 'border-gray-100 dark:border-steel-blue/20 bg-white dark:bg-surface'} hover:shadow-md transition-all duration-200`}
             >
-              <div className="w-12 h-12 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                {conv.displayName.charAt(0).toUpperCase()}
+              <div className="w-12 h-12 rounded-full bg-steel-blue flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden">
+                {conv.avatarUrl ? (
+                  <img src={conv.avatarUrl} alt={conv.displayName} className="w-full h-full object-cover" />
+                ) : (
+                  (conv.displayName || "?").charAt(0).toUpperCase()
+                )}
               </div>
 
               <div className="flex flex-col flex-1 min-w-0">

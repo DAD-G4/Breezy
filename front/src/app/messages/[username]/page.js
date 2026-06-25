@@ -91,7 +91,7 @@ export default function ConversationPage({ params }) {
         // bannière « bloqué » (input masqué) plutôt que de tomber dans le catch
         // avec une erreur générique qui cassait l'affichage.
         if (active) {
-          setOtherUser({ id: u.id, displayName, lastActive: u.profile?.last_active || null, isBlocked: blocked });
+          setOtherUser({ id: u.id, displayName, avatarUrl: u.profile?.avatar_url || null, lastActive: u.profile?.last_active || null, isBlocked: blocked });
         }
         if (blocked) {
           if (active) setMessages([]);
@@ -199,8 +199,12 @@ export default function ConversationPage({ params }) {
 
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-night shadow-sm">
-                  {title.charAt(0).toUpperCase()}
+                <div className="w-10 h-10 rounded-full bg-steel-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-night shadow-sm overflow-hidden">
+                  {otherUser?.avatarUrl ? (
+                    <img src={otherUser.avatarUrl} alt={title} className="w-full h-full object-cover" />
+                  ) : (
+                    (title || "?").charAt(0).toUpperCase()
+                  )}
                 </div>
                 <span
                   className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white dark:border-night rounded-full ${isOnline ? "bg-emerald-400" : "bg-gray-300 dark:bg-gray-500"}`}
