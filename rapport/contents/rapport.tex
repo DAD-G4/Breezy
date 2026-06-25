@@ -231,7 +231,23 @@ Fx23 & Thème sombre / clair                      & \checkmark & \checkmark & \c
 \caption{Matrice des permissions par rôle (23 fonctionnalités).}
 \end{table}
 
-\subsection{Priorisation MoSCoW}
+\subsection{Fonctionnalités additionnelles}
+
+Au-delà des 23 fonctionnalités du cahier des charges, l'équipe a livré plusieurs
+fonctionnalités complémentaires renforçant l'expérience et la robustesse :
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Blocage d'utilisateur} (désabonnement mutuel, messages et posts
+        masqués entre comptes bloqués) ;
+  \item \textbf{Refus de connexion des comptes bannis} (bannissement appliqué à
+        l'authentification) ;
+  \item \textbf{Suggestions} de comptes à suivre ;
+  \item \textbf{Présence en ligne} et \textbf{accusés de lecture} dans la
+        messagerie, \textbf{pastilles} de notifications et de messages non lus ;
+  \item \textbf{Renouvellement silencieux} de session (refresh token) ;
+  \item \textbf{Recherche en temps réel} (au fil de la frappe, par tag ou
+        utilisateur) et \textbf{posts tendance}.
+\end{itemize}
 
 Les fonctionnalités ont été hiérarchisées selon la méthode MoSCoW afin de
 sécuriser un socle livrable avant d'enrichir le périmètre :
@@ -307,7 +323,7 @@ Langages    & TypeScript (back), JavaScript / JSX (front). \\
 Frameworks  & Express.js, Next.js / React, Tailwind CSS. \\
 Données     & PostgreSQL 15 + Sequelize, MongoDB 6 + Mongoose. \\
 Infrastructure & Docker, Docker Compose, Nginx, npm Workspaces. \\
-Sécurité    & JWT (HS256), bcrypt, RBAC, en-têtes de sécurité Nginx. \\
+Sécurité    & JWT (HS256) en cookies \texttt{httpOnly} (access + refresh), bcrypt, RBAC, en-têtes de sécurité Nginx, limitation de débit. \\
 Outillage   & Git / GitHub, GitHub Actions (CI), Adminer, mongo-express. \\
 \bottomrule
 \end{tabularx}
@@ -441,21 +457,45 @@ Les likes utilisent une \textbf{mise à jour optimiste} : l'interface bascule
 immédiatement puis se recale sur la réponse du serveur (ou annule en cas d'erreur).
 Commentaires et réponses imbriquées sont stockés directement dans le document du
 post. Le suivi d'un utilisateur met à jour la table relationnelle des abonnements
-et déclenche une notification.
+et déclenche une notification. Une section \textbf{suggestions} propose des comptes
+à suivre (en excluant soi-même, les comptes déjà suivis et les comptes bloqués).
+
+\subsection{Blocage et confidentialité}
+
+Un utilisateur peut en \textbf{bloquer} un autre. Le blocage est \textbf{mutuel}
+dans ses effets : les deux abonnements éventuels sont rompus, l'envoi \emph{et} la
+consultation de messages privés deviennent impossibles entre les deux comptes
+(réponse 403 côté serveur, zone de saisie désactivée côté client), et les
+\textbf{publications du compte bloqué ne sont plus visibles} (ni dans le fil, ni
+sur son profil). Le contrôle est appliqué côté serveur (sur les services posts,
+messages et utilisateurs) et reflété immédiatement côté interface.
 
 \subsection{Notifications et messagerie}
 
-Les notifications (mentions, likes, nouveaux abonnés) sont remontées par un hook
-partagé entre l'en-tête et la barre latérale, qui résout les expéditeurs et
-formate les libellés. La messagerie privée regroupe les échanges par conversation
-et expose le nombre de messages non lus.
+Les notifications (mentions, likes, commentaires, nouveaux abonnés, messages
+privés) sont remontées par un hook partagé entre l'en-tête et la barre latérale,
+qui résout les expéditeurs et formate les libellés. Faute de WebSocket, la
+fraîcheur est assurée par une \textbf{interrogation périodique} (\textit{polling})
+qui actualise notifications et compteurs sans rechargement.
+
+La messagerie privée regroupe les échanges par conversation. Elle affiche un
+\textbf{indicateur de présence} (pastille verte « en ligne » / grise « hors
+ligne », calculée à partir d'un \texttt{last\_active} rafraîchi régulièrement), des
+\textbf{accusés de lecture} sur ses propres messages (simple coche « envoyé » /
+double coche « lu »), et une \textbf{pastille de messages non lus} sur la
+navigation.
 
 \subsection{Modération}
 
 Tout utilisateur peut \textbf{signaler} un contenu ; les signalements alimentent
 une file consultable par les modérateurs, qui peuvent les résoudre et, le cas
-échéant, \textbf{suspendre ou bannir} un compte. L'accès à l'espace de modération
-est protégé côté serveur et masqué côté client aux rôles non habilités.
+échéant, \textbf{suspendre ou bannir} un compte. Le bannissement est appliqué
+\textbf{dès l'authentification} : un compte banni se voit refuser la connexion
+(réponse 403), il ne peut donc plus accéder à l'application. L'espace de modération
+propose en outre un \textbf{filtre des utilisateurs signalés}, une recherche, et la
+création de comptes (réservée à l'administrateur, qui ne crée que des comptes
+\emph{standards}). L'accès à cet espace est protégé côté serveur et masqué côté
+client aux rôles non habilités.
 
 \subsection{Couche d'intégration front/back}
 
@@ -464,15 +504,18 @@ repose sur :
 
 \begin{itemize}[leftmargin=1.4em]
   \item une \textbf{couche de services Axios} centralisant les appels, la base URL
-        de la passerelle et l'injection du jeton ;
+        de la passerelle et l'envoi automatique des cookies d'authentification ;
+  \item un \textbf{renouvellement silencieux} du jeton : sur réponse 401, le client
+        rejoue la requête après avoir obtenu un nouveau jeton d'accès via le jeton
+        de rafraîchissement, sans déconnecter l'utilisateur ;
   \item une \textbf{enveloppe de réponse standardisée} et des \textit{mappers}
         purs convertissant les modèles back-end en modèles d'affichage ;
   \item la \textbf{passerelle Nginx} réglée pour le CORS, la limitation de débit
-        adaptée à une SPA et la diffusion publique des médias ;
-  \item un \textbf{déploiement Docker Compose} complet accompagné d'un jeu de
-        données de démonstration (utilisateurs liés, posts avec tags, médias et
-        notifications) et d'outils web d'inspection des bases (Adminer,
-        mongo-express).
+        adaptée à une SPA et la diffusion des médias ;
+  \item un \textbf{déploiement Docker Compose} complet, avec un \textbf{service de
+        données de démonstration} exécuté automatiquement au démarrage (idempotent :
+        comptes liés, posts avec tags, médias, notifications et messages) et des
+        outils web d'inspection des bases (Adminer, mongo-express).
 \end{itemize}
 
 % =====================================================================
