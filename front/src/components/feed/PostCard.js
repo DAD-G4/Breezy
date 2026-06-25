@@ -120,7 +120,8 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
 
   const renderContentWithHashtags = (content) => {
     if (!content) return null;
-    const parts = content.split(/(#\w+)/g);
+    // Rend cliquables les #hashtags (→ recherche) ET les @mentions (→ profil).
+    const parts = content.split(/([#@]\w+)/g);
     return parts.map((part, i) => {
       if (part.startsWith('#')) {
         const tag = part.slice(1);
@@ -128,6 +129,18 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
           <Link
             key={i}
             href={`/search?q=${tag}`}
+            className="text-steel-blue hover:underline font-medium"
+          >
+            {part}
+          </Link>
+        );
+      }
+      if (part.startsWith('@')) {
+        const username = part.slice(1);
+        return (
+          <Link
+            key={i}
+            href={`/profile/${username}`}
             className="text-steel-blue hover:underline font-medium"
           >
             {part}
