@@ -1,5 +1,6 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { ModelStatic } from 'sequelize';
 import { AuthRequest, UserRole } from '../types';
 
 /**
@@ -34,10 +35,13 @@ export function authenticateToken(
   res: Response,
   next: NextFunction
 ): void {
+  // Support both httpOnly cookie (primary) and Authorization header (backward compat)
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.startsWith('Bearer ')
+  const tokenFromHeader = authHeader && authHeader.startsWith('Bearer ')
     ? authHeader.slice(7)
     : null;
+  const tokenFromCookie = (req as any).cookies?.accessToken;
+  const token = tokenFromHeader || tokenFromCookie;
 
   if (!token) {
     res.status(401).json({ error: 'Access denied. No token provided.' });
@@ -60,6 +64,40 @@ export function authenticateToken(
     }
     res.status(401).json({ error: 'Invalid token.' });
   }
+}
+
+/**
+ * Optional authentication.
+ * Sets req.user if a valid token (cookie or header) is present, but NEVER
+ * rejects: used on public routes that still want to know the viewer (e.g. to
+ * compute "is_following"). Visitors simply have req.user undefined.
+ */
+export function optionalAuth(
+  req: AuthRequest,
+  _res: Response,
+  next: NextFunction
+): void {
+  const authHeader = req.headers.authorization;
+  const tokenFromHeader = authHeader && authHeader.startsWith('Bearer ')
+    ? authHeader.slice(7)
+    : null;
+  const tokenFromCookie = (req as any).cookies?.accessToken;
+  const token = tokenFromHeader || tokenFromCookie;
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, getJwtSecretLazy(), { algorithms: ['HS256'] }) as JwtPayload;
+      req.user = {
+        id: decoded.id,
+        username: decoded.username,
+        email: decoded.email,
+        role: decoded.role,
+      };
+    } catch {
+      /* token invalide/expiré → on reste en visiteur */
+    }
+  }
+  next();
 }
 
 /**
@@ -113,7 +151,7 @@ export function checkBan(banChecker: BanChecker) {
  * Role-based access control middleware.
  * MUST be used AFTER authenticateToken.
  */
-const ROLE_HIERARCHY: Record<string, number> = {
+export const ROLE_HIERARCHY: Record<string, number> = {
   [UserRole.USER]: 0,
   [UserRole.MODERATOR]: 1,
   [UserRole.ADMIN]: 2,
@@ -138,7 +176,7 @@ export function requireRole(minimumRole: UserRole) {
   };
 }
 
-export function createBanChecker(BanModel: any) {
+export function createBanChecker(BanModel: ModelStatic<any>) {
   return async (userId: number) => {
     const ban = await BanModel.findOne({ where: { user_id: userId } });
     if (!ban) return null;

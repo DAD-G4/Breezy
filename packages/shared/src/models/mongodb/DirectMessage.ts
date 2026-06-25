@@ -44,7 +44,7 @@ DirectMessageSchema.index({ conversation_id: 1, created_at: -1 });
 DirectMessageSchema.index({ recipient_id: 1, is_read: 1 });
 
 const DirectMessage: Model<IDirectMessageDocument> =
-  (mongoose.models as any).DirectMessage ||
+  (mongoose.models['DirectMessage'] as Model<IDirectMessageDocument>) ||
   mongoose.model<IDirectMessageDocument>('DirectMessage', DirectMessageSchema);
 
 export default DirectMessage;

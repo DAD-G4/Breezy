@@ -45,6 +45,14 @@ export class User
     });
     User.hasMany(models.Ban, { foreignKey: "user_id", as: "bans" });
     User.hasMany(models.Ban, { foreignKey: "banned_by", as: "issuedBans" });
+    User.hasMany(models.BlockedUser, {
+      foreignKey: "blocker_id",
+      as: "blockedUsers",
+    });
+    User.hasMany(models.BlockedUser, {
+      foreignKey: "blocked_id",
+      as: "blockedBy",
+    });
   }
 }
 

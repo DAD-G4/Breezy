@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface INotificationDocument extends Document {
   recipient_id: number;
   sender_id: number;
-  type: 'mention' | 'like' | 'follow';
+  type: 'mention' | 'like' | 'follow' | 'dm' | 'comment';
   post_id: mongoose.Types.ObjectId | null;
   is_read: boolean;
   created_at: Date;
@@ -21,7 +21,7 @@ const NotificationSchema = new Schema({
   },
   type: {
     type: String,
-    enum: ['mention', 'like', 'follow'],
+    enum: ['mention', 'like', 'follow', 'dm', 'comment'],
     required: true,
   },
   post_id: {
@@ -47,7 +47,7 @@ NotificationSchema.index({ recipient_id: 1, is_read: 1 });
 NotificationSchema.index({ recipient_id: 1, created_at: -1 });
 
 const Notification: Model<INotificationDocument> =
-  (mongoose.models as any).Notification ||
+  (mongoose.models['Notification'] as Model<INotificationDocument>) ||
   mongoose.model<INotificationDocument>('Notification', NotificationSchema);
 
 export default Notification;

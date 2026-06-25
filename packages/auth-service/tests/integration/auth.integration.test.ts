@@ -3,6 +3,7 @@ loadTestEnv(); // Must be first — sets env vars before any imports
 
 import request from 'supertest';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
 import { connectTestDatabases, disconnectTestDatabases, clearAllTestData } from '@breezy/shared/src/test-utils';
 import { sequelize, UserModel } from '@breezy/shared';
@@ -13,8 +14,17 @@ const JWT_SECRET = process.env.JWT_SECRET || 'test-secret-for-jwt-signing';
 function buildApp() {
   const app = express();
   app.use(express.json());
+  app.use(cookieParser());
   app.use('/api/auth', authRoutes);
   return app;
+}
+
+function extractCookie(res: request.Response, name: string): string | undefined {
+  const setCookie = res.headers['set-cookie'] as unknown as string[] | undefined;
+  if (!setCookie) return undefined;
+  const match = setCookie.find((c: string) => c.startsWith(`${name}=`));
+  if (!match) return undefined;
+  return match.split(';')[0].split('=')[1];
 }
 
 beforeAll(async () => {
@@ -40,14 +50,24 @@ describe('Auth Integration Tests', () => {
       password: 'securePass123',
     };
 
-    it('should register a new user and return 201', async () => {
+    it('should register a new user, set auth cookies, and return user data', async () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send(validUser)
         .expect(201);
 
       expect(res.body).toHaveProperty('message', 'User created successfully');
-      expect(res.body.data).toBeNull();
+      expect(res.body.data.user).toBeDefined();
+      expect(res.body.data.user.email).toBe(validUser.email);
+      expect(res.body.data.user.username).toBe(validUser.username);
+
+      const accessToken = extractCookie(res, 'accessToken');
+      expect(accessToken).toBeDefined();
+      const decoded = jwt.verify(accessToken!, JWT_SECRET) as jwt.JwtPayload;
+      expect(decoded.email).toBe(validUser.email);
+
+      const refreshToken = extractCookie(res, 'refreshToken');
+      expect(refreshToken).toBeDefined();
 
       // Verify user exists in real PostgreSQL
       const userInDb = await UserModel.findOne({ where: { email: validUser.email } });
@@ -138,23 +158,24 @@ describe('Auth Integration Tests', () => {
         .expect(201);
     });
 
-    it('should login with correct credentials and return valid JWT', async () => {
+    it('should login with correct credentials and set auth cookies', async () => {
       const res = await request(app)
         .post('/api/auth/login')
         .send({ email: userCredentials.email, password: userCredentials.password })
         .expect(200);
 
       expect(res.body).toHaveProperty('message', 'Login successful');
-      expect(res.body.data).toHaveProperty('token');
       expect(res.body.data).toHaveProperty('user');
 
-      const { token, user } = res.body.data;
+      const { user } = res.body.data;
       expect(user.email).toBe(userCredentials.email);
       expect(user.username).toBe(userCredentials.username);
       expect(user.role).toBe('user');
 
-      // Verify JWT is valid
-      const decoded = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
+      const accessToken = extractCookie(res, 'accessToken');
+      expect(accessToken).toBeDefined();
+
+      const decoded = jwt.verify(accessToken!, JWT_SECRET) as jwt.JwtPayload;
       expect(decoded.id).toBe(user.id);
       expect(decoded.email).toBe(userCredentials.email);
       expect(decoded.username).toBe(userCredentials.username);
@@ -177,6 +198,53 @@ describe('Auth Integration Tests', () => {
         .expect(401);
 
       expect(res.body).toHaveProperty('error', 'Invalid credentials');
+    });
+  });
+
+  describe('GET /api/auth/me', () => {
+    it('should return user data from valid cookie', async () => {
+      // Register and login to get a cookie
+      const userCredentials = {
+        email: 'me@example.com',
+        username: 'meuser',
+        password: 'securePass123',
+      };
+
+      const registerRes = await request(app)
+        .post('/api/auth/register')
+        .send(userCredentials)
+        .expect(201);
+
+      const accessToken = extractCookie(registerRes, 'accessToken');
+      expect(accessToken).toBeDefined();
+
+      // Use cookie to get user data
+      const meRes = await request(app)
+        .get('/api/auth/me')
+        .set('Cookie', `accessToken=${accessToken}`)
+        .expect(200);
+
+      expect(meRes.body.data.user.email).toBe(userCredentials.email);
+      expect(meRes.body.data.user.username).toBe(userCredentials.username);
+    });
+
+    it('should return 401 without a cookie', async () => {
+      await request(app)
+        .get('/api/auth/me')
+        .expect(401);
+    });
+  });
+
+  describe('POST /api/auth/logout', () => {
+    it('should clear auth cookies', async () => {
+      const res = await request(app)
+        .post('/api/auth/logout')
+        .expect(200);
+
+      const setCookie = res.headers['set-cookie'] as unknown as string[];
+      expect(setCookie).toBeDefined();
+      expect(setCookie.some((c: string) => c.startsWith('accessToken=;'))).toBe(true);
+      expect(setCookie.some((c: string) => c.startsWith('refreshToken=;'))).toBe(true);
     });
   });
 });

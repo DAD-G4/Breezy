@@ -1,51 +1,95 @@
 "use client";
-import { use } from "react";
-import { useRouter } from "next/navigation"; 
+import { use, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import AppShell from "@/components/layout/AppShell";
 import ProfileView from "@/components/profile/ProfileView";
+import { getApiErrorMessage } from "@/lib/api";
+import { mapPost } from "@/lib/mappers";
+import { getProfileByUsername } from "@/services/users";
+import { getUserPosts } from "@/services/posts";
+import { useAuth, useRequireAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function PublicProfilePage({ params }) {
-  const router = useRouter(); // innitialisation du router pour la navigation
+  useRequireAuth();
+  const router = useRouter();
+  const { user } = useAuth();
+  const { t, language } = useLanguage();
 
-  // On utilise le hook use() pour récupérer les paramètres de l'URL commme le nom d'utilisateur
   const resolvedParams = use(params);
-  
-  // On extrait la variable username de l'objet avec decodeURIComponent pour gérer les caractères spéciaux dans l'URL
   const username = decodeURIComponent(resolvedParams.username);
 
-  // sécurité = on s'assure que username a une valeur par défaut 
-  const safeUsername = username || "Utilisateur Inconnu";
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const publicUserData = {
-    // TODO (couche data) : remplacer par l'id numérique réel du profil
-    // (résolu depuis le username via GET /api/users/...). Requis par Fx9 (Suivre).
-    id: null,
-    name: safeUsername,
-    bio: `Salut ! Je suis ${safeUsername} et ceci est mon profil public.`,
-    followers: 42,
-    following: 150,
-    posts: [
-      { id: 201, username: safeUsername, time: "2h", content: "Un post sur mon profil public.", likesCount: 5, commentsCount: 1 }
-    ]
-  };
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setLoading(true);
+      setError("");
+      try {
+        // Résolution username → profil complet (id réel requis par Fx9 Suivre).
+        const u = await getProfileByUsername(username);
+        const displayName = u.profile?.display_name || u.username;
+
+        // Posts publics de cet utilisateur.
+        const userPosts = await getUserPosts(u.id);
+        const ownerAvatar = u.profile?.avatar_url || null;
+        const posts = (userPosts.posts || []).map((p) =>
+          mapPost(p, { authorLabel: displayName, authorHandle: u.username, avatarUrl: ownerAvatar, currentUserId: user?.id, locale: language })
+        );
+
+        if (active) {
+          setProfile({
+            id: u.id,
+            username: u.username,
+            name: displayName,
+            bio: u.profile?.bio || "",
+            avatarUrl: u.profile?.avatar_url || null,
+            followers: u.followers_count ?? 0,
+            following: u.following_count ?? 0,
+            isFollowing: !!u.is_following,
+            isBlocked: !!u.is_blocked,
+            posts,
+          });
+        }
+      } catch (err) {
+        if (active) setError(getApiErrorMessage(err, t('profile.notFound')));
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [username, user]);
 
   return (
     <AppShell>
       <div className="p-4 flex flex-col gap-4">
-
-        {/* fleche retour*/}
-        <button 
-          onClick={() => router.back()} 
-          className="p-2 -ml-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-papaya-whip hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all w-fit"
-          aria-label="Retour"
+        {/* fleche retour */}
+        <button
+          onClick={() => router.back()}
+          className="p-2 -ml-2 text-steel-blue hover:text-deep-space-blue dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all w-fit"
+            aria-label={t('common.back')}
         >
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
         </button>
 
-        <ProfileView initialUser={publicUserData} isOwnProfile={false} />
+        {loading && (
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">{t('common.loading')}</p>
+        )}
+        {!loading && error && (
+          <p className="text-center text-brick-red font-semibold py-8">{error}</p>
+        )}
+        {!loading && !error && profile && (
+          <ProfileView initialUser={profile} isOwnProfile={user?.id === profile.id} />
+        )}
       </div>
     </AppShell>
   );

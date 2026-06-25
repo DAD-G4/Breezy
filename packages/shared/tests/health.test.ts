@@ -45,9 +45,11 @@ describe('GET /api/health', () => {
     });
   });
 
-  it('returns 503 when mongodb is down', async () => {
+  it('returns 503 when mongodb connection is broken (in use but not connected)', async () => {
     (sequelize.authenticate as jest.Mock).mockResolvedValue(undefined);
-    (mongoose as any).connection.readyState = 0;
+    // readyState 2 = connecting / 3 = disconnecting → a service that uses
+    // Mongo but currently has no live connection is reported unhealthy.
+    (mongoose as any).connection.readyState = 2;
 
     const res = await request(app).get('/api/health');
     expect(res.status).toBe(503);
@@ -55,6 +57,21 @@ describe('GET /api/health', () => {
       status: 'degraded',
       postgres: 'connected',
       mongodb: 'disconnected',
+    });
+  });
+
+  it('returns 200 when mongodb is not used (postgres-only service)', async () => {
+    (sequelize.authenticate as jest.Mock).mockResolvedValue(undefined);
+    // readyState 0 = never connected → the service does not use Mongo, so it
+    // must NOT cause a false 503 (see "report mongo as not_used" fix).
+    (mongoose as any).connection.readyState = 0;
+
+    const res = await request(app).get('/api/health');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      status: 'ok',
+      postgres: 'connected',
+      mongodb: 'not_used',
     });
   });
 });

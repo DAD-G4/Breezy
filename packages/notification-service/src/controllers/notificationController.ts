@@ -16,12 +16,16 @@ export async function getNotifications(req: AuthRequest, res: Response): Promise
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
   const skip = (page - 1) * limit;
 
-  const notifications = await Notification.find({ recipient_id: req.user.id })
+  // Exclut les notifications de messages directs (« dm ») : elles ne doivent
+  // plus apparaître dans la liste, le toast in-app s'en charge.
+  const filter = { recipient_id: req.user.id, type: { $ne: 'dm' as const } };
+
+  const notifications = await Notification.find(filter)
     .sort({ created_at: -1 })
     .skip(skip)
     .limit(limit);
 
-  const total = await Notification.countDocuments({ recipient_id: req.user.id });
+  const total = await Notification.countDocuments(filter);
 
   success(res, {
     notifications,
@@ -62,4 +66,51 @@ export async function markAsRead(req: AuthRequest, res: Response): Promise<void>
   await notification.save();
 
   success(res, notification, 'Notification marked as read');
+}
+
+/**
+ * DELETE /api/notifications/:id
+ * Delete a single notification. Only the recipient can delete their own notifications.
+ */
+export async function deleteNotification(req: AuthRequest, res: Response): Promise<void> {
+  if (!req.user) {
+    error(res, 'Authentication required', 401);
+    return;
+  }
+
+  const { id } = req.params;
+
+  const notification = await Notification.findById(id);
+
+  if (!notification) {
+    error(res, 'Notification not found', 404);
+    return;
+  }
+
+  if (notification.recipient_id !== req.user.id) {
+    error(res, 'Forbidden: you can only delete your own notifications', 403);
+    return;
+  }
+
+  await Notification.findByIdAndDelete(id);
+
+  success(res, { deleted: true }, 'Notification deleted');
+}
+
+/**
+ * DELETE /api/notifications
+ * Delete all read notifications for the current user.
+ */
+export async function deleteAllRead(req: AuthRequest, res: Response): Promise<void> {
+  if (!req.user) {
+    error(res, 'Authentication required', 401);
+    return;
+  }
+
+  const result = await Notification.deleteMany({
+    recipient_id: req.user.id,
+    is_read: true,
+  });
+
+  success(res, { deletedCount: result.deletedCount }, 'Read notifications deleted');
 }

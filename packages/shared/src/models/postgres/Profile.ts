@@ -9,11 +9,12 @@ export interface ProfileAttributes {
   avatar_url: string | null;
   language_preference: string;
   theme_preference: string;
+  last_active: Date | null;
 }
 
 export type ProfileCreationAttributes = Optional<
   ProfileAttributes,
-  "id" | "display_name" | "bio" | "avatar_url" | "language_preference" | "theme_preference"
+  "id" | "display_name" | "bio" | "avatar_url" | "language_preference" | "theme_preference" | "last_active"
 >;
 
 export class Profile
@@ -27,6 +28,7 @@ export class Profile
   public avatar_url!: string | null;
   public language_preference!: string;
   public theme_preference!: string;
+  public last_active!: Date | null;
 
   public getUser!: () => Promise<any>;
   public setUser!: (user: any) => Promise<void>;
@@ -73,6 +75,10 @@ Profile.init(
       type: DataTypes.STRING(20),
       allowNull: false,
       defaultValue: "light",
+    },
+    last_active: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   },
   {

@@ -1,9 +1,24 @@
 import { Response } from 'express';
-import { DirectMessageModel as DirectMessage, success, error, AuthRequest } from '@breezy/shared';
+import { Op } from 'sequelize';
+import { DirectMessageModel as DirectMessage, BlockedUser, success, error, AuthRequest } from '@breezy/shared';
+import type { PipelineStage } from 'mongoose';
 
 /** Deterministic ID: ensures (A,B) and (B,A) map to the same conversation. */
 function generateConversationId(userId1: number, userId2: number): string {
   return `${Math.min(userId1, userId2)}-${Math.max(userId1, userId2)}`;
+}
+
+/** True si l'un des deux utilisateurs a bloqué l'autre (dans un sens ou l'autre). */
+async function isBlockedBetween(a: number, b: number): Promise<boolean> {
+  const row = await BlockedUser.findOne({
+    where: {
+      [Op.or]: [
+        { blocker_id: a, blocked_id: b },
+        { blocker_id: b, blocked_id: a },
+      ],
+    },
+  });
+  return !!row;
 }
 
 /** POST /api/dms/send */
@@ -16,6 +31,13 @@ export async function sendMessage(req: AuthRequest, res: Response): Promise<void
   const { recipient_id, message_text } = req.body;
 
   const senderId = req.user.id;
+
+  // Blocage : impossible d'envoyer un message si l'un a bloqué l'autre.
+  if (await isBlockedBetween(senderId, recipient_id)) {
+    error(res, 'You cannot message this user', 403);
+    return;
+  }
+
   const conversationId = generateConversationId(senderId, recipient_id);
 
   const dm = await DirectMessage.create({
@@ -40,6 +62,12 @@ export async function getConversation(req: AuthRequest, res: Response): Promise<
 
   if (isNaN(otherUserId)) {
     error(res, 'Invalid user ID', 400);
+    return;
+  }
+
+  // Blocage : impossible de consulter une conversation si l'un a bloqué l'autre.
+  if (await isBlockedBetween(req.user.id, otherUserId)) {
+    error(res, 'You cannot view this conversation', 403);
     return;
   }
 
@@ -79,44 +107,52 @@ export async function getConversations(req: AuthRequest, res: Response): Promise
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
   const skip = (page - 1) * limit;
 
-  const distinctConversations = await DirectMessage.distinct('conversation_id', {
-    $or: [{ sender_id: userId }, { recipient_id: userId }],
+  const pipeline: PipelineStage[] = [
+    { $match: { $or: [{ sender_id: userId }, { recipient_id: userId }] } },
+    { $sort: { created_at: -1 } },
+    {
+      $group: {
+        _id: '$conversation_id',
+        lastMessage: { $first: '$$ROOT' },
+        unreadCount: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ['$recipient_id', userId] },
+                  { $eq: ['$is_read', false] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+      },
+    },
+    {
+      $facet: {
+        data: [{ $skip: skip }, { $limit: limit }],
+        total: [{ $count: 'count' }],
+      },
+    },
+  ];
+
+  const [result] = await DirectMessage.aggregate(pipeline);
+
+  const conversations = result.data.map((item: any) => {
+    const lastMsg = item.lastMessage;
+    const otherUserId = lastMsg.sender_id === userId ? lastMsg.recipient_id : lastMsg.sender_id;
+
+    return {
+      conversation_id: item._id,
+      other_user_id: otherUserId,
+      last_message: lastMsg,
+      unread_count: item.unreadCount,
+    };
   });
 
-  const total = distinctConversations.length;
-  const paginatedIds = distinctConversations.slice(skip, skip + limit);
-
-  const conversations = (await Promise.all(
-    paginatedIds.map(async (conversationId) => {
-      const lastMessage = await DirectMessage.findOne({ conversation_id: conversationId })
-        .sort({ created_at: -1 })
-        .limit(1);
-
-      if (!lastMessage) return null;
-
-      const unreadCount = await DirectMessage.countDocuments({
-        conversation_id: conversationId,
-        recipient_id: userId,
-        is_read: false,
-      });
-
-      const otherUserId =
-        lastMessage.sender_id === userId ? lastMessage.recipient_id : lastMessage.sender_id;
-
-      return {
-        conversation_id: conversationId,
-        other_user_id: otherUserId,
-        last_message: lastMessage,
-        unread_count: unreadCount,
-      };
-    }),
-  )).filter(Boolean);
-
-  conversations.sort((a, b) => {
-    const timeA = a!.last_message?.created_at?.getTime?.() ?? 0;
-    const timeB = b!.last_message?.created_at?.getTime?.() ?? 0;
-    return timeB - timeA;
-  });
+  const total = result.total[0]?.count || 0;
 
   success(res, {
     conversations,

@@ -28,6 +28,9 @@ jest.mock('@breezy/shared', () => {
     UserModel: mockUserModel,
     NotificationModel: mockNotificationModel,
     Ban: { findOne: jest.fn().mockResolvedValue(null) },
+    // Block enforcement: controllers query BlockedUser via isBlockedBetween.
+    // Default: nobody is blocked, so the model must be stubbed (no real DB).
+    BlockedUser: { findOne: jest.fn().mockResolvedValue(null) },
     success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
       const code = statusCode || 200;
       const body: any = { data };
@@ -339,6 +342,21 @@ describe('Post Routes', () => {
       expect(res.status).toBe(403);
       expect(res.body.error).toContain('Forbidden');
       expect(mockPostModel.findByIdAndDelete).not.toHaveBeenCalled();
+    });
+
+    it('should let a moderator delete any post', async () => {
+      mockAuthenticatedUser = { id: 9, username: 'mod', email: 'mod@test.com', role: 'moderator' };
+
+      const mockPost = { _id: 'abc123', user_id: 2, content: 'Reported post' };
+
+      mockPostModel.findById.mockResolvedValue(mockPost);
+      mockPostModel.findByIdAndDelete.mockResolvedValue(mockPost);
+
+      const res = await request(app).delete('/api/posts/abc123');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toEqual({ deleted: true });
+      expect(mockPostModel.findByIdAndDelete).toHaveBeenCalledWith('abc123');
     });
 
     it('should return 404 if post not found', async () => {

@@ -1,5 +1,14 @@
 import { Response } from 'express';
-import { PostModel as Post, NotificationModel as Notification, success, error, AuthRequest } from '@breezy/shared';
+import { PostModel as Post, NotificationModel as Notification, UserModel, success, error, AuthRequest } from '@breezy/shared';
+
+/**
+ * Notifications de like (Fx15) : réservées aux utilisateurs STANDARD.
+ * La matrice exclut explicitement modérateurs et admins (User ✅, Mod ❌, Admin ❌).
+ */
+async function recipientIsStandardUser(userId: number): Promise<boolean> {
+  const u = await UserModel.findByPk(userId, { attributes: ['role'] });
+  return !!u && u.role === 'user';
+}
 
 export async function toggleLike(req: AuthRequest, res: Response): Promise<void> {
   if (!req.user) {
@@ -34,8 +43,9 @@ export async function toggleLike(req: AuthRequest, res: Response): Promise<void>
 
   const liked = updatedPost.likes.includes(userId);
 
-  // Atomic notification dedup: upsert prevents duplicates without TOCTOU
-  if (liked && userId !== updatedPost.user_id) {
+  // Atomic notification dedup: upsert prevents duplicates without TOCTOU.
+  // Skipped when the post author is a moderator/admin (Fx15).
+  if (liked && userId !== updatedPost.user_id && (await recipientIsStandardUser(updatedPost.user_id))) {
     await Notification.findOneAndUpdate(
       {
         recipient_id: updatedPost.user_id,

@@ -11,12 +11,19 @@ const mockNotificationModel = {
   findOneAndUpdate: jest.fn().mockResolvedValue(true),
 };
 
+// Rôle du destinataire de la notif (Fx15). Par défaut 'user' (notif créée) ;
+// surchargé en 'moderator'/'admin' dans les tests dédiés.
+const mockUserModel = {
+  findByPk: jest.fn().mockResolvedValue({ role: 'user' }),
+};
+
 jest.mock('@breezy/shared', () => {
   const actual = jest.requireActual('@breezy/shared');
   return {
     ...actual,
     PostModel: mockPostModel,
     NotificationModel: mockNotificationModel,
+    UserModel: mockUserModel,
     Ban: { findOne: jest.fn().mockResolvedValue(null) },
     success: jest.fn((res: any, data: any, message?: string, statusCode?: number) => {
       const code = statusCode || 200;
@@ -69,6 +76,8 @@ describe('Like Routes', () => {
     mockPostModel.findOneAndUpdate.mockReset();
     mockNotificationModel.findOneAndUpdate.mockReset();
     mockNotificationModel.findOneAndUpdate.mockResolvedValue(true);
+    mockUserModel.findByPk.mockReset();
+    mockUserModel.findByPk.mockResolvedValue({ role: 'user' });
   });
 
   describe('POST /api/posts/:id/like', () => {
@@ -161,6 +170,21 @@ describe('Like Routes', () => {
         },
         { upsert: true },
       );
+    });
+
+    it('should NOT create a like notification when the post author is a moderator (Fx15)', async () => {
+      mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
+      mockUserModel.findByPk.mockResolvedValue({ role: 'moderator' });
+
+      mockPostModel.findOneAndUpdate.mockResolvedValue({
+        _id: 'post123',
+        user_id: 2,
+        likes: [1],
+      });
+
+      await request(app).post('/api/posts/post123/like');
+
+      expect(mockNotificationModel.findOneAndUpdate).not.toHaveBeenCalled();
     });
 
     it('should not create a notification when a user likes their own post', async () => {

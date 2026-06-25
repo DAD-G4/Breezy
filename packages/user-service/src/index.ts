@@ -1,18 +1,22 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { connectPostgres, connectMongo, errorHandler, notFound, healthRouter } from '@breezy/shared';
 import publicUsers from './routes/publicUsers';
 import userRoutes from './routes/users';
 import followRoutes from './routes/follows';
+import blockRoutes from './routes/blocks';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use('/api/health', healthRouter);
 app.use('/api/users', publicUsers);
 app.use('/api/users', userRoutes);
 app.use('/api/users', followRoutes);
+app.use('/api/users', blockRoutes);
 app.use(notFound);
 app.use(errorHandler);
 

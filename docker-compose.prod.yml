@@ -1,0 +1,45 @@
+# Override de PRODUCTION pour VPS PARTAGÉ (breezy.mxrine-mz.dev)
+#
+# Contexte : la machine héberge déjà d'autres sites derrière un nginx HÔTE
+# (systemd) qui occupe 80/443, et un postgres tiers occupe 127.0.0.1:5432.
+# Cet override évite TOUT conflit :
+#   - le nginx Breezy n'écoute QUE sur 127.0.0.1:8090 (le nginx hôte proxifie
+#     breezy.mxrine-mz.dev → 127.0.0.1:8090 et termine le TLS) ;
+#   - postgres / mongo / frontend ne publient AUCUN port sur l'hôte
+#     (communication interne via le réseau Docker du compose) ;
+#   - tous les services tournent en NODE_ENV=production (cookies `secure`).
+#
+# Usage :
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
+services:
+  # NB : `!override` REMPLACE la liste de base (Compose concatène les listes
+  # de ports par défaut → `ports: []` ne suffit pas à les retirer).
+  nginx:
+    ports: !override
+      - "127.0.0.1:8090:80"
+    volumes: !override
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+
+  frontend:
+    ports: !override []   # plus d'accès direct : tout passe par le nginx Breezy
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+
+  postgres:
+    ports: !override []   # interne uniquement (évite le conflit avec le pg tiers sur 5432)
+
+  mongo:
+    ports: !override []   # interne uniquement
+
+  auth-service:         { environment: { NODE_ENV: production } }
+  user-service:         { environment: { NODE_ENV: production } }
+  post-service:         { environment: { NODE_ENV: production } }
+  tag-service:          { environment: { NODE_ENV: production } }
+  notification-service: { environment: { NODE_ENV: production } }
+  dm-service:           { environment: { NODE_ENV: production } }
+  media-service:        { environment: { NODE_ENV: production } }
+  moderation-service:   { environment: { NODE_ENV: production } }

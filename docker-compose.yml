@@ -11,13 +11,18 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD in .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-breezy} -d ${POSTGRES_DB:-breezy}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
   mongo:
     image: mongo:6
     container_name: breezy-mongo
     restart: unless-stopped
     ports:
-      - "127.0.0.1:27017:27017"
+      - "127.0.0.1:27018:27017"
     volumes:
       - mongo_data:/data/db
 
@@ -151,9 +156,11 @@ services:
     environment:
       PORT: 3007
       POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
       JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in .env}
     depends_on:
       - postgres
+      - mongo
     volumes:
       - media_uploads:/app/packages/media-service/uploads
 
@@ -171,6 +178,28 @@ services:
     depends_on:
       - postgres
       - mongo
+
+  # Seed de démonstration : crée les comptes au démarrage puis sort.
+  # Idempotent (ne recrée jamais un compte existant). `restart: no` → s'exécute
+  # une fois par `up`. Le script attend que les tables soient prêtes.
+  seed:
+    build:
+      context: .
+      dockerfile: packages/seed/Dockerfile
+    container_name: breezy-seed
+    restart: "no"
+    environment:
+      POSTGRES_URI: postgres://${POSTGRES_USER:-breezy}:${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-breezy}
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB:-breezy}
+      NODE_ENV: production
+      SEED_PASSWORD: ${SEED_PASSWORD:-Breezy123!}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+      auth-service:
+        condition: service_started
 
 volumes:
   postgres_data:
