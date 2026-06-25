@@ -45,6 +45,10 @@ export function useNotifications(t, locale) {
   const dismissIncoming = useCallback(() => setIncomingMessage(null), []);
 
   useEffect(() => {
+    // Pas de polling tant que l'utilisateur n'est pas connecté : sinon les appels
+    // vers des endpoints protégés renvoient 401 → l'intercepteur tente un refresh
+    // qui échoue → redirection forcée vers /login (y compris depuis /register).
+    if (!user) return;
     let active = true;
 
     const fetchNotifications = async () => {
@@ -136,8 +140,9 @@ export function useNotifications(t, locale) {
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("focus", onVisible);
     };
+    // (re)démarre à la connexion, s'arrête proprement à la déconnexion.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user?.id]);
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 

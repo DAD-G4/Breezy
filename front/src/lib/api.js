@@ -47,7 +47,11 @@ api.interceptors.response.use(
         await refreshPromise; // attend le refresh en cours (partagé)
         return api(original); // rejoue la requête avec le nouveau cookie
       } catch {
-        if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+        // On ne renvoie vers /login que depuis une page protégée : jamais
+        // depuis les pages publiques d'auth (/login, /register).
+        const path = typeof window !== "undefined" ? window.location.pathname : "";
+        const onAuthPage = path.startsWith("/login") || path.startsWith("/register");
+        if (typeof window !== "undefined" && !onAuthPage) {
           window.location.href = "/login";
         }
       }
