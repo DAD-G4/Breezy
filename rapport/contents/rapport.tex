@@ -20,11 +20,10 @@ poursuivis, l'architecture technique retenue, la méthodologie de travail mise e
 œuvre par l'équipe, ainsi que les fonctionnalités livrées et leurs perspectives
 d'évolution.
 
-Le projet a été mené par une équipe de trois personnes aux rôles complémentaires.
-En tant qu'\textbf{intégrateur Full-Stack, ingénieur DevOps et chef de projet},
-ma contribution a porté sur la liaison entre le front-end et le back-end, la
-conteneurisation et le déploiement de la plateforme, ainsi que sur la coordination
-et le suivi de l'avancement de l'équipe.
+Le projet a été mené par une équipe de trois personnes aux rôles
+complémentaires : développement back-end, développement front-end, et
+intégration Full-Stack / DevOps. La répartition détaillée des responsabilités
+est présentée à la section~\ref{sec:repartition}.
 
 % =====================================================================
 \section{Objectifs et attentes du projet}
@@ -121,13 +120,13 @@ adaptée à sa nature.
   \node[anchor=south west, text=breezyBlue, font=\sffamily\bfseries\footnotesize]
         at ([yshift=1pt]band.north west) {Couche Microservices};
 
-  % --- Bases de données ---
+  % --- Deux bases de données (vert) + un volume de fichiers (gris, pas une BDD) ---
   \node[store, below=1.5cm of band.south, xshift=-3.95cm] (pg)
-        {\textbf{PostgreSQL}\\ Sequelize\\[1pt]\scriptsize Comptes \textbullet{} Profils \textbullet{} Bans};
+        {\textbf{PostgreSQL}\\ \scriptsize relationnel (SQL)\\[1pt]\scriptsize Comptes \textbullet{} Profils \textbullet{} Bans};
   \node[store, right=0.5cm of pg] (mongo)
-        {\textbf{MongoDB}\\ Mongoose\\[1pt]\scriptsize Posts \textbullet{} DM \textbullet{} Notifs};
-  \node[store, right=0.5cm of mongo, fill=breezyGreen!6] (vol)
-        {\textbf{Volume Docker}\\ Fichiers\\[1pt]\scriptsize Images \textbullet{} Vidéos};
+        {\textbf{MongoDB}\\ \scriptsize documentaire (NoSQL)\\[1pt]\scriptsize Posts \textbullet{} DM \textbullet{} Notifs};
+  \node[store, right=0.5cm of mongo, draw=gray!55!black, fill=gray!12] (vol)
+        {\textbf{Volume Docker}\\ \scriptsize stockage de fichiers\\[1pt]\scriptsize Images \textbullet{} Vidéos};
 
   % --- Flux ---
   \draw[arr, breezyBlue, latex-latex] (client) -- (nginx)
@@ -143,7 +142,7 @@ adaptée à sa nature.
   \draw[arr, breezyGreen!70!black] (vol.north |- bus)   -- (vol.north);
 
 \end{tikzpicture}
-\caption{Architecture microservices de Breezy : client, passerelle Nginx, huit services métier et persistance polyglotte (PostgreSQL, MongoDB, volume de médias).}
+\caption{Architecture microservices de Breezy : client, passerelle Nginx, huit services métier et persistance polyglotte. \textbf{Deux bases de données} — PostgreSQL (relationnel) et MongoDB (documentaire) — accompagnées d'un \textbf{volume Docker} servant uniquement au stockage des fichiers médias (images, vidéos), qui n'est pas une base de données.}
 \label{fig:archi}
 \end{figure}
 
@@ -158,11 +157,19 @@ services les plus sollicités.
 (sécurité, CORS, limitation de débit, journalisation) et masque la topologie
 interne au client, qui ne connaît qu'un point d'entrée unique.
 
-\paragraph{Persistance polyglotte.} Les données relationnelles fortement
-structurées (comptes, profils, abonnements, bannissements) sont confiées à
-\textbf{PostgreSQL} via Sequelize, tandis que les données documentaires à fort
-volume et au schéma souple (posts, commentaires imbriqués, tags, messages,
-notifications, signalements) sont stockées dans \textbf{MongoDB} via Mongoose.
+\paragraph{Persistance polyglotte.} L'application s'appuie sur \textbf{deux bases
+de données}. Les données relationnelles fortement structurées (comptes, profils,
+abonnements, bannissements) sont confiées à \textbf{PostgreSQL} (SQL) via Sequelize,
+tandis que les données documentaires à fort volume et au schéma souple (posts,
+commentaires imbriqués, tags, messages, notifications, signalements) sont stockées
+dans \textbf{MongoDB} (NoSQL) via Mongoose.
+
+\paragraph{Stockage des médias.} Les \textbf{fichiers} images et vidéos ne sont
+pas placés en base de données : ils sont déposés par le \texttt{media-service} sur
+un \textbf{volume Docker} (système de fichiers persistant) et servis en statique.
+Seule l'\textbf{URL} du média est conservée en base, dans le champ \texttt{media}
+du document du post (MongoDB). Cette séparation garde les bases légères et délègue
+le service des fichiers volumineux au système de fichiers.
 
 \subsection{Modèle de données}
 
@@ -241,20 +248,26 @@ sécuriser un socle livrable avant d'enrichir le périmètre :
 \end{itemize}
 
 \subsection{Répartition des tâches dans l'équipe}
+\label{sec:repartition}
 
 \begin{table}[H]
 \centering
-\begin{tabularx}{\textwidth}{@{}l X@{}}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}p{2.7cm} X@{}}
 \toprule
-\textbf{Rôle} & \textbf{Responsabilités principales} \\
+\textbf{Membre} & \textbf{Rôle} & \textbf{Responsabilités principales} \\
 \midrule
-Membre 1 — Back-end & Microservices, modèles de données, API REST, tests
-unitaires et d'intégration, sécurité applicative. \\
-Membre 2 — Front-end & Interfaces Next.js, composants, design system Tailwind,
-maquettes et ergonomie mobile-first. \\
-Membre 3 — Full-Stack / DevOps / Chef de projet & Liaison front/back,
-conteneurisation Docker, passerelle Nginx, déploiement, coordination et suivi
-de l'avancement. \\
+Stéphane \textsc{Plathey-Badin} & Back-end &
+Microservices, modèles de données, API REST, tests unitaires et d'intégration,
+sécurité applicative. \\
+\addlinespace
+Nolan \textsc{Jourdan} & Front-end &
+Interfaces Next.js, composants, design system Tailwind, maquettes et ergonomie
+mobile-first. \\
+\addlinespace
+Marine \textsc{Mazou} & Full-Stack, DevOps \& Chef de projet &
+Liaison front-end / back-end, conteneurisation Docker, passerelle Nginx,
+déploiement, coordination et suivi de l'avancement. \\
 \bottomrule
 \end{tabularx}
 \caption{Répartition des responsabilités au sein de l'équipe.}
@@ -401,13 +414,18 @@ langue (FR/EN/ES) sont accessibles depuis l'interface.
 
 \subsection{Authentification et gestion des rôles}
 
-L'inscription crée un compte en attente de validation ; la connexion renvoie un
-\textbf{jeton JWT} (signé HS256, valable une heure) transmis ensuite dans l'en-tête
-\texttt{Authorization: Bearer}. Côté front, le jeton est conservé et injecté
-automatiquement dans chaque requête Axios. Le contrôle d'accès (RBAC) est appliqué
-côté serveur par un middleware d'authentification, et reflété côté client en
-masquant les actions non autorisées (par exemple, le bouton de modération n'est
-visible que pour les modérateurs et administrateurs).
+L'inscription crée un compte ; la connexion délivre deux jetons \textbf{JWT}
+(signés HS256) déposés en cookies \texttt{httpOnly} : un \textbf{jeton d'accès}
+de courte durée (1\,h) et un \textbf{jeton de rafraîchissement} de 7~jours. Le
+choix d'une durée d'accès courte est volontaire : il \textbf{limite la fenêtre
+d'exploitation} en cas de vol du jeton, tout en préservant le confort grâce au
+rafraîchissement \textbf{silencieux} — à l'expiration du jeton d'accès, le client
+obtient automatiquement un nouveau jeton via le jeton de rafraîchissement, sans
+re-saisie des identifiants. Le stockage en cookie \texttt{httpOnly} protège en
+outre les jetons d'un accès par JavaScript (mitigation XSS). Le contrôle d'accès
+(RBAC) est appliqué côté serveur par un middleware d'authentification, et reflété
+côté client en masquant les actions non autorisées (par exemple, le bouton de
+modération n'est visible que pour les modérateurs et administrateurs).
 
 \subsection{Publication et fil d'actualité}
 
@@ -441,8 +459,8 @@ est protégé côté serveur et masqué côté client aux rôles non habilités.
 
 \subsection{Couche d'intégration front/back}
 
-La liaison entre les deux mondes constitue le cœur de ma contribution. Elle repose
-sur :
+La liaison entre le front-end et le back-end constitue un pilier du projet. Elle
+repose sur :
 
 \begin{itemize}[leftmargin=1.4em]
   \item une \textbf{couche de services Axios} centralisant les appels, la base URL
@@ -470,8 +488,8 @@ sur :
         distribuées sur l'ensemble des microservices.
   \item \textbf{Mise à l'échelle} — orchestration Kubernetes, réplication des bases
         et mise en cache (Redis) des flux les plus consultés.
-  \item \textbf{Sécurité} — rafraîchissement des jetons (refresh tokens), HTTPS de
-        bout en bout et audit des dépendances automatisé.
+  \item \textbf{Sécurité} — HTTPS de bout en bout (terminaison TLS) et audit
+        automatisé des dépendances.
   \item \textbf{Qualité} — couverture de tests end-to-end et tests de charge pour
         valider la promesse de scalabilité.
 \end{itemize}
@@ -481,18 +499,27 @@ sur :
 \addcontentsline{toc}{section}{Conclusion}
 % =====================================================================
 
-Breezy démontre qu'un réseau social complet peut être bâti sur une architecture
-microservices conteneurisée, sécurisée et déployable en une commande, tout en
-respectant une exigence de légèreté et de réactivité. Les 23 fonctionnalités
-prévues ont été couvertes, de l'authentification à la modération, en passant par
-la publication de médias et les interactions sociales.
+Breezy atteint l'objectif fixé : proposer un réseau social complet, léger et
+réactif, bâti sur une architecture microservices conteneurisée, sécurisée et
+déployable en une seule commande. Les 23 fonctionnalités prévues ont été
+réalisées — de l'authentification et la gestion des rôles à la modération, en
+passant par la publication de contenus (texte, images, vidéos), les interactions
+sociales, la messagerie privée et les notifications.
 
-Au-delà du résultat technique, ce projet a renforcé des compétences clés
-d'intégration Full-Stack, de pratiques DevOps (conteneurisation, passerelle API,
-déploiement automatisé) et de conduite de projet (organisation Git, priorisation,
-coordination d'équipe). Les axes d'évolution identifiés — temps réel,
-observabilité et mise à l'échelle — ouvrent des perspectives concrètes pour
-transformer ce prototype abouti en service de production.
+Sur le plan technique, le projet valide plusieurs choix structurants : une
+persistance polyglotte adaptée à chaque type de donnée (PostgreSQL relationnel,
+MongoDB documentaire) avec un volume dédié au stockage des fichiers médias, une
+passerelle Nginx centralisant sécurité et routage, et une authentification par
+jetons JWT à durée de vie courte renouvelés silencieusement. La conteneurisation
+Docker garantit un environnement reproductible, du poste de développement au
+serveur de production.
+
+Au-delà du livrable, ce projet a permis à l'équipe de monter en compétence sur la
+conception d'applications distribuées, les pratiques DevOps et la conduite de
+projet collaborative (organisation Git, intégration continue, répartition et suivi
+des tâches). Les axes d'évolution identifiés — communication temps réel par
+WebSocket, observabilité et mise à l'échelle horizontale — tracent une feuille de
+route claire pour faire évoluer ce prototype abouti vers un service de production.
 
 % ---------------------------------------------------------------------
 \newpage
