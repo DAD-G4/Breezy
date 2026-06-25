@@ -1,0 +1,111 @@
+import { Request, Response, NextFunction } from 'express';
+
+interface SequelizeValidationErrorDetail {
+  message: string;
+  path: string;
+}
+
+interface SequelizeValidationError extends Error {
+  name: 'SequelizeValidationError';
+  errors: SequelizeValidationErrorDetail[];
+}
+
+interface SequelizeUniqueConstraintError extends Error {
+  name: 'SequelizeUniqueConstraintError';
+  errors: SequelizeValidationErrorDetail[];
+}
+
+interface MongooseValidationErrorDetail {
+  message: string;
+}
+
+interface MongooseValidationError extends Error {
+  name: 'ValidationError';
+  errors: Record<string, MongooseValidationErrorDetail>;
+}
+
+interface MongooseCastError extends Error {
+  name: 'CastError';
+  path: string;
+  value: string;
+}
+
+export class AppError extends Error {
+  statusCode: number;
+
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+    this.name = 'AppError';
+  }
+}
+
+export interface ErrorResponse {
+  error: string;
+  statusCode: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function errorHandler(
+  err: Error,
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+): void {
+  if (process.env.NODE_ENV !== 'production') {
+    console.error('[ErrorHandler]', err);
+  }
+
+  if (err.name === 'SequelizeValidationError') {
+    const sequelizeErr = err as SequelizeValidationError;
+    const message = sequelizeErr.errors
+      ? sequelizeErr.errors.map((e) => e.message).join(', ')
+      : 'Validation failed';
+    res.status(400).json({ error: message, statusCode: 400 });
+    return;
+  }
+
+  if (err.name === 'SequelizeUniqueConstraintError') {
+    const sequelizeErr = err as SequelizeUniqueConstraintError;
+    const message = sequelizeErr.errors
+      ? sequelizeErr.errors.map((e) => e.message).join(', ')
+      : 'Resource already exists';
+    res.status(409).json({ error: message, statusCode: 409 });
+    return;
+  }
+
+  if (err.name === 'ValidationError' && 'errors' in err) {
+    const mongooseErr = err as MongooseValidationError;
+    const message = Object.values(mongooseErr.errors)
+      .map((e) => e.message)
+      .join(', ');
+    res.status(400).json({ error: message, statusCode: 400 });
+    return;
+  }
+
+  if (err.name === 'CastError') {
+    const castErr = err as MongooseCastError;
+    const message = `Invalid ${castErr.path}: ${castErr.value}`;
+    res.status(400).json({ error: message, statusCode: 400 });
+    return;
+  }
+
+  if (err.name === 'JsonWebTokenError') {
+    res.status(401).json({ error: 'Invalid token.', statusCode: 401 });
+    return;
+  }
+
+  if (err.name === 'TokenExpiredError') {
+    res.status(401).json({ error: 'Token expired.', statusCode: 401 });
+    return;
+  }
+
+  if (err instanceof AppError) {
+    res.status(err.statusCode).json({ error: err.message, statusCode: err.statusCode });
+    return;
+  }
+
+  res.status(500).json({ error: 'Internal server error.', statusCode: 500 });
+}
+
+export default errorHandler;

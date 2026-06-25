@@ -1,0 +1,93 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import PostCard from "../components/feed/PostCard";
+import AppShell from "../components/layout/AppShell";
+import { getApiErrorMessage } from "../lib/api";
+import { mapPost } from "../lib/mappers";
+import { getFeed } from "../services/posts";
+import { resolveUsers } from "../services/users";
+import { useAuth, useRequireAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
+
+export default function FeedPage() {
+  useRequireAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { t, language } = useLanguage();
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    // On attend la fin de la restauration de session avant de décider.
+    if (authLoading) return;
+
+    if (!user) {
+      setError(t('feed.loginRequired'));
+      setLoading(false);
+      return;
+    }
+
+    let active = true;
+    (async () => {
+      setLoading(true);
+      setError("");
+      try {
+        // Feed des utilisateurs suivis (paginé).
+        const { posts: raw } = await getFeed();
+        const userIds = raw.map((p) => p.user_id);
+        const authors = await resolveUsers(userIds);
+        const mapped = raw.map((p, i) =>
+          mapPost(p, { authorLabel: authors[i]?.displayName, authorHandle: authors[i]?.username, avatarUrl: authors[i]?.avatarUrl, currentUserId: user.id, locale: language })
+        );
+        if (active) setPosts(mapped);
+      } catch (err) {
+        if (active) setError(getApiErrorMessage(err, t('feed.loadError')));
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [authLoading, user]);
+
+  return (
+    <AppShell>
+      {/* En-tête de section, collant en haut du feed sur desktop */}
+      <div className="sticky top-0 z-30 bg-slate-50/80 dark:bg-night/85 backdrop-blur border-b border-gray-200 dark:border-white/10 px-4 py-3 hidden md:block">
+        <h1 className="font-bold text-xl text-deep-space-blue dark:text-white">{t('sidebar.home')}</h1>
+      </div>
+
+      <div className="flex flex-col p-4 gap-4">
+        {loading && (
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">{t('feed.loading')}</p>
+        )}
+
+        {!loading && error && (
+          <p className="text-center text-brick-red font-semibold py-8">{error}</p>
+        )}
+
+        {!loading && !error && posts.length === 0 && (
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+            {t('feed.empty')}
+          </p>
+        )}
+
+        {posts.map((post) => (
+          <PostCard
+            key={post.id}
+            post={post}
+            currentUserId={user?.id}
+            onDelete={(postId) => setPosts((prev) => prev.filter((p) => p.id !== postId))}
+            onUpdate={(postId, content) =>
+              setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, content } : p)))
+            }
+            onBlock={(uid) => setPosts((prev) => prev.filter((p) => p.userId !== uid))}
+          />
+        ))}
+      </div>
+    </AppShell>
+  );
+}

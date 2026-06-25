@@ -1,0 +1,111 @@
+import { Request, Response } from 'express';
+import { Op } from 'sequelize';
+import { PostModel as Post, BlockedUser, success, error, AuthRequest } from '@breezy/shared';
+
+/**
+ * IDs des utilisateurs en relation de blocage (dans un sens OU l'autre) avec
+ * `me`. Sert à masquer leurs posts dans la recherche, comme dans le feed.
+ */
+async function blockedUserIds(me: number | undefined): Promise<number[]> {
+  if (!me) return [];
+  const rows = await BlockedUser.findAll({
+    where: { [Op.or]: [{ blocker_id: me }, { blocked_id: me }] },
+    attributes: ['blocker_id', 'blocked_id'],
+  });
+  const ids = new Set<number>();
+  for (const r of rows as any[]) {
+    const blocker = r.get('blocker_id');
+    const blocked = r.get('blocked_id');
+    ids.add(blocker === me ? blocked : blocker);
+  }
+  return [...ids];
+}
+
+export async function searchPostsByTag(req: AuthRequest, res: Response): Promise<void> {
+  const q = req.query.q;
+
+  if (!q || typeof q !== 'string' || q.trim().length === 0) {
+    error(res, 'Search query (q) is required', 400);
+    return;
+  }
+
+  const searchTerm = q.trim().toLowerCase();
+  const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
+  const skip = (page - 1) * limit;
+
+  // Recherche partielle (insensible à la casse) : « bree » trouve « breezy ».
+  // On échappe les caractères spéciaux regex pour éviter toute injection.
+  const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const tagFilter: Record<string, unknown> = { tags: { $regex: escaped, $options: 'i' } };
+
+  // Masque les posts des utilisateurs bloqués (dans un sens ou l'autre).
+  const blockedIds = await blockedUserIds(req.user?.id);
+  if (blockedIds.length > 0) {
+    tagFilter.user_id = { $nin: blockedIds };
+  }
+
+  const posts = await Post.find(tagFilter)
+    .sort({ created_at: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Post.countDocuments(tagFilter);
+
+  success(res, {
+    posts,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  });
+}
+
+/**
+ * GET /api/tags/suggest?q=<prefix>
+ * Renvoie jusqu'à 8 noms de tags DISTINCTS correspondant au préfixe saisi
+ * (insensible à la casse), pour l'autocomplétion des hashtags dans le
+ * compositeur. Les tags les plus utilisés remontent en premier.
+ */
+export async function suggestTags(_req: AuthRequest, res: Response): Promise<void> {
+  const q = ((_req.query.q as string) || '').trim().toLowerCase();
+
+  if (!q) {
+    success(res, { tags: [] });
+    return;
+  }
+
+  // On échappe les caractères spéciaux regex (même motif que searchPostsByTag)
+  // pour éviter toute injection. Ancré au début pour une correspondance par
+  // préfixe (« bre » trouve « breezy »).
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const tags = await Post.aggregate([
+    { $unwind: '$tags' },
+    { $match: { tags: { $regex: `^${escaped}`, $options: 'i' } } },
+    { $group: { _id: '$tags', count: { $sum: 1 } } },
+    { $sort: { count: -1, _id: 1 } },
+    { $limit: 8 },
+    { $project: { _id: 0, tag: '$_id', count: 1 } },
+  ]);
+
+  success(res, { tags });
+}
+
+export async function getTrending(_req: Request, res: Response): Promise<void> {
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const trendingTags = await Post.aggregate([
+    { $match: { created_at: { $gte: sevenDaysAgo } } },
+    { $unwind: '$tags' },
+    { $group: { _id: '$tags', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 10 },
+    { $project: { _id: 0, tag: '$_id', count: 1 } },
+  ]);
+
+  success(res, { tags: trendingTags });
+}
