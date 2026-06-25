@@ -26,6 +26,9 @@ intégration Full-Stack / DevOps. La répartition détaillée des responsabilit�
 est présentée à la section~\ref{sec:repartition}.
 
 % =====================================================================
+
+\newpage
+
 \section{Objectifs et attentes du projet}
 % =====================================================================
 
@@ -67,6 +70,8 @@ messagerie privée, les notifications, la modération et le confort d'usage
   \item Un code source versionné, organisé en monorepo et documenté.
   \item Le présent rapport de projet et le support de soutenance.
 \end{itemize}
+
+\newpage
 
 % =====================================================================
 \section{Architecture du système}
@@ -145,6 +150,8 @@ adaptée à sa nature.
 \caption{Architecture microservices de Breezy : client, passerelle Nginx, huit services métier et persistance polyglotte. \textbf{Deux bases de données} — PostgreSQL (relationnel) et MongoDB (documentaire) — accompagnées d'un \textbf{volume Docker} servant uniquement au stockage des fichiers médias (images, vidéos), qui n'est pas une base de données.}
 \label{fig:archi}
 \end{figure}
+
+\newpage
 
 \subsection{Justification des choix d'architecture}
 
@@ -249,7 +256,7 @@ fonctionnalités complémentaires renforçant l'expérience et la robustesse :
         utilisateur) et \textbf{posts tendance}.
 \end{itemize}
 
-Les fonctionnalités ont été hiérarchisées selon la méthode MoSCoW afin de
+\noindent Les fonctionnalités ont été hiérarchisées selon la méthode MoSCoW afin de
 sécuriser un socle livrable avant d'enrichir le périmètre :
 
 \begin{itemize}[leftmargin=1.4em]
@@ -288,6 +295,8 @@ déploiement, coordination et suivi de l'avancement. \\
 \end{tabularx}
 \caption{Répartition des responsabilités au sein de l'équipe.}
 \end{table}
+
+\newpage
 
 % =====================================================================
 \section{Étapes et ressources mobilisées}
@@ -330,6 +339,8 @@ Outillage   & Git / GitHub, GitHub Actions (CI), Adminer, mongo-express. \\
 \caption{Ressources techniques et humaines mobilisées.}
 \end{table}
 
+\newpage
+
 % =====================================================================
 \section{Méthodologie}
 % =====================================================================
@@ -364,6 +375,8 @@ Une chaîne \textbf{CI} (GitHub Actions) exécute la compilation du package part
 puis les tests unitaires et d'intégration de chaque service. Le déploiement local
 est entièrement automatisé : une seule commande \texttt{docker compose up} démarre
 les bases de données, les huit services, la passerelle Nginx et le front-end.
+
+\newpage
 
 % =====================================================================
 \section{Interfaces utilisateur — maquettes}
@@ -424,6 +437,8 @@ l'élément focal ; la colonne de droite (recherche, tendances, suggestions)
 n'apparaît qu'à partir des grands écrans. Un thème clair/sombre et un sélecteur de
 langue (FR/EN/ES) sont accessibles depuis l'interface.
 
+\newpage
+
 % =====================================================================
 \section{Fonctionnalités principales et mise en œuvre}
 % =====================================================================
@@ -459,6 +474,8 @@ Commentaires et réponses imbriquées sont stockés directement dans le document
 post. Le suivi d'un utilisateur met à jour la table relationnelle des abonnements
 et déclenche une notification. Une section \textbf{suggestions} propose des comptes
 à suivre (en excluant soi-même, les comptes déjà suivis et les comptes bloqués).
+
+\newpage
 
 \subsection{Blocage et confidentialité}
 
@@ -497,6 +514,8 @@ création de comptes (réservée à l'administrateur, qui ne crée que des compt
 \emph{standards}). L'accès à cet espace est protégé côté serveur et masqué côté
 client aux rôles non habilités.
 
+\newpage
+
 \subsection{Couche d'intégration front/back}
 
 La liaison entre le front-end et le back-end constitue un pilier du projet. Elle
@@ -518,6 +537,8 @@ repose sur :
         outils web d'inspection des bases (Adminer, mongo-express).
 \end{itemize}
 
+\newpage
+
 % =====================================================================
 \section{Axes d'amélioration et évolutions}
 % =====================================================================
@@ -537,6 +558,8 @@ repose sur :
         valider la promesse de scalabilité.
 \end{itemize}
 
+\newpage
+
 % =====================================================================
 \section*{Conclusion}
 \addcontentsline{toc}{section}{Conclusion}
@@ -549,7 +572,7 @@ réalisées — de l'authentification et la gestion des rôles à la modération
 passant par la publication de contenus (texte, images, vidéos), les interactions
 sociales, la messagerie privée et les notifications.
 
-Sur le plan technique, le projet valide plusieurs choix structurants : une
+\noindent Sur le plan technique, le projet valide plusieurs choix structurants : une
 persistance polyglotte adaptée à chaque type de donnée (PostgreSQL relationnel,
 MongoDB documentaire) avec un volume dédié au stockage des fichiers médias, une
 passerelle Nginx centralisant sécurité et routage, et une authentification par
@@ -557,7 +580,7 @@ jetons JWT à durée de vie courte renouvelés silencieusement. La conteneurisat
 Docker garantit un environnement reproductible, du poste de développement au
 serveur de production.
 
-Au-delà du livrable, ce projet a permis à l'équipe de monter en compétence sur la
+\noindent Au-delà du livrable, ce projet a permis à l'équipe de monter en compétence sur la
 conception d'applications distribuées, les pratiques DevOps et la conduite de
 projet collaborative (organisation Git, intégration continue, répartition et suivi
 des tâches). Les axes d'évolution identifiés — communication temps réel par
