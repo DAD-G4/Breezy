@@ -47,7 +47,7 @@ describe('Auth Integration Tests', () => {
     const validUser = {
       email: 'test@example.com',
       username: 'testuser',
-      password: 'securePass123',
+      password: 'Str0ng!Pass',
     };
 
     it('should register a new user, set auth cookies, and return user data', async () => {
@@ -147,7 +147,7 @@ describe('Auth Integration Tests', () => {
     const userCredentials = {
       email: 'login@example.com',
       username: 'loginuser',
-      password: 'securePass123',
+      password: 'Str0ng!Pass',
     };
 
     beforeEach(async () => {
@@ -207,7 +207,7 @@ describe('Auth Integration Tests', () => {
       const userCredentials = {
         email: 'me@example.com',
         username: 'meuser',
-        password: 'securePass123',
+        password: 'Str0ng!Pass',
       };
 
       const registerRes = await request(app)

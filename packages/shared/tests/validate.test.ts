@@ -70,6 +70,21 @@ describe('validateEmail', () => {
   it('returns error for non-string input', () => {
     expect(validateEmail(123 as unknown as string)).toBe('Email is required');
   });
+
+  it('returns error for whitespace-only email', () => {
+    expect(validateEmail('   ')).toBe('Email is required');
+  });
+
+  it('trims surrounding whitespace before validating', () => {
+    expect(validateEmail('  user@example.com  ')).toBeNull();
+  });
+
+  it('returns error when email exceeds 254 characters', () => {
+    const longLocal = 'a'.repeat(250);
+    expect(validateEmail(`${longLocal}@example.com`)).toBe(
+      'Email must be at most 254 characters'
+    );
+  });
 });
 
 describe('validateUsername', () => {
@@ -87,8 +102,16 @@ describe('validateUsername', () => {
     expect(validateUsername('a'.repeat(30))).toBeNull();
   });
 
+  it('returns null for username with allowed underscores and dots', () => {
+    expect(validateUsername('a_b.c1')).toBeNull();
+  });
+
   it('returns error when username is empty', () => {
     expect(validateUsername('')).toBe('Username is required');
+  });
+
+  it('returns error when username is whitespace only', () => {
+    expect(validateUsername('   ')).toBe('Username is required');
   });
 
   it('returns error when username is undefined', () => {
@@ -103,6 +126,51 @@ describe('validateUsername', () => {
     expect(validateUsername('a'.repeat(31))).toBe('Username must be at most 30 characters');
   });
 
+  it('returns error for uppercase letters (must be lowercased form)', () => {
+    expect(validateUsername('Alice')).toBe(
+      'Username can only contain lowercase letters, digits, underscores and dots'
+    );
+  });
+
+  it('returns error for disallowed characters', () => {
+    expect(validateUsername('al ice')).toBe(
+      'Username can only contain lowercase letters, digits, underscores and dots'
+    );
+    expect(validateUsername('al-ice')).toBe(
+      'Username can only contain lowercase letters, digits, underscores and dots'
+    );
+    expect(validateUsername('alice!')).toBe(
+      'Username can only contain lowercase letters, digits, underscores and dots'
+    );
+  });
+
+  it('returns error when username starts with a dot or underscore', () => {
+    expect(validateUsername('.alice')).toBe(
+      'Username cannot start or end with a dot or underscore'
+    );
+    expect(validateUsername('_alice')).toBe(
+      'Username cannot start or end with a dot or underscore'
+    );
+  });
+
+  it('returns error when username ends with a dot or underscore', () => {
+    expect(validateUsername('alice.')).toBe(
+      'Username cannot start or end with a dot or underscore'
+    );
+    expect(validateUsername('alice_')).toBe(
+      'Username cannot start or end with a dot or underscore'
+    );
+  });
+
+  it('returns error for consecutive dots', () => {
+    expect(validateUsername('al..ice')).toBe('Username cannot contain consecutive dots');
+  });
+
+  it('returns error for a reserved username', () => {
+    expect(validateUsername('admin')).toBe('This username is reserved');
+    expect(validateUsername('moderator')).toBe('This username is reserved');
+  });
+
   it('returns error for non-string input', () => {
     expect(validateUsername(42 as unknown as string)).toBe('Username is required');
   });
@@ -111,12 +179,16 @@ describe('validateUsername', () => {
 describe('validatePassword', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns null for a valid password (8 chars)', () => {
-    expect(validatePassword('password1')).toBeNull();
+  it('returns null for a strong password meeting all rules', () => {
+    expect(validatePassword('Str0ng!Pass')).toBeNull();
   });
 
-  it('returns null for a long password', () => {
-    expect(validatePassword('a'.repeat(100))).toBeNull();
+  it('returns null for a long compliant passphrase', () => {
+    expect(validatePassword('Aa1!' + 'a'.repeat(60))).toBeNull();
+  });
+
+  it('returns null for a compliant password at the max length (128 chars)', () => {
+    expect(validatePassword('Aa1!' + 'a'.repeat(124))).toBeNull();
   });
 
   it('returns error when password is empty', () => {
@@ -127,8 +199,50 @@ describe('validatePassword', () => {
     expect(validatePassword(undefined as unknown as string)).toBe('Password is required');
   });
 
+  it('returns error when password is whitespace only', () => {
+    expect(validatePassword('        ')).toBe(
+      'Password cannot be empty or whitespace only'
+    );
+  });
+
   it('returns error when password is too short (7 chars)', () => {
-    expect(validatePassword('1234567')).toBe('Password must be at least 8 characters');
+    expect(validatePassword('Ab1!xyz')).toBe('Password must be at least 8 characters');
+  });
+
+  it('returns error when password exceeds 128 characters', () => {
+    expect(validatePassword('Aa1!' + 'a'.repeat(125))).toBe(
+      'Password must be at most 128 characters'
+    );
+  });
+
+  it('returns error listing a missing uppercase letter', () => {
+    expect(validatePassword('str0ng!pass')).toBe(
+      'Password must contain at least one uppercase letter'
+    );
+  });
+
+  it('returns error listing a missing lowercase letter', () => {
+    expect(validatePassword('STR0NG!PASS')).toBe(
+      'Password must contain at least one lowercase letter'
+    );
+  });
+
+  it('returns error listing a missing digit', () => {
+    expect(validatePassword('Strong!Pass')).toBe(
+      'Password must contain at least one digit'
+    );
+  });
+
+  it('returns error listing a missing special character', () => {
+    expect(validatePassword('Str0ngPass')).toBe(
+      'Password must contain at least one special character'
+    );
+  });
+
+  it('returns error listing all missing classes for a weak all-lowercase password', () => {
+    expect(validatePassword('password')).toBe(
+      'Password must contain at least one uppercase letter, one digit, one special character'
+    );
   });
 
   it('returns error for non-string input', () => {
@@ -143,7 +257,7 @@ describe('validateRegisterInput', () => {
     const errors = validateRegisterInput({
       email: 'user@example.com',
       username: 'alice',
-      password: 'password1',
+      password: 'Str0ng!Pass',
     });
     expect(errors).toEqual([]);
   });
@@ -160,9 +274,20 @@ describe('validateRegisterInput', () => {
     const errors = validateRegisterInput({
       email: 'not-an-email',
       username: 'alice',
-      password: 'password1',
+      password: 'Str0ng!Pass',
     });
     expect(errors).toEqual(['Invalid email format']);
+  });
+
+  it('returns single error for a weak password only', () => {
+    const errors = validateRegisterInput({
+      email: 'user@example.com',
+      username: 'alice',
+      password: 'password',
+    });
+    expect(errors).toEqual([
+      'Password must contain at least one uppercase letter, one digit, one special character',
+    ]);
   });
 
   it('returns errors for multiple invalid fields', () => {

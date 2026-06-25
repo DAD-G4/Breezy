@@ -35,7 +35,7 @@ describe('Ban-at-login Integration Tests', () => {
   const userCredentials = {
     email: 'banned@example.com',
     username: 'banneduser',
-    password: 'securePass123',
+    password: 'Str0ng!Pass',
   };
 
   beforeEach(async () => {
