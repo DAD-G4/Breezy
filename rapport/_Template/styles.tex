@@ -1,0 +1,57 @@
+% --- STYLES ---
+
+% ========================
+%       INDENTATION
+% ========================
+\setlength{\parindent}{1.5em}      % Automatic paragraph indentation
+
+% ========================
+%         COLORS
+% ========================
+\definecolor{sectionTitle}{RGB}{32, 94, 153} % Dark blue (section titles)
+\definecolor{subsectionTitle}{RGB}{75, 147, 215} % Light blue (subsection titles)
+\definecolor{footer}{RGB}{75, 147, 215} % Light blue (footer text)
+\definecolor{confidentialC2}{RGB}{255, 165, 0} % Orange (C2 - Confidential)
+
+% ========================
+%   TITLE FORMATTING
+% ========================
+\titleformat{\section}
+  {\color{sectionTitle}\normalfont\Large\bfseries\fontfamily{cmss}}
+  {\color{sectionTitle}\thesection}{1em}
+  {\MakeUppercase}
+  [\noindent\color{black}\rule{\textwidth}{0.5pt}]
+
+\titleformat{\subsection}
+  {\color{subsectionTitle}\normalfont\large\bfseries\fontfamily{cmss}}
+  {\color{subsectionTitle}\thesubsection}{1em}
+  {\MakeUppercase}
+  [\noindent\color{black}\rule{\textwidth}{0.4pt}]
+
+% ========================
+%   LIST CUSTOMIZATION
+% ========================
+\renewcommand{\contentsname}{Table of Contents}
+\renewcommand{\listfigurename}{List of Figures}
+\renewcommand{\appendixname}{Appendix}
+
+% ========================
+%    PAGE STYLE
+% ========================
+\pagestyle{empty} % No header or footer by default
+
+% ========================
+% TEXTBLOCK POSITIONING
+% ========================
+\setlength{\TPHorizModule}{1cm}
+\setlength{\TPVertModule}{1cm}
+
+% ========================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+
