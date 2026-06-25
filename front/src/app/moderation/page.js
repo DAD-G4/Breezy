@@ -251,17 +251,17 @@ export default function ModerationPage() {
         </div>
 
         {/* ONGLETS */}
-        <div className="flex gap-4 border-b border-gray-200 dark:border-steel-blue/40">
+        <div className="flex gap-4 border-b border-gray-200 dark:border-steel-blue/40 overflow-x-auto">
           <button 
             onClick={() => setActiveTab("reports")}
-            className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === "reports" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-white"}`}
+            className={`shrink-0 whitespace-nowrap pb-3 text-sm font-bold transition-colors relative ${activeTab === "reports" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-white"}`}
           >
             {t('moderation.tabReports')} ({reports.length})
             {activeTab === "reports" && <span className="absolute bottom-0 left-0 w-full h-1 bg-steel-blue rounded-t-full"></span>}
           </button>
           <button 
             onClick={() => setActiveTab("users")}
-            className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === "users" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-white"}`}
+            className={`shrink-0 whitespace-nowrap pb-3 text-sm font-bold transition-colors relative ${activeTab === "users" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-white"}`}
           >
             {t('moderation.tabUsers')}
             {activeTab === "users" && <span className="absolute bottom-0 left-0 w-full h-1 bg-steel-blue rounded-t-full"></span>}
@@ -269,7 +269,7 @@ export default function ModerationPage() {
           {isAdmin && (
             <button 
               onClick={() => setActiveTab("accounts")}
-              className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === "accounts" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-white"}`}
+              className={`shrink-0 whitespace-nowrap pb-3 text-sm font-bold transition-colors relative ${activeTab === "accounts" ? "text-steel-blue" : "text-gray-500 hover:text-deep-space-blue dark:hover:text-white"}`}
             >
               {t('moderation.createAccount')}
               {activeTab === "accounts" && <span className="absolute bottom-0 left-0 w-full h-1 bg-steel-blue rounded-t-full"></span>}
@@ -351,8 +351,8 @@ export default function ModerationPage() {
                 <p className="text-center py-10 text-gray-500">{t('moderation.noUsers')}</p>
               ) : (
                 filteredUsers.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-surface shadow-sm">
-                    
+                  <div key={user.id} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 border border-gray-200 dark:border-steel-blue/40 rounded-xl bg-white dark:bg-surface shadow-sm">
+
                     <div className="flex flex-col">
                       <span className="font-bold text-deep-space-blue dark:text-white">@{user.username}</span>
                       <div className="flex items-center gap-2 mt-1">
@@ -366,7 +366,7 @@ export default function ModerationPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                         user.status === "active" ? "bg-green-100 text-green-700" :
                         "bg-red-100 text-red-700"
