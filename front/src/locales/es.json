@@ -4,7 +4,12 @@
     "removeImage": "Eliminar imagen",
     "me": "Yo",
     "loading": "Cargando...",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "lightMode": "Modo claro",
+    "darkMode": "Modo oscuro",
+    "undo": "Deshacer",
+    "avatar": "Avatar",
+    "emoji": "Emoji"
   },
   "sidebar": {
     "home": "Inicio",
@@ -169,6 +174,7 @@
     "blockedNoPosts": "No puedes ver las publicaciones de este usuario."
   },
   "postCard": {
+    "reportReason": "Contenido inapropiado",
     "report": "Denunciar publicación",
     "reported": "Publicación denunciada ✓",
     "reportAlert": "La publicación de {{username}} ha sido denunciada.",

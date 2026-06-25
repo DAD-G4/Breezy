@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function Toast({ message, onUndo, duration = 5000 }) {
+  const { t } = useLanguage();
   const [visible, setVisible] = useState(true);
   const [exiting, setExiting] = useState(false);
 
@@ -39,14 +41,14 @@ export default function Toast({ message, onUndo, duration = 5000 }) {
           }}
           className="ml-2 px-3 py-1 text-xs font-bold rounded-full bg-steel-blue/20 dark:bg-surface/40 text-steel-blue dark:text-white hover:bg-steel-blue/30 dark:hover:bg-deep-space-blue/30 transition-colors"
         >
-          Undo
+          {t('common.undo')}
         </button>
       )}
 
       <button
         onClick={dismiss}
         className="ml-1 p-1 rounded-full text-white/50 dark:text-deep-space-blue/50 hover:text-white dark:hover:text-deep-space-blue transition-colors"
-        aria-label="Close"
+        aria-label={t('common.close')}
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />

@@ -4,7 +4,12 @@
     "removeImage": "Remove image",
     "me": "Me",
     "loading": "Loading...",
-    "close": "Close"
+    "close": "Close",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "undo": "Undo",
+    "avatar": "Avatar",
+    "emoji": "Emoji"
   },
   "sidebar": {
     "home": "Home",
@@ -169,6 +174,7 @@
     "blockedNoPosts": "You can't see this user's posts."
   },
   "postCard": {
+    "reportReason": "Inappropriate content",
     "report": "Report post",
     "reported": "Post reported ✓",
     "reportAlert": "{{username}}'s post has been reported.",

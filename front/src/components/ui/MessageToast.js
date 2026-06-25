@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "../../context/LanguageContext";
 
 /**
  * Popup affichée en haut de l'écran à la réception d'un nouveau message privé.
@@ -10,6 +11,7 @@ import { useRouter } from "next/navigation";
  */
 export default function MessageToast({ name, text, username, onClose, duration = 10000 }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [exiting, setExiting] = useState(false);
   const [progress, setProgress] = useState(100);
 
@@ -59,7 +61,7 @@ export default function MessageToast({ name, text, username, onClose, duration =
         <span
           role="button"
           tabIndex={0}
-          aria-label="Fermer"
+          aria-label={t('common.close')}
           onClick={(e) => {
             e.stopPropagation();
             close();

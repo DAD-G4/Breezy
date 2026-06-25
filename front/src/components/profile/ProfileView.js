@@ -203,7 +203,7 @@ export default function ProfileView({ initialUser, isOwnProfile }) {
             >
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-steel-blue flex items-center justify-center text-white text-2xl font-bold border-2 border-white dark:border-night overflow-hidden">
                 {avatarPreview ? (
-                  <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={avatarPreview} alt={t('common.avatar')} className="w-full h-full object-cover" />
                 ) : (
                   name.charAt(0).toUpperCase()
                 )}

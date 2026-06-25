@@ -32,7 +32,7 @@ export default function PostCard({ post, disableProfileLink = false, currentUser
     setIsMenuOpen(false);
     if (reported) return;
     try {
-      await report({ targetType: "post", targetId: post.id, reason: "Contenu inapproprié" });
+      await report({ targetType: "post", targetId: post.id, reason: t('postCard.reportReason') });
       setReported(true);
       setShowToast(true);
     } catch (err) {

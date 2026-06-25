@@ -55,7 +55,7 @@ export default function RegisterPage() {
 
         <div className="w-full max-w-sm border-2 border-deep-space-blue dark:border-white rounded-lg p-6 bg-white dark:bg-surface shadow-xl transition-colors duration-300">
           <h1 className="text-2xl font-bold text-center mb-6 pb-4 border-b-2 border-deep-space-blue/20 dark:border-white/20">
-            Register
+            {t('register.title')}
           </h1>
 
           <form onSubmit={handleRegister} className="space-y-4">
@@ -123,7 +123,7 @@ export default function RegisterPage() {
                 onClick={() => router.push("/login")}
                 className="px-6 py-2 rounded-full border-2 border-deep-space-blue dark:border-white hover:bg-steel-blue hover:text-white hover:border-steel-blue transition-colors mb-2 mt-4"
               >
-                Login
+                {t('register.loginButton')}
               </button>
               <span className="text-gray-500 dark:text-gray-400 text-xs mt-1">
                 {t('register.alreadyHaveAccount')}

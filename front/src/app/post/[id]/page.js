@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use, useEffect } from "react";
+import { useState, use, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AppShell from "../../../components/layout/AppShell";
@@ -10,6 +10,7 @@ import { mapPost, relativeTime } from "../../../lib/mappers";
 import { getPost, addComment, addReply, deleteComment } from "../../../services/posts";
 import { resolveUsers } from "../../../services/users";
 import MentionTagAutocomplete from "../../../components/ui/MentionTagAutocomplete";
+import EmojiPicker from "../../../components/ui/EmojiPicker";
 import { useAuth, useRequireAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
 
@@ -30,6 +31,31 @@ export default function PostDetailsPage({ params }) {
   const [newComment, setNewComment] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Référence vers le <textarea> du commentaire (insertion d'emoji au curseur).
+  const commentRef = useRef(null);
+
+  const insertCommentEmoji = (emoji) => {
+    const el = commentRef.current;
+    setNewComment((prev) => {
+      const hasCaret = el && typeof el.selectionStart === "number";
+      const start = hasCaret ? el.selectionStart : prev.length;
+      const end = hasCaret ? el.selectionEnd : prev.length;
+      const next = prev.slice(0, start) + emoji + prev.slice(end);
+      const caret = start + emoji.length;
+      requestAnimationFrame(() => {
+        if (el) {
+          el.focus();
+          try {
+            el.setSelectionRange(caret, caret);
+          } catch {
+            /* ignore */
+          }
+        }
+      });
+      return next;
+    });
+  };
 
   // Réponses : on suit le commentaire en cours de réponse + le texte saisi.
   const [replyingTo, setReplyingTo] = useState(null);
@@ -191,13 +217,15 @@ export default function PostDetailsPage({ params }) {
           <div className="flex-1 flex flex-col gap-2">
             <MentionTagAutocomplete
               as="textarea"
+              inputRef={commentRef}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder={t('postDetails.addCommentPlaceholder')}
               rows={2}
               className="w-full px-4 py-2.5 text-[15px] rounded-2xl border border-gray-200 dark:border-steel-blue/40 bg-gray-50 dark:bg-black/20 text-deep-space-blue dark:text-white outline-none focus:border-steel-blue resize-none transition-colors"
             />
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center">
+              <EmojiPicker onSelect={insertCommentEmoji} />
               <button type="submit" disabled={!newComment.trim() || submitting} className="px-5 py-2 bg-steel-blue hover:bg-deep-space-blue text-white rounded-full font-bold text-sm transition-colors disabled:opacity-50">
                 {t('commentSection.comment')}
               </button>

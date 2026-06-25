@@ -9,6 +9,7 @@ import { getConversation, sendMessage, markConversationRead } from "@/services/d
 import { useAuth, useRequireAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { relativeTime } from "@/lib/mappers";
+import EmojiPicker from "@/components/ui/EmojiPicker";
 
 // Rafraîchissement live de la conversation ouverte (polling léger).
 const MESSAGES_POLL_MS = 8000;
@@ -29,6 +30,30 @@ export default function ConversationPage({ params }) {
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const scrollContainerRef = useRef(null);
+  const messageInputRef = useRef(null);
+
+  // Insère un emoji à la position du curseur de l'input de message.
+  const insertMessageEmoji = (emoji) => {
+    const el = messageInputRef.current;
+    setNewMessage((prev) => {
+      const hasCaret = el && typeof el.selectionStart === "number";
+      const start = hasCaret ? el.selectionStart : prev.length;
+      const end = hasCaret ? el.selectionEnd : prev.length;
+      const next = prev.slice(0, start) + emoji + prev.slice(end);
+      const caret = start + emoji.length;
+      requestAnimationFrame(() => {
+        if (el) {
+          el.focus();
+          try {
+            el.setSelectionRange(caret, caret);
+          } catch {
+            /* ignore */
+          }
+        }
+      });
+      return next;
+    });
+  };
   // « Collé en bas » : on ne suit les nouveaux messages que si l'utilisateur est
   // déjà en bas. S'il a remonté pour lire l'historique, le polling ne doit pas
   // le ramener brutalement en bas.
@@ -165,7 +190,7 @@ export default function ConversationPage({ params }) {
             <button
               onClick={() => router.back()}
               className="flex items-center justify-center w-9 h-9 rounded-full text-steel-blue hover:bg-steel-blue/10 dark:hover:bg-steel-blue/20 active:scale-95 transition-all"
-              aria-label="Back"
+              aria-label={t('common.back')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -277,7 +302,9 @@ export default function ConversationPage({ params }) {
           className="shrink-0 px-4 py-3 bg-gray-100/90 dark:bg-night/95 border-t border-gray-200/60 dark:border-steel-blue/20"
         >
           <div className="flex items-end gap-2">
+            <EmojiPicker onSelect={insertMessageEmoji} />
             <input
+              ref={messageInputRef}
               type="text"
               placeholder={t('conversation.placeholder')}
               value={newMessage}

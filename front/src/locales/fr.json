@@ -4,7 +4,12 @@
     "removeImage": "Supprimer l'image",
     "me": "Moi",
     "loading": "Chargement...",
-    "close": "Fermer"
+    "close": "Fermer",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre",
+    "undo": "Annuler",
+    "avatar": "Avatar",
+    "emoji": "Emoji"
   },
   "sidebar": {
     "home": "Accueil",
@@ -169,6 +174,7 @@
     "blockedNoPosts": "Vous ne pouvez pas voir les publications de cet utilisateur."
   },
   "postCard": {
+    "reportReason": "Contenu inapproprié",
     "report": "Signaler le post",
     "reported": "Post signalé ✓",
     "reportAlert": "Le post de {{username}} a été signalé.",

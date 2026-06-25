@@ -300,8 +300,9 @@ function SearchContent() {
 }
 
 export default function SearchPage() {
+  const { t } = useLanguage();
   return (
-    <Suspense fallback={<AppShell><div className="flex items-center justify-center py-16"><p className="text-gray-500 dark:text-gray-400">Loading...</p></div></AppShell>}>
+    <Suspense fallback={<AppShell><div className="flex items-center justify-center py-16"><p className="text-gray-500 dark:text-gray-400">{t('common.loading')}</p></div></AppShell>}>
       <SearchContent />
     </Suspense>
   );
