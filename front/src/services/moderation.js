@@ -46,3 +46,9 @@ export async function listUsers() {
   const res = await api.get("/moderation/users");
   return res.data.data;
 }
+
+// DELETE /api/moderation/users/:id (admin) — supprime un compte et tout son contenu
+export async function deleteUser(userId) {
+  const res = await api.delete(`/moderation/users/${userId}`);
+  return res.data.data;
+}

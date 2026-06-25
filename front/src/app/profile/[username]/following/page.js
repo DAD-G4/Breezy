@@ -10,7 +10,7 @@ import { useAuth, useRequireAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 
 function UserCard({ u, currentUserId, onFollowChange, t }) {
-  const [isFollowing, setIsFollowing] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(u.is_following || false);
   const [loading, setLoading] = useState(false);
   const isSelf = u.id === currentUserId;
 

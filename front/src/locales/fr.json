@@ -28,7 +28,7 @@
     "notif": {
       "liked": "a aimé votre publication.",
       "followed": "a commencé à vous suivre.",
-      "mentioned": "vous a mentionné dans un commentaire.",
+      "mentioned": "vous a mentionné dans une publication.",
       "commented": "a commenté votre publication.",
       "time5m": "Il y a 5 min",
       "time1h": "1h",
@@ -70,7 +70,8 @@
     "errorMessage": "Identifiants incorrects. Veuillez réessayer.",
     "submitButton": "Connexion",
     "registerButton": "S'inscrire",
-    "noAccount": "Pas encore de compte ?"
+    "noAccount": "Pas encore de compte ?",
+    "banned": "Votre compte a été banni. Vous avez été déconnecté."
   },
   "register": {
     "title": "Inscription",
@@ -125,7 +126,8 @@
     "logout": "Se déconnecter",
     "notFound": "Profil introuvable.",
     "loadError": "Impossible de charger le profil.",
-    "lines": "lignes"
+    "lines": "lignes",
+    "noPosts": "Aucun post pour l'instant."
   },
   "postDetails": {
     "commentPosted": "Nouveau commentaire posté",
@@ -239,6 +241,10 @@
     "noReports": "Aucun signalement en attente. Bon travail !",
     "ignore": "Ignorer",
     "deletePost": "Supprimer le post",
+    "deleteUser": "Supprimer l'utilisateur",
+    "deleteUserTitle": "Supprimer cet utilisateur ?",
+    "deleteUserMessage": "Cette action est définitive : le compte, ses posts et ses messages seront supprimés.",
+    "userDeleted": "Utilisateur supprimé",
     "statusActive": "Actif",
     "statusSuspended": "Suspendu",
     "statusBanned": "Banni",

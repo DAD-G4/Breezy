@@ -31,8 +31,10 @@ export default function RegisterPage() {
 
     try {
       // POST /api/auth/register. Le backend dérive display_name depuis username.
+      // L'inscription connecte automatiquement (cookies posés côté backend) →
+      // on envoie directement vers le feed, pas vers /login.
       await register({ email, username, password });
-      router.push("/login");
+      router.push("/");
     } catch (err) {
       setError(
         getApiErrorMessage(err, t('register.errorMessage'))

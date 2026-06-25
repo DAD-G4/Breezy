@@ -28,7 +28,7 @@
     "notif": {
       "liked": "liked your post.",
       "followed": "started following you.",
-      "mentioned": "mentioned you in a comment.",
+      "mentioned": "mentioned you in a post.",
       "commented": "commented on your post.",
       "time5m": "5 min ago",
       "time1h": "1h",
@@ -70,7 +70,8 @@
     "errorMessage": "Incorrect credentials. Please try again.",
     "submitButton": "Connection",
     "registerButton": "Sign Up",
-    "noAccount": "Don't have an account yet?"
+    "noAccount": "Don't have an account yet?",
+    "banned": "Your account has been banned. You have been logged out."
   },
   "register": {
     "title": "Register",
@@ -125,7 +126,8 @@
     "logout": "Log out",
     "notFound": "Profile not found.",
     "loadError": "Could not load the profile.",
-    "lines": "lines"
+    "lines": "lines",
+    "noPosts": "No posts yet."
   },
   "postDetails": {
     "commentPosted": "New comment posted",
@@ -239,6 +241,10 @@
     "noReports": "No pending reports. Good job!",
     "ignore": "Ignore",
     "deletePost": "Delete post",
+    "deleteUser": "Delete user",
+    "deleteUserTitle": "Delete this user?",
+    "deleteUserMessage": "This action is permanent: the account, its posts and its messages will be deleted.",
+    "userDeleted": "User deleted",
     "statusActive": "Active",
     "statusSuspended": "Suspended",
     "statusBanned": "Banned",

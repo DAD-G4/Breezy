@@ -28,7 +28,7 @@
     "notif": {
       "liked": "le gustó tu publicación.",
       "followed": "empezó a seguirte.",
-      "mentioned": "te mencionó en un comentario.",
+      "mentioned": "te mencionó en una publicación.",
       "commented": "comentó tu publicación.",
       "time5m": "Hace 5 min",
       "time1h": "1h",
@@ -70,7 +70,8 @@
     "errorMessage": "Credenciales incorrectas. Inténtalo de nuevo.",
     "submitButton": "Conexión",
     "registerButton": "Registrarse",
-    "noAccount": "¿Aún no tienes una cuenta?"
+    "noAccount": "¿Aún no tienes una cuenta?",
+    "banned": "Tu cuenta ha sido baneada. Has sido desconectado."
   },
   "register": {
     "title": "Registrarse",
@@ -125,7 +126,8 @@
     "logout": "Cerrar sesión",
     "notFound": "Perfil no encontrado.",
     "loadError": "No se pudo cargar el perfil.",
-    "lines": "líneas"
+    "lines": "líneas",
+    "noPosts": "No hay publicaciones aún."
   },
   "postDetails": {
     "commentPosted": "Nuevo comentario publicado",
@@ -239,6 +241,10 @@
     "noReports": "No hay denuncias pendientes. ¡Buen trabajo!",
     "ignore": "Ignorar",
     "deletePost": "Eliminar publicación",
+    "deleteUser": "Eliminar usuario",
+    "deleteUserTitle": "¿Eliminar este usuario?",
+    "deleteUserMessage": "Esta acción es permanente: la cuenta, sus publicaciones y sus mensajes serán eliminados.",
+    "userDeleted": "Usuario eliminado",
     "statusActive": "Activo",
     "statusSuspended": "Suspendido",
     "statusBanned": "Baneado",

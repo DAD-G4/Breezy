@@ -7,6 +7,7 @@ import { getApiErrorMessage } from "../../lib/api";
 import { createPost } from "../../services/posts";
 import { upload } from "../../services/media";
 import { resolveUser } from "../../services/users";
+import MentionTagAutocomplete from "../../components/ui/MentionTagAutocomplete";
 import { useAuth, useRequireAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
@@ -116,8 +117,9 @@ export default function CreatePostPage() {
             </span>
           </div>
 
-          {/* Zone de texte — limite 280 caractères (Fx3) */}
-          <textarea
+          {/* Zone de texte — limite 280 caractères (Fx3) + autocomplétion @/# */}
+          <MentionTagAutocomplete
+            as="textarea"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t('createPost.placeholder')}

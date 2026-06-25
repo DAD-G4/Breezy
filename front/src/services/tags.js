@@ -14,3 +14,10 @@ export async function getTrending() {
   const res = await api.get("/tags/trending");
   return res.data.data.tags;
 }
+
+// GET /api/tags/suggest?q=prefix → [{ tag, count }]
+// Autocomplétion des hashtags : noms de tags existants correspondant au préfixe.
+export async function suggestTags(q) {
+  const res = await api.get("/tags/suggest", { params: { q } });
+  return res.data.data.tags;
+}

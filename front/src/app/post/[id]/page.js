@@ -9,6 +9,7 @@ import { getApiErrorMessage } from "../../../lib/api";
 import { mapPost, relativeTime } from "../../../lib/mappers";
 import { getPost, addComment, addReply, deleteComment } from "../../../services/posts";
 import { resolveUsers } from "../../../services/users";
+import MentionTagAutocomplete from "../../../components/ui/MentionTagAutocomplete";
 import { useAuth, useRequireAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
 
@@ -62,9 +63,9 @@ export default function PostDetailsPage({ params }) {
           const ca = authorMap[c.user_id];
           const replies = (c.replies || []).map((r) => {
             const ra = authorMap[r.user_id];
-            return { id: r.reply_id, username: ra?.displayName, authorHandle: ra?.username, time: relativeTime(r.created_at, language), content: r.content };
+            return { id: r.reply_id, username: ra?.displayName, authorHandle: ra?.username, avatarUrl: ra?.avatarUrl, time: relativeTime(r.created_at, language), content: r.content };
           });
-          return { id: c.comment_id, userId: c.user_id, username: ca?.displayName, authorHandle: ca?.username, time: relativeTime(c.created_at, language), content: c.content, replies };
+          return { id: c.comment_id, userId: c.user_id, username: ca?.displayName, authorHandle: ca?.username, avatarUrl: ca?.avatarUrl, time: relativeTime(c.created_at, language), content: c.content, replies };
         });
 
         if (active) {
@@ -188,7 +189,8 @@ export default function PostDetailsPage({ params }) {
             {(myName || "?").charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 flex flex-col gap-2">
-            <textarea
+            <MentionTagAutocomplete
+              as="textarea"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder={t('postDetails.addCommentPlaceholder')}
@@ -225,12 +227,20 @@ export default function PostDetailsPage({ params }) {
               <div className="flex gap-3">
                 {/* Avatar (cliquable) */}
                 {comment.authorHandle ? (
-                  <Link href={`/profile/${comment.authorHandle}`} className="w-10 h-10 rounded-full bg-steel-blue shrink-0 flex items-center justify-center text-white font-bold hover:opacity-80 transition-opacity">
-                    {comment.username.charAt(0).toUpperCase()}
+                  <Link href={`/profile/${comment.authorHandle}`} className="w-10 h-10 rounded-full bg-steel-blue shrink-0 flex items-center justify-center text-white font-bold overflow-hidden hover:opacity-80 transition-opacity">
+                    {comment.avatarUrl ? (
+                      <img src={comment.avatarUrl} alt={comment.username} className="w-full h-full object-cover" />
+                    ) : (
+                      (comment.username || "?").charAt(0).toUpperCase()
+                    )}
                   </Link>
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-steel-blue shrink-0 flex items-center justify-center text-white font-bold">
-                    {comment.username.charAt(0).toUpperCase()}
+                  <div className="w-10 h-10 rounded-full bg-steel-blue shrink-0 flex items-center justify-center text-white font-bold overflow-hidden">
+                    {comment.avatarUrl ? (
+                      <img src={comment.avatarUrl} alt={comment.username} className="w-full h-full object-cover" />
+                    ) : (
+                      (comment.username || "?").charAt(0).toUpperCase()
+                    )}
                   </div>
                 )}
 
@@ -298,12 +308,20 @@ export default function PostDetailsPage({ params }) {
                       {comment.replies.map((reply) => (
                         <div key={reply.id} className="flex gap-2.5">
                           {reply.authorHandle ? (
-                            <Link href={`/profile/${reply.authorHandle}`} className="w-8 h-8 rounded-full bg-steel-blue/80 shrink-0 flex items-center justify-center text-white font-bold text-xs hover:opacity-80 transition-opacity">
-                              {reply.username.charAt(0).toUpperCase()}
+                            <Link href={`/profile/${reply.authorHandle}`} className="w-8 h-8 rounded-full bg-steel-blue/80 shrink-0 flex items-center justify-center text-white font-bold text-xs overflow-hidden hover:opacity-80 transition-opacity">
+                              {reply.avatarUrl ? (
+                                <img src={reply.avatarUrl} alt={reply.username} className="w-full h-full object-cover" />
+                              ) : (
+                                (reply.username || "?").charAt(0).toUpperCase()
+                              )}
                             </Link>
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-steel-blue/80 shrink-0 flex items-center justify-center text-white font-bold text-xs">
-                              {reply.username.charAt(0).toUpperCase()}
+                            <div className="w-8 h-8 rounded-full bg-steel-blue/80 shrink-0 flex items-center justify-center text-white font-bold text-xs overflow-hidden">
+                              {reply.avatarUrl ? (
+                                <img src={reply.avatarUrl} alt={reply.username} className="w-full h-full object-cover" />
+                              ) : (
+                                (reply.username || "?").charAt(0).toUpperCase()
+                              )}
                             </div>
                           )}
                           <div className="flex flex-col min-w-0">

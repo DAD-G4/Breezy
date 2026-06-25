@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import AppShell from "@/components/layout/AppShell";
 import Toast from "@/components/ui/Toast";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { useLanguage } from "@/context/LanguageContext";
 import { getApiErrorMessage } from "@/lib/api";
-import { listReports, resolveReport, banUser, unbanUser, listUsers } from "@/services/moderation";
+import { listReports, resolveReport, banUser, unbanUser, listUsers, deleteUser } from "@/services/moderation";
 import { getPost, deletePost } from "@/services/posts";
 import { resolveUsers } from "@/services/users";
 import { adminRegister } from "@/services/auth";
@@ -26,9 +27,11 @@ export default function ModerationPage() {
   const [accountError, setAccountError] = useState("");
   const [toastMsg, setToastMsg] = useState("");
   const [toastId, setToastId] = useState(0);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   const isStaff = user?.role === "moderator" || user?.role === "admin";
   const isAdmin = user?.role === "admin";
+  const myId = user?.id;
 
   useEffect(() => {
     if (!loading && user && !isStaff) {
@@ -133,9 +136,26 @@ export default function ModerationPage() {
     setReports((rs) => rs.filter((r) => r.id !== report.id));
     try {
       await deletePost(report.targetId);
+      await resolveReport(report.id); // clôt le signalement pour qu'il ne réapparaisse pas
     } catch (err) {
       console.error('[Moderation] Failed to delete post:', err);
       setReports(prev => [...prev, report]);
+    }
+  };
+
+  // Suppression définitive d'un utilisateur (admin uniquement, via ConfirmDialog).
+  const confirmDeleteUser = async () => {
+    const target = userToDelete;
+    if (!target) return;
+    setUserToDelete(null);
+    setUsers((us) => us.filter((u) => u.id !== target.id));
+    try {
+      await deleteUser(target.id);
+      setToastMsg(t("moderation.userDeleted"));
+      setToastId((n) => n + 1);
+    } catch (err) {
+      console.error('[Moderation] Failed to delete user:', err);
+      setUsers((prev) => [target, ...prev]); // rollback
     }
   };
 
@@ -362,6 +382,17 @@ export default function ModerationPage() {
                         <option value="active">{t('moderation.actionActive')}</option>
                         <option value="banned">{t('moderation.actionBan')}</option>
                       </select>
+
+                      {isAdmin && user.role !== "admin" && user.id !== myId && (
+                        <button
+                          onClick={() => setUserToDelete(user)}
+                          aria-label={t('moderation.deleteUser')}
+                          title={t('moderation.deleteUser')}
+                          className="p-2 rounded-lg text-brick-red hover:bg-brick-red/10 transition-colors"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))
@@ -416,6 +447,18 @@ export default function ModerationPage() {
       </div>
 
       {toastMsg && <Toast key={toastId} message={toastMsg} />}
+
+      <ConfirmDialog
+        open={!!userToDelete}
+        title={t('moderation.deleteUserTitle')}
+        message={t('moderation.deleteUserMessage')}
+        confirmLabel={t('moderation.deleteUser')}
+        cancelLabel={t('common.cancel')}
+        variant="danger"
+        icon="warning"
+        onConfirm={confirmDeleteUser}
+        onCancel={() => setUserToDelete(null)}
+      />
     </AppShell>
   );
 }

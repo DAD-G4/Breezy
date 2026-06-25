@@ -52,6 +52,25 @@ api.interceptors.response.use(
         }
       }
     }
+
+    // Compte banni : le backend renvoie 403 « User is banned. » sur toute route
+    // protégée. On déconnecte (cookies effacés) puis on renvoie vers /login.
+    if (
+      status === 403 &&
+      /banned/i.test(error.response?.data?.error || "") &&
+      !AUTH_ROUTE.test(url) &&
+      typeof window !== "undefined"
+    ) {
+      try {
+        await api.post("/auth/logout");
+      } catch {
+        /* best effort — on déconnecte quand même côté client */
+      }
+      if (!window.location.pathname.startsWith("/login")) {
+        window.location.href = "/login?banned=1";
+      }
+    }
+
     return Promise.reject(error);
   }
 );

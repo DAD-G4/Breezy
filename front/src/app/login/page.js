@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/layout/Header";
 import BreezyBadge from "../../components/ui/BreezyBadge";
@@ -18,6 +18,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [banned, setBanned] = useState(false);
+
+  // L'intercepteur redirige un compte banni vers /login?banned=1 après l'avoir
+  // déconnecté ; on affiche alors un bandeau explicatif.
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setBanned(new URLSearchParams(window.location.search).get("banned") === "1");
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -54,6 +63,12 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-center mb-6 pb-4 border-b-2 border-deep-space-blue/20 dark:border-white/20">
             Login
           </h1>
+
+          {banned && (
+            <div className="mb-4 text-center text-brick-red font-semibold text-sm bg-brick-red/10 border border-brick-red/30 rounded-lg p-3">
+              {t('login.banned')}
+            </div>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
