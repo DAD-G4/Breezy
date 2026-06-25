@@ -53,6 +53,19 @@ async function viewerFollows(viewerId: number | undefined, targetId: number): Pr
   return count > 0;
 }
 
+/**
+ * Renvoie l'ensemble des ids (parmi `ids`) que le viewer connecté suit.
+ * Une seule requête WHERE IN ; renvoie un Set vide si le viewer est anonyme.
+ */
+async function viewerFollowingSet(viewerId: number | undefined, ids: number[]): Promise<Set<number>> {
+  if (!viewerId || ids.length === 0) return new Set();
+  const rows = await Follower.findAll({
+    where: { follower_id: viewerId, following_id: { [Op.in]: ids } },
+    attributes: ['following_id'],
+  });
+  return new Set(rows.map((r: any) => r.get('following_id') as number));
+}
+
 /** True si un blocage existe entre le viewer et la cible (dans un sens ou l'autre). */
 async function blockedBetween(viewerId: number | undefined, targetId: number): Promise<boolean> {
   if (!viewerId || viewerId === targetId) return false;
@@ -392,10 +405,14 @@ export async function getFollowers(req: AuthRequest, res: Response): Promise<voi
     order: [['created_at', 'DESC']],
   });
 
+  const followerUsers = follows
+    .map((f: any) => f.get('follower'))
+    .filter(Boolean);
+  const ids = followerUsers.map((u: any) => u.get('id') as number);
+  const followedSet = await viewerFollowingSet(req.user?.id, ids);
+
   const followers = await Promise.all(
-    follows.map(async (f: any) => {
-      const u = f.get('follower');
-      if (!u) return null;
+    followerUsers.map(async (u: any) => {
       const uid = u.get('id') as number;
       const [followerCount, followingCount] = await Promise.all([
         Follower.count({ where: { following_id: uid } }),
@@ -408,11 +425,12 @@ export async function getFollowers(req: AuthRequest, res: Response): Promise<voi
         avatar_url: u.get('profile')?.avatar_url || null,
         follower_count: followerCount,
         following_count: followingCount,
+        is_following: followedSet.has(uid),
       };
     })
   );
 
-  success(res, { users: followers.filter(Boolean) });
+  success(res, { users: followers });
 }
 
 /**
@@ -442,10 +460,14 @@ export async function getFollowing(req: AuthRequest, res: Response): Promise<voi
     order: [['created_at', 'DESC']],
   });
 
+  const followingUsers = follows
+    .map((f: any) => f.get('following'))
+    .filter(Boolean);
+  const ids = followingUsers.map((u: any) => u.get('id') as number);
+  const followedSet = await viewerFollowingSet(req.user?.id, ids);
+
   const followingList = await Promise.all(
-    follows.map(async (f: any) => {
-      const u = f.get('following');
-      if (!u) return null;
+    followingUsers.map(async (u: any) => {
       const uid = u.get('id') as number;
       const [followerCount, followingCount] = await Promise.all([
         Follower.count({ where: { following_id: uid } }),
@@ -458,9 +480,10 @@ export async function getFollowing(req: AuthRequest, res: Response): Promise<voi
         avatar_url: u.get('profile')?.avatar_url || null,
         follower_count: followerCount,
         following_count: followingCount,
+        is_following: followedSet.has(uid),
       };
     })
   );
 
-  success(res, { users: followingList.filter(Boolean) });
+  success(res, { users: followingList });
 }

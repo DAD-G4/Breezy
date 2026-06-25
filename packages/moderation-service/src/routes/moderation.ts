@@ -8,6 +8,7 @@ import {
   deleteBan,
   listBans,
   listAllUsers,
+  deleteUser,
 } from '../controllers/moderationController';
 
 const router = Router();
@@ -24,5 +25,6 @@ router.delete('/ban/:userId', requireRole(UserRole.ADMIN), asyncHandler(deleteBa
 router.get('/bans', requireRole(UserRole.MODERATOR), asyncHandler(listBans));
 
 router.get('/users', requireRole(UserRole.MODERATOR), asyncHandler(listAllUsers));
+router.delete('/users/:id', requireRole(UserRole.ADMIN), asyncHandler(deleteUser));
 
 export default router;

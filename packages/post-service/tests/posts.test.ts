@@ -344,6 +344,21 @@ describe('Post Routes', () => {
       expect(mockPostModel.findByIdAndDelete).not.toHaveBeenCalled();
     });
 
+    it('should let a moderator delete any post', async () => {
+      mockAuthenticatedUser = { id: 9, username: 'mod', email: 'mod@test.com', role: 'moderator' };
+
+      const mockPost = { _id: 'abc123', user_id: 2, content: 'Reported post' };
+
+      mockPostModel.findById.mockResolvedValue(mockPost);
+      mockPostModel.findByIdAndDelete.mockResolvedValue(mockPost);
+
+      const res = await request(app).delete('/api/posts/abc123');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toEqual({ deleted: true });
+      expect(mockPostModel.findByIdAndDelete).toHaveBeenCalledWith('abc123');
+    });
+
     it('should return 404 if post not found', async () => {
       mockAuthenticatedUser = { id: 1, username: 'alice', email: 'alice@test.com', role: 'user' };
 

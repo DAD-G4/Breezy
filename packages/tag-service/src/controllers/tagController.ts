@@ -63,6 +63,37 @@ export async function searchPostsByTag(req: AuthRequest, res: Response): Promise
   });
 }
 
+/**
+ * GET /api/tags/suggest?q=<prefix>
+ * Renvoie jusqu'à 8 noms de tags DISTINCTS correspondant au préfixe saisi
+ * (insensible à la casse), pour l'autocomplétion des hashtags dans le
+ * compositeur. Les tags les plus utilisés remontent en premier.
+ */
+export async function suggestTags(_req: AuthRequest, res: Response): Promise<void> {
+  const q = ((_req.query.q as string) || '').trim().toLowerCase();
+
+  if (!q) {
+    success(res, { tags: [] });
+    return;
+  }
+
+  // On échappe les caractères spéciaux regex (même motif que searchPostsByTag)
+  // pour éviter toute injection. Ancré au début pour une correspondance par
+  // préfixe (« bre » trouve « breezy »).
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const tags = await Post.aggregate([
+    { $unwind: '$tags' },
+    { $match: { tags: { $regex: `^${escaped}`, $options: 'i' } } },
+    { $group: { _id: '$tags', count: { $sum: 1 } } },
+    { $sort: { count: -1, _id: 1 } },
+    { $limit: 8 },
+    { $project: { _id: 0, tag: '$_id', count: 1 } },
+  ]);
+
+  success(res, { tags });
+}
+
 export async function getTrending(_req: Request, res: Response): Promise<void> {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);

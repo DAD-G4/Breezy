@@ -143,8 +143,9 @@ describe('Notification Routes', () => {
 
       await request(app).get('/api/notifications');
 
-      expect(mockNotificationModel.find).toHaveBeenCalledWith({ recipient_id: 1 });
-      expect(mockNotificationModel.countDocuments).toHaveBeenCalledWith({ recipient_id: 1 });
+      // DM notifications are excluded from the list (type !== 'dm').
+      expect(mockNotificationModel.find).toHaveBeenCalledWith({ recipient_id: 1, type: { $ne: 'dm' } });
+      expect(mockNotificationModel.countDocuments).toHaveBeenCalledWith({ recipient_id: 1, type: { $ne: 'dm' } });
     });
 
     it('should return empty notifications list', async () => {

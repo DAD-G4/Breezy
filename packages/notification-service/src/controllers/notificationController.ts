@@ -16,12 +16,16 @@ export async function getNotifications(req: AuthRequest, res: Response): Promise
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
   const skip = (page - 1) * limit;
 
-  const notifications = await Notification.find({ recipient_id: req.user.id })
+  // Exclut les notifications de messages directs (« dm ») : elles ne doivent
+  // plus apparaître dans la liste, le toast in-app s'en charge.
+  const filter = { recipient_id: req.user.id, type: { $ne: 'dm' as const } };
+
+  const notifications = await Notification.find(filter)
     .sort({ created_at: -1 })
     .skip(skip)
     .limit(limit);
 
-  const total = await Notification.countDocuments({ recipient_id: req.user.id });
+  const total = await Notification.countDocuments(filter);
 
   success(res, {
     notifications,

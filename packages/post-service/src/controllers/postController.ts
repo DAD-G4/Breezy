@@ -139,7 +139,9 @@ export async function deletePost(req: AuthRequest, res: Response): Promise<void>
     return;
   }
 
-  if (req.user.id !== post.user_id) {
+  // L'auteur OU un membre du staff (modérateur/admin) peut supprimer le post.
+  const isStaff = req.user.role === 'moderator' || req.user.role === 'admin';
+  if (req.user.id !== post.user_id && !isStaff) {
     error(res, 'Forbidden: you can only delete your own posts', 403);
     return;
   }
