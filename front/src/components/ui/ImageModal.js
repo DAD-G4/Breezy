@@ -1,7 +1,9 @@
 "use client";
 import { useEffect } from "react";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function ImageModal({ src, alt, onClose }) {
+  const { t } = useLanguage();
   // Fermer sur Escape
   useEffect(() => {
     const handleKey = (e) => {
@@ -20,7 +22,7 @@ export default function ImageModal({ src, alt, onClose }) {
       <button
         onClick={onClose}
         className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-        aria-label="Close"
+        aria-label={t('common.close')}
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />

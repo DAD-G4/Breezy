@@ -61,7 +61,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm border-2 border-deep-space-blue dark:border-white rounded-lg p-6 bg-white dark:bg-surface shadow-xl transition-colors duration-300">
           
           <h1 className="text-2xl font-bold text-center mb-6 pb-4 border-b-2 border-deep-space-blue/20 dark:border-white/20">
-            Login
+            {t('login.title')}
           </h1>
 
           {banned && (
@@ -128,7 +128,7 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={toggleTheme}
-          aria-label={theme === "dark" ? "Activer le thème clair" : "Activer le thème sombre"}
+          aria-label={theme === "dark" ? t('common.lightMode') : t('common.darkMode')}
           className="mt-8 flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 dark:border-white/20 text-sm font-medium text-deep-space-blue dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
         >
           {theme === "dark" ? (
@@ -138,7 +138,7 @@ export default function LoginPage() {
                 <circle cx="12" cy="12" r="4" />
                 <path strokeLinecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" />
               </svg>
-              Mode clair
+              {t('common.lightMode')}
             </>
           ) : (
             <>
@@ -146,7 +146,7 @@ export default function LoginPage() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
-              Mode sombre
+              {t('common.darkMode')}
             </>
           )}
         </button>

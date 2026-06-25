@@ -1,13 +1,37 @@
 import { Request, Response, NextFunction } from 'express';
 import { error } from '../utils/response';
 
+// Sound, pragmatic email format: a local part, an @, a domain, and a dotted TLD,
+// with no spaces anywhere. RFC 5321 caps the whole address at 254 characters.
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_MAX_LENGTH = 254;
+
+// Usernames are lowercased before validation (see authController), so we only
+// allow the lowercased character set here: letters, digits, underscore, dot.
+const USERNAME_MIN_LENGTH = 3;
+const USERNAME_MAX_LENGTH = 30;
+const USERNAME_REGEX = /^[a-z0-9_.]+$/;
+
+// Reserved handles we never want a user to claim (impersonation / confusion).
+const RESERVED_USERNAMES = new Set(['admin', 'root', 'support', 'breezy', 'moderator']);
+
+// Allow long passphrases but cap the length to avoid a bcrypt DoS on huge input.
+const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MAX_LENGTH = 128;
+const PASSWORD_SPECIAL_REGEX = /[^A-Za-z0-9]/;
 
 export function validateEmail(email: string): string | null {
   if (!email || typeof email !== 'string') {
     return 'Email is required';
   }
-  if (!EMAIL_REGEX.test(email)) {
+  const trimmed = email.trim();
+  if (trimmed.length === 0) {
+    return 'Email is required';
+  }
+  if (trimmed.length > EMAIL_MAX_LENGTH) {
+    return `Email must be at most ${EMAIL_MAX_LENGTH} characters`;
+  }
+  if (!EMAIL_REGEX.test(trimmed)) {
     return 'Invalid email format';
   }
   return null;
@@ -17,11 +41,26 @@ export function validateUsername(username: string): string | null {
   if (!username || typeof username !== 'string') {
     return 'Username is required';
   }
-  if (username.length < 3) {
-    return 'Username must be at least 3 characters';
+  if (username.trim().length === 0) {
+    return 'Username is required';
   }
-  if (username.length > 30) {
-    return 'Username must be at most 30 characters';
+  if (username.length < USERNAME_MIN_LENGTH) {
+    return `Username must be at least ${USERNAME_MIN_LENGTH} characters`;
+  }
+  if (username.length > USERNAME_MAX_LENGTH) {
+    return `Username must be at most ${USERNAME_MAX_LENGTH} characters`;
+  }
+  if (!USERNAME_REGEX.test(username)) {
+    return 'Username can only contain lowercase letters, digits, underscores and dots';
+  }
+  if (/^[._]|[._]$/.test(username)) {
+    return 'Username cannot start or end with a dot or underscore';
+  }
+  if (username.includes('..')) {
+    return 'Username cannot contain consecutive dots';
+  }
+  if (RESERVED_USERNAMES.has(username)) {
+    return 'This username is reserved';
   }
   return null;
 }
@@ -30,8 +69,24 @@ export function validatePassword(password: string): string | null {
   if (!password || typeof password !== 'string') {
     return 'Password is required';
   }
-  if (password.length < 8) {
-    return 'Password must be at least 8 characters';
+  if (password.trim().length === 0) {
+    return 'Password cannot be empty or whitespace only';
+  }
+  if (password.length < PASSWORD_MIN_LENGTH) {
+    return `Password must be at least ${PASSWORD_MIN_LENGTH} characters`;
+  }
+  if (password.length > PASSWORD_MAX_LENGTH) {
+    return `Password must be at most ${PASSWORD_MAX_LENGTH} characters`;
+  }
+
+  const missing: string[] = [];
+  if (!/[a-z]/.test(password)) missing.push('one lowercase letter');
+  if (!/[A-Z]/.test(password)) missing.push('one uppercase letter');
+  if (!/[0-9]/.test(password)) missing.push('one digit');
+  if (!PASSWORD_SPECIAL_REGEX.test(password)) missing.push('one special character');
+
+  if (missing.length > 0) {
+    return `Password must contain at least ${missing.join(', ')}`;
   }
   return null;
 }

@@ -53,7 +53,7 @@ export default function NotificationsPage() {
               onClick={handleClearRead}
               className="text-sm font-medium text-brick-red hover:underline"
             >
-              {t("notifications.clearRead") ?? "Clear read"}
+              {t("notifications.clearRead")}
             </button>
           </div>
         </div>

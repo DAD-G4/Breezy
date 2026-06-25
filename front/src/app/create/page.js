@@ -8,6 +8,7 @@ import { createPost } from "../../services/posts";
 import { upload } from "../../services/media";
 import { resolveUser } from "../../services/users";
 import MentionTagAutocomplete from "../../components/ui/MentionTagAutocomplete";
+import EmojiPicker from "../../components/ui/EmojiPicker";
 import { useAuth, useRequireAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
@@ -33,6 +34,34 @@ export default function CreatePostPage() {
 
   // simuler le clic sur l'input file caché
   const fileInputRef = useRef(null);
+  // Référence vers le <textarea> sous-jacent (pour l'insertion d'emoji au curseur).
+  const contentRef = useRef(null);
+
+  // Insère un emoji à la position du curseur en respectant la limite de 280
+  // caractères (Fx3). Si l'insertion dépassait la limite, on n'insère rien.
+  const MAX_LEN = 280;
+  const insertEmoji = (emoji) => {
+    const el = contentRef.current;
+    setContent((prev) => {
+      const hasCaret = el && typeof el.selectionStart === "number";
+      const start = hasCaret ? el.selectionStart : prev.length;
+      const end = hasCaret ? el.selectionEnd : prev.length;
+      const next = prev.slice(0, start) + emoji + prev.slice(end);
+      if (next.length > MAX_LEN) return prev; // ne pas dépasser la limite
+      const caret = start + emoji.length;
+      requestAnimationFrame(() => {
+        if (el) {
+          el.focus();
+          try {
+            el.setSelectionRange(caret, caret);
+          } catch {
+            /* ignore */
+          }
+        }
+      });
+      return next;
+    });
+  };
 
   // gérer l'ajout d'un média image OU vidéo (aperçu local + fichier conservé)
   const handleImageChange = (e) => {
@@ -120,6 +149,7 @@ export default function CreatePostPage() {
           {/* Zone de texte — limite 280 caractères (Fx3) + autocomplétion @/# */}
           <MentionTagAutocomplete
             as="textarea"
+            inputRef={contentRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t('createPost.placeholder')}
@@ -181,6 +211,9 @@ export default function CreatePostPage() {
                 onChange={handleImageChange}
                 className="hidden"
               />
+
+              {/* Sélecteur d'emojis (insertion au curseur, limite 280 respectée) */}
+              <EmojiPicker onSelect={insertEmoji} />
             </div>
 
             {/* Compteur de caractères (Fx3) + Soumission */}
